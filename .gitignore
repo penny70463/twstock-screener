@@ -10,3 +10,6 @@ data/cache/
 
 # 每日產出結果保留（給 Streamlit 讀），但忽略過大的中間檔
 data/raw/
+
+# LLM parse 失敗時的原始回應 dump（除錯用，不進版控）
+data/results/_llm_raw_failed.txt
