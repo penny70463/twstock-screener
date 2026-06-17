@@ -38,7 +38,9 @@ jobs:
           PYTHONUNBUFFERED: "1"  # 讓 print 進度即時串流到 Actions log，否則 block-buffered 看不到
           NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
           NVIDIA_BASE_URL: ${{ secrets.NVIDIA_BASE_URL }}
-          NVIDIA_MODEL: ${{ secrets.NVIDIA_MODEL }}
+          # gemma 從 GitHub Actions 機房 IP 一律 timeout（free tier 限流，連 5 檔請求都不回）。
+          # CI 改用快模型（~33s/批）才跑得完；本地仍可用 .env 的 gemma 求品質。
+          NVIDIA_MODEL: meta/llama-3.3-70b-instruct
           FINMIND_TOKEN: ${{ secrets.FINMIND_TOKEN }}
         run: python -u run_pipeline.py
 
