@@ -2,8 +2,9 @@ name: daily-screener
 
 on:
   schedule:
-    # 台股 13:30 收盤 = UTC 05:30；盤後資料齊全約 14:30 後，這裡設 UTC 07:00 (台灣 15:00)
-    - cron: "0 7 * * 1-5"
+    # 台股 13:30 收盤，但 FinMind 日K 約 17:30 才更新（TWSE 盤後 ~14:30）。
+    # 設 UTC 10:00 = 台灣 18:00，確保兩個資料源當日資料都齊全。
+    - cron: "0 10 * * 1-5"
   workflow_dispatch: {}
 
 permissions:
