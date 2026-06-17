@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date, datetime, timedelta
 
 import pandas as pd
@@ -9,6 +10,31 @@ import pandas as pd
 from config import RESULT_DIR, settings
 from src import data_source, ma_filter, ranking
 from src.classifier import classify_themes
+
+_FETCH_WORKERS = 8  # 併發數；FinMind 600/hr 額度下抓 200 檔很安全
+
+
+def _fetch_histories(
+    ids: list[str], start: date, on_date: date, verbose: bool
+) -> dict[str, pd.DataFrame]:
+    histories: dict[str, pd.DataFrame] = {}
+    done = 0
+    with ThreadPoolExecutor(max_workers=_FETCH_WORKERS) as pool:
+        futures = {
+            pool.submit(data_source.get_stock_history, sid, start, on_date): sid
+            for sid in ids
+        }
+        for fut in as_completed(futures):
+            sid = futures[fut]
+            try:
+                histories[sid] = fut.result()
+            except Exception as e:  # 單股失敗不應中斷整批
+                if verbose:
+                    print(f"  ! {sid} 歷史抓取失敗: {e}")
+            done += 1
+            if verbose and done % 50 == 0:
+                print(f"  歷史抓取進度 {done}/{len(ids)}")
+    return histories
 
 
 def run(classify: bool = True, verbose: bool = True) -> dict:
@@ -21,18 +47,11 @@ def run(classify: bool = True, verbose: bool = True) -> dict:
     if verbose:
         print(f"[{on_date}] TWSE 共 {len(today)} 檔，取漲幅前 {len(gainers)} 名")
 
-    # 2. 對 top-N 抓歷史，算四均線（FinMind 單股 + 快取）
+    # 2. 對 top-N 平行抓歷史，算四均線（FinMind 單股 + 快取）
+    #    序列逐檔在 CI（跨區網路）會慢到數十分鐘，改用 thread pool 併發。
     start = on_date - timedelta(days=int(settings.max_ma * 2 + 60))
-    histories: dict[str, pd.DataFrame] = {}
     ids = gainers["stock_id"].tolist()
-    for i, sid in enumerate(ids, 1):
-        try:
-            histories[sid] = data_source.get_stock_history(sid, start, on_date)
-        except Exception as e:  # 單股失敗不應中斷整批
-            if verbose:
-                print(f"  ! {sid} 歷史抓取失敗: {e}")
-        if verbose and i % 50 == 0:
-            print(f"  歷史抓取進度 {i}/{len(ids)}")
+    histories = _fetch_histories(ids, start, on_date, verbose)
 
     ma = ma_filter.screen(histories, settings.ma_windows)
     passed_ids = ma[ma["above_all"]]["stock_id"].tolist() if not ma.empty else []
