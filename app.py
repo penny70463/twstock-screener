@@ -57,7 +57,16 @@ c1, c2, c3 = st.columns(3)
 c1.metric("交易日", data.get("date", "-"))
 c2.metric("通過篩選檔數", len(screened))
 c3.metric("題材族群數", len(themes))
-st.caption(f"產生時間：{data.get('generated_at', '-')}　參數：{data.get('params', {})}")
+
+generated_at = (data.get("generated_at") or "-").replace("T", " ")
+st.caption(f"產生時間：{generated_at}　參數：{data.get('params', {})}")
+
+st.info(
+    "資料更新時間：每個交易日**台灣時間 18:00** 自動更新。"
+    "台股 13:30 收盤，但 TWSE 盤後行情約 14:30 才齊全、"
+    "FinMind 日 K（用於計算均線）約 17:30 更新，故排在 18:00 確保兩個資料源當日資料都到位。",
+    icon="🕒",
+)
 
 tab1, tab2 = st.tabs(["題材族群", "完整清單"])
 
