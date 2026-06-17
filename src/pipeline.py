@@ -5,6 +5,9 @@ import json
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date, datetime, timedelta
+from zoneinfo import ZoneInfo
+
+TW_TZ = ZoneInfo("Asia/Taipei")  # CI runner 是 UTC，統一用台灣時區標記產生時間
 
 import pandas as pd
 
@@ -102,7 +105,7 @@ def run(classify: bool = True, verbose: bool = True) -> dict:
 
     payload = {
         "date": on_date.isoformat(),
-        "generated_at": datetime.now().isoformat(timespec="seconds"),
+        "generated_at": datetime.now(TW_TZ).isoformat(timespec="seconds"),
         "params": {"top_n": settings.top_n, "ma_windows": settings.ma_windows},
         "universe": "TWSE 上市",
         "screened": json.loads(result.to_json(orient="records", force_ascii=False)),
