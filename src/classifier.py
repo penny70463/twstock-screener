@@ -11,7 +11,7 @@ from pathlib import Path
 from openai import OpenAI
 
 from config import RESULT_DIR, settings
-from src.prompts import THEME_SYSTEM_PROMPT
+from src.prompts import THEME_MERGE_PROMPT, THEME_SYSTEM_PROMPT
 
 
 def _client() -> OpenAI:
@@ -52,7 +52,22 @@ def classify_themes(stocks: list[dict]) -> dict:
         print(f"    批次 {bi}/{len(batches)}（{len(batch)} 檔）→ {len(themes)} 題材", flush=True)
         raw_themes.extend(themes)
 
-    return {"themes": _merge_themes(raw_themes, name_map)}
+    # 階段一：完全同名先併（codes 層級），減少要丟給階段二的量
+    stage1 = _merge_exact(raw_themes)
+
+    # 階段二：分批會把同題材切成近義名（記憶體/記憶體封測…），且各批有各自「其他」。
+    #   把精簡後的題材名+codes 丟回 LLM 做一次語意歸併。輸入小、輸出小 → 快又穩。
+    #   多檔（>1 批）才需要；單批沒有跨批碎片問題。
+    final = stage1
+    if len(batches) > 1 and stage1:
+        consolidated = _consolidate(client, stage1)
+        if consolidated:
+            print(f"    階段二歸併：{len(stage1)} → {len(consolidated)} 題材", flush=True)
+            final = consolidated
+        else:
+            print("    ! 階段二歸併失敗，沿用階段一結果", flush=True)
+
+    return {"themes": _attach_all(final, name_map)}
 
 
 def _classify_batch(client: OpenAI, batch: list[dict], bi: int) -> list[dict]:
@@ -81,8 +96,8 @@ def _classify_batch(client: OpenAI, batch: list[dict], bi: int) -> list[dict]:
     return [t for t in parsed.get("themes", []) if isinstance(t, dict)]
 
 
-def _merge_themes(raw_themes: list[dict], name_map: dict) -> list[dict]:
-    """跨批合併：同名題材的個股併在一起。只保留輸入清單內的代號（濾 hallucinate）。"""
+def _merge_exact(raw_themes: list[dict]) -> list[dict]:
+    """完全同名合併，codes 去重。回傳 [{name,reason,codes}]（尚未補名稱、未濾 hallucinate）。"""
     order: list[str] = []
     bucket: dict[str, dict] = {}
     for t in raw_themes:
@@ -91,19 +106,61 @@ def _merge_themes(raw_themes: list[dict], name_map: dict) -> list[dict]:
         if name not in bucket:
             bucket[name] = {"reason": t.get("reason", ""), "codes": []}
             order.append(name)
-        bucket[name]["codes"].extend(codes)
+        bucket[name]["codes"].extend(c for c in codes if c)
 
-    merged: list[dict] = []
+    out: list[dict] = []
     for name in order:
         seen: set[str] = set()
+        codes = [c for c in bucket[name]["codes"] if not (c in seen or seen.add(c))]
+        out.append({"name": name, "reason": bucket[name]["reason"], "codes": codes})
+    return out
+
+
+_CONSOLIDATE_RETRIES = 3
+
+
+def _consolidate(client: OpenAI, themes: list[dict]) -> list[dict] | None:
+    """階段二：把碎片化題材丟回 LLM 做語意歸併。輸入小、重試成本低，故重試數次救連線中斷。"""
+    payload = [{"name": t["name"], "codes": t["codes"]} for t in themes]
+    messages = [
+        {"role": "system", "content": THEME_MERGE_PROMPT},
+        {"role": "user", "content": json.dumps(payload, ensure_ascii=False)},
+    ]
+    last = ""
+    for attempt in range(1, _CONSOLIDATE_RETRIES + 1):
+        try:
+            content = _call(client, messages, json_mode=True)
+        except Exception as e:
+            print(f"  ! 階段二第 {attempt} 次呼叫失敗: {e}", flush=True)
+            time.sleep(2)
+            continue
+        last = content
+        parsed = _safe_parse(content)
+        if parsed is not None:
+            merged = [t for t in parsed.get("themes", []) if isinstance(t, dict)]
+            if merged:
+                return merged
+        print(f"  ! 階段二第 {attempt} 次 parse 失敗（長度 {len(content)}），重試", flush=True)
+        time.sleep(2)
+    _dump_raw(last, 0)
+    return None
+
+
+def _attach_all(themes: list[dict], name_map: dict) -> list[dict]:
+    """補回股票名稱，並濾掉不在輸入清單內的代號（hallucinate）。"""
+    out: list[dict] = []
+    for t in themes:
+        name = (t.get("name") or "未命名").strip()
+        codes = t.get("codes") or [s.get("code") for s in t.get("stocks", [])]
+        seen: set[str] = set()
         stocks = []
-        for c in bucket[name]["codes"]:
+        for c in codes:
             if c in name_map and c not in seen:
                 seen.add(c)
                 stocks.append({"code": c, "name": name_map[c]})
         if stocks:
-            merged.append({"name": name, "reason": bucket[name]["reason"], "stocks": stocks})
-    return merged
+            out.append({"name": name, "reason": t.get("reason", ""), "stocks": stocks})
+    return out
 
 
 def _dump_raw(content: str, bi: int) -> None:
