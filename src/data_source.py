@@ -29,7 +29,7 @@ def _finmind(dataset: str, **params) -> pd.DataFrame:
     payload = {"dataset": dataset, **params}
     if settings.finmind_token:
         payload["token"] = settings.finmind_token
-    resp = requests.get(FINMIND_URL, params=payload, timeout=60)
+    resp = requests.get(FINMIND_URL, params=payload, timeout=15)
     resp.raise_for_status()
     body = resp.json()
     if body.get("status") != 200:

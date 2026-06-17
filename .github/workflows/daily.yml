@@ -24,6 +24,15 @@ jobs:
       - name: Install deps
         run: pip install -r requirements.txt
 
+      # 跨次保留 FinMind 歷史 parquet 快取：之後每天只增量抓 1 天/檔，大幅縮短時間
+      - name: Cache FinMind history
+        uses: actions/cache@v4
+        with:
+          path: data/cache
+          key: finmind-cache-${{ github.run_id }}
+          restore-keys: |
+            finmind-cache-
+
       - name: Run pipeline
         env:
           NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
