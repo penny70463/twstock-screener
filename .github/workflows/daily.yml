@@ -39,7 +39,15 @@ jobs:
           git add -f data/results/*.json
           if git diff --cached --quiet; then
             echo "No changes."
-          else
-            git commit -m "chore: daily screener result $(date -u +%F)"
-            git push
+            exit 0
           fi
+          git commit -m "chore: daily screener result $(date -u +%F)"
+          # 排程執行期間遠端可能被其他 push 更新，先 rebase 再推，重試防競態
+          for i in 1 2 3; do
+            git pull --rebase --autostash origin master \
+              && git push origin master \
+              && exit 0
+            echo "push 衝突，重試 $i ..."
+            sleep 5
+          done
+          echo "push 連續失敗" && exit 1
