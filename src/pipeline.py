@@ -62,7 +62,10 @@ def run(classify: bool = True, verbose: bool = True) -> dict:
             }
             for r in result.itertuples()
         ]
-        themes = classify_themes(stocks)
+        try:
+            themes = classify_themes(stocks)
+        except Exception as e:  # 分類失敗不應讓整批排程 crash，仍輸出篩選清單
+            print(f"  ! LLM 題材分類失敗，僅輸出篩選清單: {e}")
 
     payload = {
         "date": on_date.isoformat(),

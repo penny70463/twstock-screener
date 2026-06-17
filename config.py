@@ -25,10 +25,11 @@ def _parse_windows(raw: str) -> list[int]:
 @dataclass
 class Settings:
     nvidia_api_key: str = os.getenv("NVIDIA_API_KEY", "")
-    nvidia_base_url: str = os.getenv(
-        "NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1"
+    # 用 `or` 而非 getenv 預設：環境變數被設為空字串時（如 CI 未填的 secret）也要 fallback
+    nvidia_base_url: str = (
+        os.getenv("NVIDIA_BASE_URL") or "https://integrate.api.nvidia.com/v1"
     )
-    nvidia_model: str = os.getenv("NVIDIA_MODEL", "meta/llama-3.1-70b-instruct")
+    nvidia_model: str = os.getenv("NVIDIA_MODEL") or "meta/llama-3.1-70b-instruct"
 
     finmind_token: str = os.getenv("FINMIND_TOKEN", "")
 
