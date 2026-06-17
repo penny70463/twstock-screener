@@ -15,14 +15,14 @@ from src.prompts import THEME_SYSTEM_PROMPT
 
 def _client() -> OpenAI:
     settings.require_nvidia()
-    # gemma 是唯一能產出「真題材」的模型（其他模型快但亂分），代價是慢：free tier
-    # 分類 ~125 檔約 8-10 分鐘且有波動，timeout 設 900s 留緩衝；不重試避免時間翻倍。
-    # 偶爾仍可能超時，由 pipeline 以 try/except 兜底，僅少題材、不中斷。
+    # gemma 是唯一能產出「真題材」的模型（其他模型快但亂分），代價是慢：free tier ~290s。
+    # 非串流長請求中途無資料流動，會被 proxy/idle timeout 砍連線（APIConnectionError）；
+    # 故 _call 改串流。連線仍可能斷，max_retries=2 讓 SDK 自動重試。
     return OpenAI(
         api_key=settings.nvidia_api_key,
         base_url=settings.nvidia_base_url,
         timeout=900.0,
-        max_retries=0,
+        max_retries=2,
     )
 
 
@@ -60,7 +60,13 @@ def classify_themes(stocks: list[dict]) -> dict:
         # 留證據：parse 失敗時把原始回應落地，才能事後查是截斷還是格式跑掉
         _dump_raw(content)
         return {"themes": [], "_raw": content}
-    return {"themes": [_attach_names(t, name_map) for t in parsed.get("themes", [])]}
+    # LLM 偶爾把 theme 包成 list 或其他結構，只收 dict 形式的有效題材
+    themes = [
+        _attach_names(t, name_map)
+        for t in parsed.get("themes", [])
+        if isinstance(t, dict)
+    ]
+    return {"themes": themes}
 
 
 def _dump_raw(content: str) -> None:
@@ -89,11 +95,16 @@ def _call(client: OpenAI, messages: list[dict], json_mode: bool) -> str:
         "temperature": 0.2,
         # 125 檔分類完整輸出可達 ~3000 字，預設 max_tokens 偏小會截斷 → JSON 壞掉 → 0 題材
         "max_tokens": 4096,
+        # 串流：token 邊生成邊傳，連線持續有資料，避免長請求被 proxy/idle timeout 砍斷
+        "stream": True,
     }
     if json_mode:
         kwargs["response_format"] = {"type": "json_object"}
-    resp = client.chat.completions.create(**kwargs)
-    return (resp.choices[0].message.content or "").strip()
+    chunks: list[str] = []
+    for ev in client.chat.completions.create(**kwargs):
+        if ev.choices and ev.choices[0].delta and ev.choices[0].delta.content:
+            chunks.append(ev.choices[0].delta.content)
+    return "".join(chunks).strip()
 
 
 def _safe_parse(content: str) -> dict | None:
