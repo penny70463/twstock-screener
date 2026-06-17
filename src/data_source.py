@@ -103,9 +103,18 @@ def get_market_today() -> pd.DataFrame:
 
     Change 欄為漲跌「價」，昨收 = close - change，漲幅% = change / 昨收 * 100。
     """
-    resp = requests.get(TWSE_DAILY_URL, timeout=60)
+    resp = requests.get(TWSE_DAILY_URL, timeout=30)
     resp.raise_for_status()
-    df = pd.DataFrame(resp.json())
+    try:
+        rows = resp.json()
+    except ValueError:
+        raise RuntimeError(
+            "TWSE 回傳非 JSON（多半是盤後資料尚未產生，或來源暫時異常）。"
+            f" status={resp.status_code}, body前80字={resp.text[:80]!r}"
+        )
+    if not rows:
+        raise RuntimeError("TWSE 當日行情為空（可能非交易日，或盤後資料尚未產生，建議盤後 14:30 之後再跑）")
+    df = pd.DataFrame(rows)
     df = df.rename(
         columns={
             "Code": "stock_id",
