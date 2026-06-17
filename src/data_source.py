@@ -19,6 +19,12 @@ from config import CACHE_DIR, settings
 
 FINMIND_URL = "https://api.finmindtrade.com/api/v4/data"
 TWSE_DAILY_URL = "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL"
+# 機房 IP（如 GitHub Actions）或缺 header 時，TWSE 偶爾回 HTML 反爬/錯誤頁。
+# 明確要求 JSON + 帶 UA 可大幅降低機率。
+_TWSE_HEADERS = {
+    "Accept": "application/json",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+}
 
 INFO_CACHE = CACHE_DIR / "stock_info.parquet"
 _SLEEP_BETWEEN_CALLS = 0.3  # FinMind 單股節流，避免觸發 rate limit
@@ -103,14 +109,24 @@ def get_market_today() -> pd.DataFrame:
 
     Change 欄為漲跌「價」，昨收 = close - change，漲幅% = change / 昨收 * 100。
     """
-    resp = requests.get(TWSE_DAILY_URL, timeout=30)
-    resp.raise_for_status()
-    try:
-        rows = resp.json()
-    except ValueError:
+    rows = None
+    last_body = ""
+    # TWSE 回 HTML 多為間歇性（機房 IP 反爬/暫時異常），重試幾次即可
+    for attempt in range(4):
+        resp = requests.get(TWSE_DAILY_URL, headers=_TWSE_HEADERS, timeout=30)
+        resp.raise_for_status()
+        try:
+            rows = resp.json()
+            break
+        except ValueError:
+            last_body = resp.text[:80]
+            if attempt < 3:
+                time.sleep(2 * (attempt + 1))  # 2s, 4s, 6s 退避
+    if rows is None:
         raise RuntimeError(
-            "TWSE 回傳非 JSON（多半是盤後資料尚未產生，或來源暫時異常）。"
-            f" status={resp.status_code}, body前80字={resp.text[:80]!r}"
+            "TWSE 連續回傳非 JSON（機房 IP 反爬或來源暫時異常；"
+            "盤後資料尚未產生也可能如此，建議 14:30 後再跑）。"
+            f" 末次 status={resp.status_code}, body前80字={last_body!r}"
         )
     if not rows:
         raise RuntimeError("TWSE 當日行情為空（可能非交易日，或盤後資料尚未產生，建議盤後 14:30 之後再跑）")
