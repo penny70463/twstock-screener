@@ -14,12 +14,13 @@ from src.prompts import THEME_SYSTEM_PROMPT
 
 def _client() -> OpenAI:
     settings.require_nvidia()
-    # gemma 在 free tier 分類 ~125 檔約需 8 分鐘，timeout 設 600s 留緩衝；不重試避免時間翻倍。
-    # 分類失敗（含 timeout）由 pipeline 以 try/except 兜底，僅少題材、不中斷。
+    # gemma 是唯一能產出「真題材」的模型（其他模型快但亂分），代價是慢：free tier
+    # 分類 ~125 檔約 8-10 分鐘且有波動，timeout 設 900s 留緩衝；不重試避免時間翻倍。
+    # 偶爾仍可能超時，由 pipeline 以 try/except 兜底，僅少題材、不中斷。
     return OpenAI(
         api_key=settings.nvidia_api_key,
         base_url=settings.nvidia_base_url,
-        timeout=600.0,
+        timeout=900.0,
         max_retries=0,
     )
 
