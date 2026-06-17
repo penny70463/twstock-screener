@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import json
+import time
 from pathlib import Path
 
 from openai import OpenAI
@@ -15,77 +16,103 @@ from src.prompts import THEME_SYSTEM_PROMPT
 
 def _client() -> OpenAI:
     settings.require_nvidia()
-    # gemma 是唯一能產出「真題材」的模型（其他模型快但亂分），代價是慢：free tier ~290s。
-    # 非串流長請求中途無資料流動，會被 proxy/idle timeout 砍連線（APIConnectionError）；
-    # 故 _call 改串流。連線仍可能斷，max_retries=2 讓 SDK 自動重試。
+    # gemma free tier 延遲極不穩（10s~500s+）且連跑會被限流。分批呼叫，每批設較短 timeout
+    # 並不重試：被限流卡住的批次快速放棄、跳過，仍保住其他批的題材（部分結果勝過全 0）。
+    # 串流讓正常批次的連線持續有資料，避免被當 idle 砍。
     return OpenAI(
         api_key=settings.nvidia_api_key,
         base_url=settings.nvidia_base_url,
-        timeout=900.0,
-        max_retries=2,
+        timeout=240.0,
+        max_retries=0,
     )
+
+
+# CI 出口到 NVIDIA 的長請求會在 ~270s 被砍（與請求長短相關）。切小批讓每次請求
+# 遠低於該上限；且單批失敗只少該批題材，不會整批 0。30 檔/批 ≈ 5 批。
+_BATCH_SIZE = 30
 
 
 def classify_themes(stocks: list[dict]) -> dict:
     """stocks: [{"code","name","industry"}...] -> {"themes":[{name,reason,stocks:[{code,name}]}]}。
 
-    LLM 只回 code（縮短輸出），名稱在此用本地對照補回。temperature 低以求可重現。
+    分批呼叫 LLM（避開 CI 長請求被砍），各批結果再依題材名合併。LLM 只回 code，名稱本地補回。
     """
     if not stocks:
         return {"themes": []}
 
     name_map = {s["code"]: s.get("name", s["code"]) for s in stocks}
     client = _client()
+    batches = [stocks[i : i + _BATCH_SIZE] for i in range(0, len(stocks), _BATCH_SIZE)]
+
+    raw_themes: list[dict] = []
+    for bi, batch in enumerate(batches, 1):
+        if bi > 1:
+            time.sleep(1.5)  # 批次間留白，降低 free tier 突發限流機率
+        themes = _classify_batch(client, batch, bi)
+        print(f"    批次 {bi}/{len(batches)}（{len(batch)} 檔）→ {len(themes)} 題材", flush=True)
+        raw_themes.extend(themes)
+
+    return {"themes": _merge_themes(raw_themes, name_map)}
+
+
+def _classify_batch(client: OpenAI, batch: list[dict], bi: int) -> list[dict]:
+    """單批分類，回傳原始 theme dict 清單（含 codes，尚未補名稱）。失敗回空清單。"""
     messages = [
         {"role": "system", "content": THEME_SYSTEM_PROMPT},
-        {"role": "user", "content": json.dumps(stocks, ensure_ascii=False)},
+        {"role": "user", "content": json.dumps(batch, ensure_ascii=False)},
     ]
-
     try:
         content = _call(client, messages, json_mode=True)
-    except Exception as e:  # timeout/連線錯誤：直接放棄，不再花另一個長 timeout
-        content = ""
-        print(f"  ! LLM 呼叫失敗: {e}", flush=True)
+    except Exception as e:
+        print(f"  ! 批次 {bi} LLM 呼叫失敗: {e}", flush=True)
+        return []
 
     parsed = _safe_parse(content)
-    # 只有「拿到回應但 parse 失敗」才退非 JSON 模式（部分模型不支援 response_format）
+    # 拿到回應但 parse 失敗才退非 JSON 模式（部分模型不支援 response_format）
     if parsed is None and content:
         try:
-            content = _call(client, messages, json_mode=False)
-            parsed = _safe_parse(content)
+            parsed = _safe_parse(_call(client, messages, json_mode=False))
         except Exception:
             parsed = None
 
     if parsed is None:
-        # 留證據：parse 失敗時把原始回應落地，才能事後查是截斷還是格式跑掉
-        _dump_raw(content)
-        return {"themes": [], "_raw": content}
-    # LLM 偶爾把 theme 包成 list 或其他結構，只收 dict 形式的有效題材
-    themes = [
-        _attach_names(t, name_map)
-        for t in parsed.get("themes", [])
-        if isinstance(t, dict)
-    ]
-    return {"themes": themes}
+        _dump_raw(content, bi)
+        return []
+    return [t for t in parsed.get("themes", []) if isinstance(t, dict)]
 
 
-def _dump_raw(content: str) -> None:
+def _merge_themes(raw_themes: list[dict], name_map: dict) -> list[dict]:
+    """跨批合併：同名題材的個股併在一起。只保留輸入清單內的代號（濾 hallucinate）。"""
+    order: list[str] = []
+    bucket: dict[str, dict] = {}
+    for t in raw_themes:
+        name = (t.get("name") or "未命名").strip()
+        codes = t.get("codes") or [s.get("code") for s in t.get("stocks", [])]
+        if name not in bucket:
+            bucket[name] = {"reason": t.get("reason", ""), "codes": []}
+            order.append(name)
+        bucket[name]["codes"].extend(codes)
+
+    merged: list[dict] = []
+    for name in order:
+        seen: set[str] = set()
+        stocks = []
+        for c in bucket[name]["codes"]:
+            if c in name_map and c not in seen:
+                seen.add(c)
+                stocks.append({"code": c, "name": name_map[c]})
+        if stocks:
+            merged.append({"name": name, "reason": bucket[name]["reason"], "stocks": stocks})
+    return merged
+
+
+def _dump_raw(content: str, bi: int) -> None:
     try:
-        p = Path(RESULT_DIR) / "_llm_raw_failed.txt"
+        p = Path(RESULT_DIR) / f"_llm_raw_failed_b{bi}.txt"
         p.write_text(content or "(空回應)", encoding="utf-8")
-        print(f"  ! 題材 parse 失敗，原始回應已存 {p}（長度 {len(content)}）", flush=True)
+        print(f"  ! 批次 {bi} parse 失敗，原始回應已存 {p}（長度 {len(content)}）", flush=True)
     except Exception:
         pass
-
-
-def _attach_names(theme: dict, name_map: dict) -> dict:
-    codes = theme.get("codes") or [s.get("code") for s in theme.get("stocks", [])]
-    # 只保留輸入清單內的代號：LLM 偶爾 hallucinate 代號（如 2300→23008），直接濾掉
-    return {
-        "name": theme.get("name", "未命名"),
-        "reason": theme.get("reason", ""),
-        "stocks": [{"code": c, "name": name_map[c]} for c in codes if c in name_map],
-    }
 
 
 def _call(client: OpenAI, messages: list[dict], json_mode: bool) -> str:
