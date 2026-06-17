@@ -14,7 +14,13 @@ from src.prompts import THEME_SYSTEM_PROMPT
 
 def _client() -> OpenAI:
     settings.require_nvidia()
-    return OpenAI(api_key=settings.nvidia_api_key, base_url=settings.nvidia_base_url)
+    # 限制 timeout 與重試：避免 NVIDIA 回應慢時卡住整個排程（預設 600s×2 重試可達 ~30 分）
+    return OpenAI(
+        api_key=settings.nvidia_api_key,
+        base_url=settings.nvidia_base_url,
+        timeout=90.0,
+        max_retries=1,
+    )
 
 
 def classify_themes(stocks: list[dict]) -> dict:

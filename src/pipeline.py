@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date, datetime, timedelta
 
@@ -37,7 +38,15 @@ def _fetch_histories(
     return histories
 
 
+def _step(label: str, t0: float, verbose: bool) -> float:
+    now = time.time()
+    if verbose:
+        print(f"  [+{now - t0:6.1f}s] {label}", flush=True)
+    return now
+
+
 def run(classify: bool = True, verbose: bool = True) -> dict:
+    t0 = time.time()
     # 1. TWSE 全上市當日行情 → 漲幅排行前 N
     today = data_source.get_market_today()
     if today.empty:
@@ -45,18 +54,20 @@ def run(classify: bool = True, verbose: bool = True) -> dict:
     on_date: date = today["date"].max()
     gainers = ranking.top_gainers(today, settings.top_n)
     if verbose:
-        print(f"[{on_date}] TWSE 共 {len(today)} 檔，取漲幅前 {len(gainers)} 名")
+        print(f"[{on_date}] TWSE 共 {len(today)} 檔，取漲幅前 {len(gainers)} 名", flush=True)
+    _step("TWSE 當日行情完成", t0, verbose)
 
     # 2. 對 top-N 平行抓歷史，算四均線（FinMind 單股 + 快取）
     #    序列逐檔在 CI（跨區網路）會慢到數十分鐘，改用 thread pool 併發。
     start = on_date - timedelta(days=int(settings.max_ma * 2 + 60))
     ids = gainers["stock_id"].tolist()
     histories = _fetch_histories(ids, start, on_date, verbose)
+    _step("歷史抓取完成", t0, verbose)
 
     ma = ma_filter.screen(histories, settings.ma_windows)
     passed_ids = ma[ma["above_all"]]["stock_id"].tolist() if not ma.empty else []
     if verbose:
-        print(f"  站上 {settings.ma_windows} 全部均線：{len(passed_ids)} 檔")
+        print(f"  站上 {settings.ma_windows} 全部均線：{len(passed_ids)} 檔", flush=True)
 
     # 3. 合併漲幅 + 均線 + 產業別
     info = data_source.get_stock_info()[["stock_id", "industry_category"]]
@@ -81,10 +92,13 @@ def run(classify: bool = True, verbose: bool = True) -> dict:
             }
             for r in result.itertuples()
         ]
+        if verbose:
+            print(f"  LLM 分類中（{len(stocks)} 檔）...", flush=True)
         try:
             themes = classify_themes(stocks)
         except Exception as e:  # 分類失敗不應讓整批排程 crash，仍輸出篩選清單
-            print(f"  ! LLM 題材分類失敗，僅輸出篩選清單: {e}")
+            print(f"  ! LLM 題材分類失敗，僅輸出篩選清單: {e}", flush=True)
+        _step("LLM 分類完成", t0, verbose)
 
     payload = {
         "date": on_date.isoformat(),
