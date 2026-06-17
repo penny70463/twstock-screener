@@ -1,0 +1,44 @@
+name: daily-screener
+
+on:
+  schedule:
+    # 台股 13:30 收盤 = UTC 05:30；盤後資料齊全約 14:30 後，這裡設 UTC 07:00 (台灣 15:00)
+    - cron: "0 7 * * 1-5"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install deps
+        run: pip install -r requirements.txt
+
+      - name: Run pipeline
+        env:
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+          NVIDIA_BASE_URL: ${{ secrets.NVIDIA_BASE_URL }}
+          NVIDIA_MODEL: ${{ secrets.NVIDIA_MODEL }}
+          FINMIND_TOKEN: ${{ secrets.FINMIND_TOKEN }}
+        run: python run_pipeline.py
+
+      - name: Commit results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f data/results/*.json
+          if git diff --cached --quiet; then
+            echo "No changes."
+          else
+            git commit -m "chore: daily screener result $(date -u +%F)"
+            git push
+          fi

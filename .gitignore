@@ -1,0 +1,12 @@
+.env
+.venv/
+venv/
+__pycache__/
+*.pyc
+.DS_Store
+
+# 快取的歷史 K 線（體積大，不進版控）
+data/cache/
+
+# 每日產出結果保留（給 Streamlit 讀），但忽略過大的中間檔
+data/raw/
