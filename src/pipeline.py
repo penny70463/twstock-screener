@@ -186,7 +186,7 @@ def _send_line_broadcast(payload: dict, result_df: pd.DataFrame, market: str = "
     threshold = payload["market_state"]["threshold"]
     
     themes = payload.get("themes", [])
-    theme_names = "、".join([t["theme"] for t in themes[:3]]) if themes else "無明顯題材"
+    theme_names = "、".join([t.get("name", "") for t in themes[:3]]) if themes else "無明顯題材"
     
     # 挑出最強 3 檔
     top_stocks = []
