@@ -183,7 +183,7 @@ const formatCurrency = (val) => {
 
       <!-- 新增持股 -->
       <div class="add-stock-panel glass-panel">
-        <h3 class="panel-title">新增持股</h3>
+        <h2 class="section-title">新增持股</h2>
         <form @submit.prevent="addPosition" class="add-form">
           <input type="text" v-model="newStock.id" placeholder="股票代號 (如: 2330)" required class="form-input" />
           <input type="number" v-model="newStock.shares" placeholder="持股數 (股)" required class="form-input" min="1" />
@@ -194,7 +194,7 @@ const formatCurrency = (val) => {
 
       <!-- 持股清單 -->
       <div class="glass-panel table-container mt-6">
-        <h3 class="panel-title mb-4">持股體檢報告</h3>
+        <h2 class="section-title mb-4">持股體檢報告</h2>
         <table class="stock-table" v-if="enrichedPositions.length > 0">
           <thead>
             <tr>
@@ -303,10 +303,12 @@ const formatCurrency = (val) => {
   padding: 1.5rem;
 }
 
-.panel-title {
-  font-size: 1.2rem;
-  margin-bottom: 1rem;
-  color: white;
+.section-title {
+  font-size: 1.5rem;
+  margin: 0 0 1.5rem 0;
+  color: var(--text-main);
+  border-left: 4px solid var(--accent-blue);
+  padding-left: 1rem;
 }
 
 .add-form {

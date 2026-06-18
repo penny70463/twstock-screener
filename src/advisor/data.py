@@ -60,8 +60,10 @@ def _to_num(s) -> float:
 
 
 def _is_common_stock(code: str) -> bool:
-    """4 碼純數字的普通股，排除 ETF（00 開頭）、特別股、權證等"""
-    return len(code) == 4 and code.isdigit() and not code.startswith("00")
+    """放寬限制：4~6碼英數字皆可（涵蓋ETF與ETN），但排除權證（通常為6碼且03~08開頭）"""
+    if len(code) == 6 and code[:2] in ("03", "04", "05", "06", "07", "08"):
+        return False
+    return 4 <= len(code) <= 6 and code.isalnum()
 
 
 # ── 股票池 ──────────────────────────────────────────────────
