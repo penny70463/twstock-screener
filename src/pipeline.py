@@ -46,7 +46,7 @@ def run(classify: bool = True, verbose: bool = True) -> dict:
         print(f"[{datetime.now(TW_TZ).date()}] 大盤狀態: {market_state['label']}, 建議門檻: {threshold}", flush=True)
     
     # 4. 執行 Advisor 多因子選股
-    screened_df = adv_screener.run_screen(universe, history, inst, revenue, threshold)
+    screened_df, universe_df = adv_screener.run_screen(universe, history, inst, revenue, threshold)
     _step("Advisor 評分與篩選完成", t0, verbose)
     
     if screened_df.empty:
@@ -100,7 +100,33 @@ def run(classify: bool = True, verbose: bool = True) -> dict:
 
     payload = _build_payload(datetime.now(TW_TZ).date(), result, themes, market_state)
     _save(payload, datetime.now(TW_TZ).date())
+    
+    # 儲存 Universe 給前端投資組合使用
+    universe_payload = _build_universe_payload(datetime.now(TW_TZ).date(), universe_df, market_state)
+    (RESULT_DIR / "universe.json").write_text(
+        json.dumps(universe_payload, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    
     return payload
+
+def _build_universe_payload(on_date: date, universe_df: pd.DataFrame, market_state: dict) -> dict:
+    records = []
+    if not universe_df.empty:
+        # 重命名欄位以符合前端
+        u_df = universe_df.rename(columns={
+            "代號": "stock_id",
+            "名稱": "stock_name",
+            "產業": "industry_category",
+            "收盤價": "close",
+        })
+        records = json.loads(u_df.to_json(orient="records", force_ascii=False))
+        
+    return {
+        "date": on_date.isoformat(),
+        "generated_at": datetime.now(TW_TZ).isoformat(timespec="seconds"),
+        "market_state": market_state,
+        "stocks": records
+    }
 
 def _build_payload(on_date: date, result: pd.DataFrame, themes: dict, market_state: dict) -> dict:
     records = []

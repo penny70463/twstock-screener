@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import PortfolioReview from './components/PortfolioReview.vue'
 
+const activeTab = ref('screener')
 const data = ref(null)
 const loading = ref(true)
 const error = ref(null)
@@ -155,8 +157,28 @@ const filteredAndSortedStocks = computed(() => {
         </div>
       </section>
 
-      <!-- Leaderboard -->
-      <section class="section">
+      <!-- Tab Navigation -->
+      <div class="tabs-container">
+        <button 
+          class="tab-btn" 
+          :class="{ active: activeTab === 'screener' }"
+          @click="activeTab = 'screener'"
+        >
+          🚀 強勢股掃描
+        </button>
+        <button 
+          class="tab-btn" 
+          :class="{ active: activeTab === 'portfolio' }"
+          @click="activeTab = 'portfolio'"
+        >
+          💼 我的存股體檢
+        </button>
+      </div>
+
+      <!-- Screener Tab Content -->
+      <template v-if="activeTab === 'screener'">
+        <!-- Leaderboard -->
+        <section class="section">
         <div class="section-header">
           <h2 class="section-title">高分強勢股清單 (共 {{ filteredAndSortedStocks.length }} 檔)</h2>
           <input type="text" v-model="searchQuery" placeholder="搜尋代號、名稱、產業或訊號..." class="search-input" />
@@ -214,6 +236,12 @@ const filteredAndSortedStocks = computed(() => {
           </div>
         </div>
       </section>
+      </template>
+
+      <!-- Portfolio Tab Content -->
+      <template v-if="activeTab === 'portfolio'">
+        <PortfolioReview :marketState="data?.market_state" />
+      </template>
     </div>
   </div>
 </template>
@@ -245,10 +273,51 @@ body {
   min-height: 100vh;
 }
 
+/* Main Layout */
 .dashboard-container {
-  max-width: 1280px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
+}
+
+/* Tabs */
+.tabs-container {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.5rem;
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.tab-btn:hover {
+  color: white;
+}
+
+.tab-btn.active {
+  color: var(--accent-blue);
+}
+
+.tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -0.5rem;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--accent-blue);
+  border-radius: 2px;
 }
 
 /* Glassmorphism Utilities */

@@ -19,6 +19,16 @@ export default defineConfig({
             res.end(JSON.stringify({ error: 'File not found' }));
           }
         });
+        server.middlewares.use('/api/universe.json', (req, res) => {
+          const filePath = path.resolve(__dirname, '../data/results/universe.json');
+          if (fs.existsSync(filePath)) {
+            res.setHeader('Content-Type', 'application/json');
+            res.end(fs.readFileSync(filePath));
+          } else {
+            res.statusCode = 404;
+            res.end(JSON.stringify({ error: 'File not found' }));
+          }
+        });
       }
     }
   ],
