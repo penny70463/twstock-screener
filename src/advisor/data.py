@@ -203,6 +203,10 @@ def patch_latest_bar(history: dict[str, pd.DataFrame],
     # 快照「全部列」都已是最後交易日才直接用——openapi 在午夜輪轉時
     # 會出現混合狀態（部分列 6/12、部分列還在 6/11），看最大日期會被騙
     expected = _expected_last_session()
+    
+    if "date" not in listings.columns:
+        return 0 # 美股沒有這個官方報價快照修補邏輯，直接回傳
+        
     dates = listings["date"].dropna()
     snapshot_ok = len(dates) > 0 and (dates == expected).all()
 
@@ -265,15 +269,48 @@ def load_name_map() -> dict[str, str]:
         return {}
 
 
+def us_listings() -> pd.DataFrame:
+    """取得美股清單 (S&P 500 + 熱門 ETF) 作為初始宇宙"""
+    records = []
+    # 常見大盤與板塊 ETF
+    etfs = ["SPY", "QQQ", "DIA", "IWM", "SMH", "SOXX", "XLE", "XLF", "XLV", "XLP", "XLU", "XLI", "XLB", "XLRE", "XLK", "XLY", "ARKK"]
+    for sym in etfs:
+        records.append({
+            "code": sym, "name": sym + " ETF", "yahoo": sym, "market": "US",
+            "close": 100, "trade_value": 1e9, "industry": "ETF"
+        })
+        
+    mega_caps = [
+        "AAPL", "MSFT", "NVDA", "GOOGL", "AMZN", "META", "BRK-B", "LLY", "AVGO", "TSLA",
+        "JPM", "WMT", "UNH", "XOM", "V", "PG", "MA", "JNJ", "HD", "ORCL",
+        "COST", "ABBV", "MRK", "CVX", "CRM", "BAC", "NFLX", "AMD", "KO", "PEP",
+        "TMO", "LIN", "ADBE", "DIS", "WFC", "CSCO", "MCD", "QCOM", "ABT", "INTU",
+        "IBM", "AMAT", "CAT", "GE", "TXN", "DHR", "VZ", "NOW", "PFE", "PM",
+        "MU", "UBER", "INTC", "ISRG", "SYK", "LOW", "SPGI", "HON", "BA", "COP",
+        "BKNG", "PLTR", "ARM", "SMCI", "SNOW", "CRWD", "DDOG", "NET", "PANW", "FTNT"
+    ]
+    for sym in mega_caps:
+        records.append({
+            "code": sym, "name": sym, "yahoo": sym, "market": "US",
+            "close": 100, "trade_value": 1e9, "industry": "Mega Cap / Tech"
+        })
+        
+    df = pd.DataFrame(records)
+    df = df.drop_duplicates(subset=["code"])
+    _save_name_map(df)
+    return df
+
 def get_universe(min_price: float = config.MIN_PRICE,
                  min_value: float = config.MIN_TRADE_VALUE,
                  limit: int = config.UNIVERSE_LIMIT,
                  include_otc: bool = True,
-                 listings: pd.DataFrame | None = None) -> pd.DataFrame:
-    """選股用股票池：只留 4 碼普通股，依流動性過濾。
-
-    listings 可傳入 all_listings() 的結果避免重複請求。
-    """
+                 listings: pd.DataFrame | None = None,
+                 market: str = "TW") -> pd.DataFrame:
+    """選股用股票池：區分台股與美股。"""
+    if market == "US":
+        df = listings if listings is not None else us_listings()
+        return df.head(limit).reset_index(drop=True)
+        
     df = listings if listings is not None else all_listings(include_otc)
     df = df[df["code"].map(_is_common_stock)]
     df = df[(df["close"] >= min_price) & (df["trade_value"] >= min_value)]

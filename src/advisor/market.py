@@ -18,9 +18,10 @@ import yfinance as yf
 from . import config
 
 
-def get_regime() -> dict:
+def get_regime(market: str = "TW") -> dict:
     """回傳大盤狀態：label（多頭/中性/空頭）、score 門檻、說明"""
-    twii = yf.download("^TWII", period="1y", auto_adjust=True, progress=False)
+    index_symbol = "^TWII" if market == "TW" else "^GSPC"
+    twii = yf.download(index_symbol, period="1y", auto_adjust=True, progress=False)
     if isinstance(twii.columns, pd.MultiIndex):
         twii.columns = twii.columns.get_level_values(0)
     c = twii["Close"].dropna()

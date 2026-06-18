@@ -5,3 +5,4 @@ openai>=1.30.0
 python-dotenv>=1.0.0
 streamlit>=1.32.0
 yfinance>=0.2.40
+lxml>=5.0.0

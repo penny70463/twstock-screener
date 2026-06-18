@@ -5,6 +5,10 @@ const props = defineProps({
   marketState: {
     type: Object,
     default: () => ({})
+  },
+  market: {
+    type: String,
+    default: 'TW'
   }
 })
 
@@ -12,9 +16,12 @@ const universe = ref([])
 const loading = ref(true)
 const error = ref(null)
 
-const UNIVERSE_URL = import.meta.env.DEV 
-  ? '/api/universe.json' 
-  : 'https://raw.githubusercontent.com/penny70463/twstock-screener/master/data/results/universe.json'
+const UNIVERSE_URL = computed(() => {
+  const fileName = `universe_${props.market.toLowerCase()}.json`
+  return import.meta.env.DEV 
+    ? `/api/${fileName}` 
+    : `https://raw.githubusercontent.com/penny70463/twstock-screener/master/data/results/${fileName}`
+})
 
 // 使用者存股狀態
 const portfolio = ref({
@@ -30,14 +37,14 @@ const newStock = ref({
   price: ''
 })
 
-// 載入 localStorage
-onMounted(async () => {
-  const saved = localStorage.getItem('twstock_portfolio')
+const getStorageKey = () => props.market === 'TW' ? 'twstock_portfolio' : `twstock_portfolio_${props.market.toLowerCase()}`
+
+const loadPortfolio = () => {
+  const saved = localStorage.getItem(getStorageKey())
   if (saved) {
     try {
       const parsed = JSON.parse(saved)
       if (parsed.positions) {
-        // 舊資料遷移：將 shares/price 轉換為 lots 陣列
         parsed.positions = parsed.positions.map(p => {
           if (!p.lots) {
             return {
@@ -58,10 +65,15 @@ onMounted(async () => {
     } catch (e) {
       console.error('Failed to parse portfolio', e)
     }
+  } else {
+    portfolio.value = { cash: 0, positions: [] }
   }
+}
 
+const fetchUniverse = async () => {
+  loading.value = true
   try {
-    const res = await fetch(UNIVERSE_URL, { cache: 'no-store' })
+    const res = await fetch(UNIVERSE_URL.value, { cache: 'no-store' })
     if (!res.ok) throw new Error('Failed to fetch universe data')
     const data = await res.json()
     universe.value = data.stocks || []
@@ -70,11 +82,20 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
+}
+
+onMounted(() => {
+  loadPortfolio()
+  fetchUniverse()
 })
 
-// 儲存到 localStorage
+watch(() => props.market, () => {
+  loadPortfolio()
+  fetchUniverse()
+})
+
 watch(portfolio, (newVal) => {
-  localStorage.setItem('twstock_portfolio', JSON.stringify(newVal))
+  localStorage.setItem(getStorageKey(), JSON.stringify(newVal))
 }, { deep: true })
 
 const addPosition = () => {
@@ -264,7 +285,9 @@ const totalPL = computed(() => {
 })
 
 const formatCurrency = (val) => {
-  return new Intl.NumberFormat('zh-TW', { style: 'currency', currency: 'TWD', maximumFractionDigits: 0 }).format(val)
+  const currency = props.market === 'US' ? 'USD' : 'TWD'
+  const digits = props.market === 'US' ? 2 : 0
+  return new Intl.NumberFormat('zh-TW', { style: 'currency', currency: currency, maximumFractionDigits: digits }).format(val)
 }
 
 // 曝險控管建議
@@ -357,7 +380,7 @@ const isSparklineUp = (prices) => {
         <div class="summary-item">
           <span class="summary-label">現金部位</span>
           <div class="cash-input-group">
-            <span class="currency-symbol">$</span>
+            <span class="currency-symbol">{{ market === 'US' ? 'US$' : '$' }}</span>
             <input type="number" v-model="portfolio.cash" class="cash-input" placeholder="輸入現金餘額" />
           </div>
         </div>

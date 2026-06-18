@@ -24,31 +24,34 @@ def _step(label: str, t0: float, verbose: bool) -> float:
         print(f"  [+{now - t0:6.1f}s] {label}", flush=True)
     return now
 
-def run(classify: bool = True, verbose: bool = True) -> dict:
+def run(market: str = "TW", classify: bool = True, verbose: bool = True) -> dict:
     t0 = time.time()
     
     # 1. 取得全市場股票池與歷史資料
-    if verbose: print("  取得全市場資料中...", flush=True)
-    universe = adv_data.get_universe() # 預設取前 600 大流動性
+    if verbose: print(f"  取得 {market} 市場資料中...", flush=True)
+    universe = adv_data.get_universe(market=market) # 依據市場取股票池
     tickers = {row.code: row.yahoo for row in universe.itertuples()}
     
     history = adv_data.fetch_history(tickers)
     adv_data.patch_latest_bar(history, universe)
     _step("歷史股價與快取完成", t0, verbose)
     
-    # 2. 取得法人與營收資料
-    inst = adv_data.fetch_institutional(days=3, lookback=10)
-    revenue = adv_data.fetch_revenue()
-    _step("三大法人與月營收完成", t0, verbose)
+    # 2. 取得法人與營收資料 (僅台股支援)
+    if market == "TW":
+        inst = adv_data.fetch_institutional(days=3, lookback=10)
+        revenue = adv_data.fetch_revenue()
+        _step("三大法人與月營收完成", t0, verbose)
+    else:
+        inst, revenue = None, None
     
     # 3. 取得大盤狀態與門檻
-    market_state = adv_market.get_regime()
+    market_state = adv_market.get_regime(market=market)
     threshold = market_state["threshold"]
     if verbose:
         print(f"[{datetime.now(TW_TZ).date()}] 大盤狀態: {market_state['label']}, 建議門檻: {threshold}", flush=True)
     
     # 4. 執行 Advisor 多因子選股
-    screened_df, universe_df = adv_screener.run_screen(universe, history, inst, revenue, threshold)
+    screened_df, universe_df = adv_screener.run_screen(universe, history, inst, revenue, threshold, market=market)
     _step("Advisor 評分與篩選完成", t0, verbose)
     
     if screened_df.empty:
@@ -100,24 +103,24 @@ def run(classify: bool = True, verbose: bool = True) -> dict:
             print(f"  ! LLM 題材分類失敗: {e}", flush=True)
         _step("LLM 分類完成", t0, verbose)
 
-    payload = _build_payload(datetime.now(TW_TZ).date(), result, themes, market_state)
-    _save(payload, datetime.now(TW_TZ).date())
+    payload = _build_payload(datetime.now(TW_TZ).date(), result, themes, market_state, market=market)
+    _save(payload, datetime.now(TW_TZ).date(), market=market)
     
     # 儲存 Universe 給前端投資組合使用
-    universe_payload = _build_universe_payload(datetime.now(TW_TZ).date(), universe_df, market_state)
-    (RESULT_DIR / "universe.json").write_text(
+    universe_payload = _build_universe_payload(datetime.now(TW_TZ).date(), universe_df, market_state, market=market)
+    (RESULT_DIR / f"universe_{market.lower()}.json").write_text(
         json.dumps(universe_payload, ensure_ascii=False, indent=2), encoding="utf-8"
     )
     
     # 產生可用日期清單 (Time Travel)
-    _generate_available_dates()
+    _generate_available_dates(market=market)
     
     # 發送 Line 廣播推播 (若有設定 Token)
-    _send_line_broadcast(payload, result)
+    _send_line_broadcast(payload, result, market=market)
     
     return payload
 
-def _build_universe_payload(on_date: date, universe_df: pd.DataFrame, market_state: dict) -> dict:
+def _build_universe_payload(on_date: date, universe_df: pd.DataFrame, market_state: dict, market: str = "TW") -> dict:
     records = []
     if not universe_df.empty:
         # 重命名欄位以符合前端
@@ -136,7 +139,7 @@ def _build_universe_payload(on_date: date, universe_df: pd.DataFrame, market_sta
         "stocks": records
     }
 
-def _build_payload(on_date: date, result: pd.DataFrame, themes: dict, market_state: dict) -> dict:
+def _build_payload(on_date: date, result: pd.DataFrame, themes: dict, market_state: dict, market: str = "TW") -> dict:
     records = []
     if not result.empty:
         records = json.loads(result.to_json(orient="records", force_ascii=False))
@@ -146,21 +149,21 @@ def _build_payload(on_date: date, result: pd.DataFrame, themes: dict, market_sta
         "generated_at": datetime.now(TW_TZ).isoformat(timespec="seconds"),
         "params": {"top_n": settings.top_n, "advisor_threshold": market_state["threshold"]},
         "market_state": market_state,
-        "universe": "TWSE+TPEX Top 流動性",
+        "universe": f"{market} Market",
         "screened": records,
         "themes": themes.get("themes", []),
     }
 
-def _save(payload: dict, on_date: date) -> None:
-    for name in (on_date.isoformat(), "latest"):
+def _save(payload: dict, on_date: date, market: str = "TW") -> None:
+    for name in (f"{on_date.isoformat()}_{market.lower()}", f"latest_{market.lower()}"):
         (RESULT_DIR / f"{name}.json").write_text(
             json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
         )
 
-def _generate_available_dates() -> None:
+def _generate_available_dates(market: str = "TW") -> None:
     """掃描 results 資料夾，產生可用的歷史日期清單"""
     import re
-    date_pattern = re.compile(r"^(\d{4}-\d{2}-\d{2})\.json$")
+    date_pattern = re.compile(rf"^(\d{{4}}-\d{{2}}-\d{{2}})_{market.lower()}\.json$")
     dates = []
     if RESULT_DIR.exists():
         for f in RESULT_DIR.iterdir():
@@ -168,11 +171,11 @@ def _generate_available_dates() -> None:
             if match:
                 dates.append(match.group(1))
     dates.sort(reverse=True) # 最新日期在前
-    (RESULT_DIR / "available_dates.json").write_text(
+    (RESULT_DIR / f"available_dates_{market.lower()}.json").write_text(
         json.dumps(dates, ensure_ascii=False), encoding="utf-8"
     )
 
-def _send_line_broadcast(payload: dict, result_df: pd.DataFrame) -> None:
+def _send_line_broadcast(payload: dict, result_df: pd.DataFrame, market: str = "TW") -> None:
     """發送 Line 廣播推播"""
     token = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
     if not token or payload is None:
@@ -193,8 +196,9 @@ def _send_line_broadcast(payload: dict, result_df: pd.DataFrame) -> None:
             top_stocks.append(f"{r.stock_id} {name}")
     top_stocks_str = "、".join(top_stocks) if top_stocks else "無"
     
+    market_name = "台股" if market == "TW" else "美股"
     message = (
-        f"【台股動能掃描 {on_date}】\n"
+        f"【{market_name}動能掃描 {on_date}】\n"
         f"📊 大盤狀態：{market_label} (門檻 {threshold}分)\n"
         f"🔥 熱門題材：{theme_names}\n"
         f"🚀 強勢指標：{top_stocks_str}\n\n"

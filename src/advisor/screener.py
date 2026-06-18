@@ -9,7 +9,8 @@ def run_screen(universe: pd.DataFrame,
                history: dict[str, pd.DataFrame],
                inst: pd.DataFrame | None,
                revenue: pd.DataFrame | None,
-               threshold: float) -> tuple[pd.DataFrame, pd.DataFrame]:
+               threshold: float,
+               market: str = "TW") -> tuple[pd.DataFrame, pd.DataFrame]:
     """回傳 (過濾後的股票, 全股票池評分)"""
     meta = universe.set_index("code")
 

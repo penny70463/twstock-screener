@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import PortfolioReview from './components/PortfolioReview.vue'
 
+const activeMarket = ref('TW')
 const activeTab = ref('screener')
 const data = ref(null)
 const loading = ref(true)
@@ -13,9 +14,12 @@ const selectedDate = ref('latest')
 const fetchData = async () => {
   loading.value = true
   error.value = null
+  const fileName = selectedDate.value === 'latest' 
+    ? `latest_${activeMarket.value.toLowerCase()}.json` 
+    : `${selectedDate.value}_${activeMarket.value.toLowerCase()}.json`
   const DATA_URL = import.meta.env.DEV 
-    ? `/api/${selectedDate.value}.json` 
-    : `https://raw.githubusercontent.com/penny70463/twstock-screener/master/data/results/${selectedDate.value}.json`
+    ? `/api/${fileName}` 
+    : `https://raw.githubusercontent.com/penny70463/twstock-screener/master/data/results/${fileName}`
   try {
     const response = await fetch(DATA_URL, { cache: 'no-store' })
     if (!response.ok) throw new Error('Failed to fetch data')
@@ -28,9 +32,10 @@ const fetchData = async () => {
 }
 
 const fetchDates = async () => {
+  const fileName = `available_dates_${activeMarket.value.toLowerCase()}.json`
   const URL = import.meta.env.DEV 
-    ? '/api/available_dates.json' 
-    : 'https://raw.githubusercontent.com/penny70463/twstock-screener/master/data/results/available_dates.json'
+    ? `/api/${fileName}` 
+    : `https://raw.githubusercontent.com/penny70463/twstock-screener/master/data/results/${fileName}`
   try {
     const res = await fetch(URL, { cache: 'no-store' })
     if (res.ok) {
@@ -49,6 +54,12 @@ onMounted(() => {
 })
 
 watch(selectedDate, () => {
+  fetchData()
+})
+
+watch(activeMarket, () => {
+  selectedDate.value = 'latest'
+  fetchDates()
   fetchData()
 })
 
@@ -166,13 +177,16 @@ const isSparklineUp = (prices) => {
     </div>
 
     <div v-else-if="data" class="dashboard-content">
-      <!-- Hero Banner -->
       <header class="glass-panel hero-banner">
         <div class="hero-left">
-          <h1>台股動能與題材掃描</h1>
+          <div class="market-toggle">
+            <button :class="{ active: activeMarket === 'TW' }" @click="activeMarket = 'TW'">🇹🇼 台股</button>
+            <button :class="{ active: activeMarket === 'US' }" @click="activeMarket = 'US'">🇺🇸 美股</button>
+          </div>
+          <h1>{{ activeMarket === 'TW' ? '台股' : '美股' }}動能與題材掃描</h1>
           <p class="subtitle">自動化多因子選股儀表板</p>
-          <p class="logic-desc">💡 <strong>長線保護短線交集邏輯</strong>：結合大盤多空動態調整門檻，嚴格篩出具備「均線多頭」與「法人籌碼」的長線資優生後，再依據「單日強勢漲幅」進行交集排序。</p>
-          <p class="logic-desc">⏱️ <strong>更新頻率</strong>：每個交易日（週一至週五）下午 18:00 自動執行選股與題材分析排程。</p>
+          <p class="logic-desc">💡 <strong>長線保護短線交集邏輯</strong>：結合大盤多空動態調整門檻，嚴格篩出具備「均線多頭」的長線資優生後，再依據「單日強勢漲幅」進行交集排序。</p>
+          <p class="logic-desc">⏱️ <strong>更新頻率</strong>：每個交易日自動執行選股與題材分析排程。</p>
         </div>
         <div class="hero-right">
           <div class="market-indicator" :class="marketClass">
@@ -304,7 +318,7 @@ const isSparklineUp = (prices) => {
 
       <!-- Portfolio Tab Content -->
       <template v-if="activeTab === 'portfolio'">
-        <PortfolioReview :marketState="data?.market_state" />
+        <PortfolioReview :marketState="data?.market_state" :market="activeMarket" />
       </template>
     </div>
   </div>
@@ -436,6 +450,37 @@ body {
   flex-direction: column;
   align-items: flex-end;
   gap: 0.75rem;
+}
+
+.market-toggle {
+  display: inline-flex;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.3rem;
+  border-radius: 999px;
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.market-toggle button {
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  padding: 0.5rem 1.25rem;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.market-toggle button:hover {
+  color: white;
+}
+
+.market-toggle button.active {
+  background: var(--accent-blue);
+  color: white;
+  box-shadow: 0 2px 10px rgba(59, 130, 246, 0.4);
 }
 
 .market-indicator {
