@@ -287,6 +287,12 @@ body {
   margin-bottom: 2rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding-bottom: 0.5rem;
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+.tabs-container::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
 }
 
 .tab-btn {
@@ -299,6 +305,7 @@ body {
   cursor: pointer;
   transition: all 0.2s;
   position: relative;
+  white-space: nowrap;
 }
 
 .tab-btn:hover {
