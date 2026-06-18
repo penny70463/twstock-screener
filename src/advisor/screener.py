@@ -41,6 +41,8 @@ def run_screen(universe: pd.DataFrame,
         industry = ""
         if revenue is not None and code in revenue.index:
             industry = str(revenue.loc[code].get("industry", "") or "")
+        elif code in meta.index and "industry" in meta.columns:
+            industry = str(meta.at[code, "industry"] or "")
             
         row_data = {
             "代號": code,
