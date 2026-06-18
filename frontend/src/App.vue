@@ -1,7 +1,6 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import PortfolioReview from './components/PortfolioReview.vue'
-import StrategyComparison from './components/StrategyComparison.vue'
 
 const activeMarket = ref('TW')
 const activeTab = ref('screener')
@@ -46,8 +45,6 @@ const fetchDates = async () => {
     console.error("No dates found")
   }
 }
-
-import { watch } from 'vue'
 
 onMounted(() => {
   fetchDates()
@@ -247,9 +244,6 @@ const isSparklineUp = (prices) => {
 
       <!-- Screener Tab Content -->
       <template v-if="activeTab === 'screener'">
-        <!-- 美股：主動 vs 被動 績效對照 -->
-        <StrategyComparison v-if="activeMarket === 'US'" :key="activeMarket" />
-
         <!-- Leaderboard -->
         <section class="section">
         <div class="section-header">
@@ -698,7 +692,9 @@ body {
 /* Table */
 .table-container {
   overflow-x: auto;
-  padding: 1px; /* for border */
+  max-height: 600px;
+  overflow-y: auto;
+  padding: 1px;
 }
 
 .stock-table {
@@ -710,7 +706,7 @@ body {
 .stock-table th, .stock-table td {
   padding: 1rem 1.25rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  white-space: nowrap; /* 防止手機版文字被擠壓成直式 */
+  white-space: nowrap;
 }
 
 .stock-table th {
@@ -719,11 +715,10 @@ body {
   font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  background: rgba(0, 0, 0, 0.2);
-}
-
-.stock-table tr:last-child td {
-  border-bottom: none;
+  background: var(--panel-bg);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .stock-table tbody tr {
