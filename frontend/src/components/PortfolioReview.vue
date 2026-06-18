@@ -147,6 +147,47 @@ const totalPL = computed(() => {
 const formatCurrency = (val) => {
   return new Intl.NumberFormat('zh-TW', { style: 'currency', currency: 'TWD', maximumFractionDigits: 0 }).format(val)
 }
+
+// 曝險控管建議
+const exposureAdvice = computed(() => {
+  if (totalPortfolioValue.value <= 0) return null
+
+  const regime = props.marketState?.label || '未知'
+  let targetRatio = 1.0 // 預設多頭 100%
+  if (regime === '盤整') targetRatio = 0.5
+  if (regime === '空頭') targetRatio = 0.0
+
+  const stocksValue = enrichedPositions.value.reduce((sum, p) => sum + p.currentValue, 0)
+  const targetStockValue = totalPortfolioValue.value * targetRatio
+  const excess = stocksValue - targetStockValue
+
+  if (excess > 0) {
+    return {
+      status: 'warning',
+      icon: '⚠️',
+      title: '曝險過高，建議減碼',
+      message: `目前大盤為【${regime}】，建議總持股水位應降至 ${targetRatio * 100}%。您的持股比例偏高，建議收回 ${formatCurrency(excess)} 的現金。請優先考慮從下方「建議減碼/出清」的標的開始賣出。`,
+      cssClass: 'bg-yellow-900/40 border-yellow-500/50 text-yellow-100'
+    }
+  } else if (excess < 0) {
+    // excess is negative, so -excess is the amount we can buy
+    return {
+      status: 'success',
+      icon: '✅',
+      title: '資金充裕，可適度建倉',
+      message: `目前大盤為【${regime}】，建議總持股水位為 ${targetRatio * 100}%。您目前資金水位安全，仍有 ${formatCurrency(-excess)} 的額度可以考慮買進「強勢股掃描」中的高分標的。`,
+      cssClass: 'bg-green-900/40 border-green-500/50 text-green-100'
+    }
+  } else {
+    return {
+      status: 'safe',
+      icon: '🛡️',
+      title: '水位安全',
+      message: `目前大盤為【${regime}】，您的持股水位剛好符合大盤目標比例 (${targetRatio * 100}%)，部位控管非常良好！`,
+      cssClass: 'bg-blue-900/40 border-blue-500/50 text-blue-100'
+    }
+  }
+})
 </script>
 
 <template>
@@ -160,6 +201,15 @@ const formatCurrency = (val) => {
     </div>
 
     <template v-else>
+      <!-- 大盤部位與曝險建議 -->
+      <div v-if="exposureAdvice" class="exposure-alert" :class="exposureAdvice.cssClass">
+        <div class="exposure-icon">{{ exposureAdvice.icon }}</div>
+        <div class="exposure-content">
+          <h4 class="exposure-title">{{ exposureAdvice.title }}</h4>
+          <p class="exposure-message">{{ exposureAdvice.message }}</p>
+        </div>
+      </div>
+
       <!-- 總覽卡片 -->
       <div class="glass-panel summary-card">
         <div class="summary-item">
@@ -254,8 +304,13 @@ const formatCurrency = (val) => {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1.5rem;
+  padding: 1.5rem;
   background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
   border-left: 4px solid var(--accent-purple);
+}
+
+.table-container {
+  padding: 1.5rem;
 }
 
 .summary-item {
@@ -367,4 +422,31 @@ const formatCurrency = (val) => {
 .text-green-400 { color: #4ade80; }
 .text-red-400 { color: #f87171; }
 .text-yellow-400 { color: #facc15; }
+
+.exposure-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.2rem 1.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid;
+}
+
+.exposure-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.exposure-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 0.4rem 0;
+}
+
+.exposure-message {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  opacity: 0.9;
+}
 </style>
