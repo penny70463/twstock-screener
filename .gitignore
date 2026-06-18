@@ -13,3 +13,9 @@ data/raw/
 
 # LLM parse 失敗時的原始回應 dump（除錯用，不進版控）
 data/results/_llm_raw_failed*.txt
+
+# Temporary scripts & logs
+cron_log.txt
+patch_advisor.py
+test_adv_pipeline.py
+scratch/

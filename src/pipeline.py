@@ -1,45 +1,20 @@
-"""串接流程：TWSE 排行 → top-N → FinMind 抓歷史算四均線 → LLM 題材分類 → 存結果。"""
+"""串接流程：Advisor 篩選 → 當日漲幅排序 → LLM 題材分類 → 存結果。"""
 from __future__ import annotations
 
 import json
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
-TW_TZ = ZoneInfo("Asia/Taipei")  # CI runner 是 UTC，統一用台灣時區標記產生時間
+TW_TZ = ZoneInfo("Asia/Taipei")
 
 import pandas as pd
 
 from config import RESULT_DIR, settings
-from src import data_source, ma_filter, ranking
 from src.classifier import classify_themes
-
-_FETCH_WORKERS = 8  # 併發數；FinMind 600/hr 額度下抓 200 檔很安全
-
-
-def _fetch_histories(
-    ids: list[str], start: date, on_date: date, verbose: bool
-) -> dict[str, pd.DataFrame]:
-    histories: dict[str, pd.DataFrame] = {}
-    done = 0
-    with ThreadPoolExecutor(max_workers=_FETCH_WORKERS) as pool:
-        futures = {
-            pool.submit(data_source.get_stock_history, sid, start, on_date): sid
-            for sid in ids
-        }
-        for fut in as_completed(futures):
-            sid = futures[fut]
-            try:
-                histories[sid] = fut.result()
-            except Exception as e:  # 單股失敗不應中斷整批
-                if verbose:
-                    print(f"  ! {sid} 歷史抓取失敗: {e}")
-            done += 1
-            if verbose and done % 50 == 0:
-                print(f"  歷史抓取進度 {done}/{len(ids)}")
-    return histories
-
+from src.advisor import data as adv_data
+from src.advisor import market as adv_market
+from src.advisor import screener as adv_screener
 
 def _step(label: str, t0: float, verbose: bool) -> float:
     now = time.time()
@@ -47,44 +22,64 @@ def _step(label: str, t0: float, verbose: bool) -> float:
         print(f"  [+{now - t0:6.1f}s] {label}", flush=True)
     return now
 
-
 def run(classify: bool = True, verbose: bool = True) -> dict:
     t0 = time.time()
-    # 1. TWSE 全上市當日行情 → 漲幅排行前 N
-    today = data_source.get_market_today()
-    if today.empty:
-        raise RuntimeError("取不到 TWSE 當日行情（可能非交易日或來源異常）")
-    on_date: date = today["date"].max()
-    gainers = ranking.top_gainers(today, settings.top_n)
+    
+    # 1. 取得全市場股票池與歷史資料
+    if verbose: print("  取得全市場資料中...", flush=True)
+    universe = adv_data.get_universe() # 預設取前 600 大流動性
+    tickers = {row.code: row.yahoo for row in universe.itertuples()}
+    
+    history = adv_data.fetch_history(tickers)
+    adv_data.patch_latest_bar(history, universe)
+    _step("歷史股價與快取完成", t0, verbose)
+    
+    # 2. 取得法人與營收資料
+    inst = adv_data.fetch_institutional(days=3, lookback=10)
+    revenue = adv_data.fetch_revenue()
+    _step("三大法人與月營收完成", t0, verbose)
+    
+    # 3. 取得大盤狀態與門檻
+    market_state = adv_market.get_regime()
+    threshold = market_state["threshold"]
     if verbose:
-        print(f"[{on_date}] TWSE 共 {len(today)} 檔，取漲幅前 {len(gainers)} 名", flush=True)
-    _step("TWSE 當日行情完成", t0, verbose)
-
-    # 2. 對 top-N 平行抓歷史，算四均線（FinMind 單股 + 快取）
-    #    序列逐檔在 CI（跨區網路）會慢到數十分鐘，改用 thread pool 併發。
-    start = on_date - timedelta(days=int(settings.max_ma * 2 + 60))
-    ids = gainers["stock_id"].tolist()
-    histories = _fetch_histories(ids, start, on_date, verbose)
-    _step("歷史抓取完成", t0, verbose)
-
-    ma = ma_filter.screen(histories, settings.ma_windows)
-    passed_ids = ma[ma["above_all"]]["stock_id"].tolist() if not ma.empty else []
+        print(f"[{datetime.now(TW_TZ).date()}] 大盤狀態: {market_state['label']}, 建議門檻: {threshold}", flush=True)
+    
+    # 4. 執行 Advisor 多因子選股
+    screened_df = adv_screener.run_screen(universe, history, inst, revenue, threshold)
+    _step("Advisor 評分與篩選完成", t0, verbose)
+    
+    if screened_df.empty:
+        if verbose: print("  ! 今日無股票通過 Advisor 篩選門檻", flush=True)
+        return _build_payload(datetime.now(TW_TZ).date(), pd.DataFrame(), {}, market_state)
+        
+    # 5. 計算當日漲幅，作為交集排序依據 (長線保護短線，短線找動能)
+    change_pcts = []
+    for code in screened_df["代號"]:
+        df = history.get(code)
+        if df is not None and len(df) >= 2:
+            pct = (df["Close"].iloc[-1] / df["Close"].iloc[-2] - 1) * 100
+            change_pcts.append(round(pct, 2))
+        else:
+            change_pcts.append(0.0)
+            
+    screened_df["change_pct"] = change_pcts
+    
+    # 過濾出今天上漲的，並依照漲幅由高到低排序，只取前 top_n 送給 LLM
+    result = screened_df[screened_df["change_pct"] > 0].sort_values("change_pct", ascending=False).head(settings.top_n)
+    
     if verbose:
-        print(f"  站上 {settings.ma_windows} 全部均線：{len(passed_ids)} 檔", flush=True)
+        print(f"  通過 Advisor 門檻且今日上漲共 {len(result)} 檔（排序取前 {settings.top_n}）", flush=True)
+        
+    # 為了相容前端顯示，將欄位名稱對齊
+    result = result.rename(columns={
+        "代號": "stock_id",
+        "名稱": "stock_name",
+        "產業": "industry_category",
+        "收盤價": "close",
+    })
 
-    # 3. 合併漲幅 + 均線 + 產業別
-    info = data_source.get_stock_info()[["stock_id", "industry_category"]]
-    ma_cols = ma.drop(columns=["close"], errors="ignore")  # close 已在 gainers，避免衝突
-    result = (
-        gainers[gainers["stock_id"].isin(passed_ids)]
-        .merge(ma_cols, on="stock_id", how="left")
-        .merge(info, on="stock_id", how="left")
-        .drop(columns=["above_all"], errors="ignore")
-        .sort_values("change_pct", ascending=False)
-        .reset_index(drop=True)
-    )
-
-    # 4. LLM 題材分類
+    # 6. LLM 題材分類
     themes = {"themes": []}
     if classify and not result.empty:
         stocks = [
@@ -99,21 +94,28 @@ def run(classify: bool = True, verbose: bool = True) -> dict:
             print(f"  LLM 分類中（{len(stocks)} 檔）...", flush=True)
         try:
             themes = classify_themes(stocks)
-        except Exception as e:  # 分類失敗不應讓整批排程 crash，仍輸出篩選清單
-            print(f"  ! LLM 題材分類失敗，僅輸出篩選清單: {e}", flush=True)
+        except Exception as e:
+            print(f"  ! LLM 題材分類失敗: {e}", flush=True)
         _step("LLM 分類完成", t0, verbose)
 
-    payload = {
-        "date": on_date.isoformat(),
-        "generated_at": datetime.now(TW_TZ).isoformat(timespec="seconds"),
-        "params": {"top_n": settings.top_n, "ma_windows": settings.ma_windows},
-        "universe": "TWSE 上市",
-        "screened": json.loads(result.to_json(orient="records", force_ascii=False)),
-        "themes": themes.get("themes", []),
-    }
-    _save(payload, on_date)
+    payload = _build_payload(datetime.now(TW_TZ).date(), result, themes, market_state)
+    _save(payload, datetime.now(TW_TZ).date())
     return payload
 
+def _build_payload(on_date: date, result: pd.DataFrame, themes: dict, market_state: dict) -> dict:
+    records = []
+    if not result.empty:
+        records = json.loads(result.to_json(orient="records", force_ascii=False))
+        
+    return {
+        "date": on_date.isoformat(),
+        "generated_at": datetime.now(TW_TZ).isoformat(timespec="seconds"),
+        "params": {"top_n": settings.top_n, "advisor_threshold": market_state["threshold"]},
+        "market_state": market_state,
+        "universe": "TWSE+TPEX Top 流動性",
+        "screened": records,
+        "themes": themes.get("themes", []),
+    }
 
 def _save(payload: dict, on_date: date) -> None:
     for name in (on_date.isoformat(), "latest"):
