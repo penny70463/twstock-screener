@@ -1,77 +1,71 @@
-# 台股每日強勢股篩選 + 題材族群分類
+# 台股動能與題材掃描儀表板 (twstock-screener)
 
-每日篩出**漲幅排行前 N 名**且**站上 20/60/120/240 日均線**的個股，再用 LLM 依**投資題材**分群並說明。
+結合長線技術指標、法人籌碼與短線動能的全自動化多因子選股系統，並使用 LLM 進行每日題材族群分類。
 
-## 架構（為何這樣拆）
+## 系統架構（前後端分離）
 
-資料管線是「批次、慢、每天跑一次」，網頁是「讀結果、即時顯示」——兩者性質不同，所以拆開：
+本專案採用完美的「前後端分離」與「靜態託管」架構，以達到零成本、零維護、載入秒開的目標：
 
+```text
+[Mac 本機 Cron 排程] ──跑管線──> data/results/latest.json ──Push──> [GitHub] ──Fetch──> [Vercel 靜態前端]
 ```
-GitHub Actions (每日排程) ──跑管線──> data/results/*.json ──讀──> Streamlit 網頁
-```
 
-- **管線**：`run_pipeline.py` → TWSE 全上市當日行情排漲幅前 N → 對 top-N 用 FinMind 單股抓 240 日歷史算四均線 → NVIDIA LLM 分題材 → 存 JSON。
-- **網頁**：`app.py` 只讀 `data/results/latest.json` 顯示，不現抓現算（快又省 API）。
-- **LLM**：走 NVIDIA NIM（OpenAI 相容雲端 API），本地**不跑模型**、不吃 GPU，venv 只裝 `openai` 套件發請求。
+- **後端 (Python)**：
+  - 每天下午 18:00 自動在 Mac 背景執行 `run_daily.sh`。
+  - 呼叫 `src/pipeline.py` 串接強大的 Advisor 核心邏輯（整合大盤多空門檻、均線多頭排列、三大法人籌碼）。
+  - 取出符合長線保護條件且「當日漲幅強勢」的標的，送交 NVIDIA LLM 分類題材。
+  - 將結果存為 JSON 檔並自動 Git Commit & Push 到 GitHub。
+- **前端 (Vue 3 + Vite)**：
+  - 位於 `frontend/` 目錄，部署於 Vercel。
+  - 使用者開啟網頁時，瀏覽器會直接從 GitHub Raw 抓取最新的 `latest.json` 進行渲染，速度極快且無需後端伺服器。
 
-```
+## 目錄結構
+
+```text
 twstock-screener/
-├── config.py            # env 與篩選參數
-├── run_pipeline.py      # 排程入口
-├── app.py               # Streamlit 顯示
+├── run_daily.sh         # Mac 自動化排程入口 (Cron)
+├── config.py            # 環境變數與設定
 ├── src/
-│   ├── data_source.py   # TWSE 當日全市場 + FinMind 單股歷史 + parquet 快取
-│   ├── ranking.py       # 漲幅前 N
-│   ├── ma_filter.py     # 四均線篩選
+│   ├── advisor/         # 核心多因子評分引擎 (趨勢、籌碼、量能、市場狀態)
 │   ├── classifier.py    # NVIDIA LLM 題材分類
-│   ├── prompts.py       # 分類 system prompt
-│   └── pipeline.py      # 串接
-└── .github/workflows/daily.yml
+│   └── pipeline.py      # 每日排程主邏輯串接
+├── frontend/            # Vue 3 靜態儀表板前端
+│   ├── src/App.vue      # 儀表板 UI (玻璃特效、排序、篩選)
+│   └── package.json     # 前端依賴
+└── data/results/        # 輸出的 JSON 資料存放區
 ```
 
-## 本地執行
+## 本地開發與執行
+
+### 後端管線測試
+確保 Python 環境與套件已安裝，並填妥 `.env` 中的 `NVIDIA_API_KEY`：
+```bash
+python run_pipeline.py
+```
+此步驟會在 `data/results/` 中產生最新的 `latest.json`。
+
+### 前端 UI 測試
+進入 `frontend` 目錄並啟動本地開發伺服器：
+```bash
+cd frontend
+npm install
+npm run dev
+```
+開發伺服器會自動抓取本地剛生成的 `latest.json` 顯示，方便在不推送到 GitHub 的情況下預覽畫面。
+
+## 部署至 Vercel
+
+1. 將本專案的程式碼 (包含 `frontend/`) Push 至 GitHub。
+2. 在 Vercel 後台點擊 **Add New Project**，並匯入本專案。
+3. **重要：** 將 **Root Directory** 設定為 `frontend`。
+4. Framework Preset 保持為 Vite，點擊 Deploy 即可。
+5. 未來只要 Mac 上的排程成功 Push 了新的 JSON 資料，Vercel 網頁就會自動顯示最新狀態。
+
+## 自動化排程設定 (Mac crontab)
+
+要讓系統每天自動更新資料並推送到 GitHub，請在終端機輸入 `crontab -e` 並加入以下設定：
 
 ```bash
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env        # 填入 NVIDIA_API_KEY（與 nvidia-tg-bot 同一把）
-
-python run_pipeline.py      # 產生 data/results/latest.json
-streamlit run app.py        # 開網頁看結果
+# 每個交易日 (週一至週五) 的 18:00 執行
+0 18 * * 1-5 /你的絕對路徑/twstock-screener/run_daily.sh >> /你的絕對路徑/twstock-screener/cron_log.txt 2>&1
 ```
-
-只想篩選、先不花 LLM 額度：`python run_pipeline.py --no-llm`。
-
-## 參數（.env）
-
-| 變數 | 說明 | 預設 |
-|---|---|---|
-| `NVIDIA_API_KEY` | NVIDIA NIM 金鑰（必填才會分類） | — |
-| `NVIDIA_BASE_URL` | NIM 端點 | `https://integrate.api.nvidia.com/v1` |
-| `NVIDIA_MODEL` | 模型 | `meta/llama-3.1-70b-instruct` |
-| `FINMIND_TOKEN` | FinMind token，提高額度（建議填） | 空 |
-| `TOP_N` | 漲幅取前幾名 | `200` |
-| `MA_WINDOWS` | 均線天數 | `20,60,120,240` |
-
-## 部署
-
-### GitHub Actions 排程（免費）
-推上 GitHub 後，到 repo **Settings → Secrets and variables → Actions** 設定 `NVIDIA_API_KEY`、`FINMIND_TOKEN` 等。
-workflow 每個交易日台灣時間 15:00 自動跑，產出結果 commit 回 repo。也可在 Actions 頁手動 `Run workflow`。
-
-### Streamlit Community Cloud（免費）
-1. 連結此 repo，主程式選 `app.py`。
-2. 金鑰**不要寫進程式碼**，到 App → Settings → **Secrets** 填入（TOML 格式）：
-   ```toml
-   NVIDIA_API_KEY = "xxx"
-   FINMIND_TOKEN = "xxx"
-   ```
-3. 網頁只讀 `data/results/`，由 Actions 排程更新；公開 app 也安全（金鑰在 Secrets，不進前端）。
-
-## 注意事項
-
-- **資料範圍：目前僅上市（TWSE）**。漲幅排行用 TWSE 官方 OpenAPI（免費、免 auth、一次拿全上市）。上櫃（TPEx）因 OpenAPI 憑證在 Python 3.13 驗證失敗，暫未納入。
-- **為何不用 FinMind 全市場**：FinMind 的 `TaiwanStockPrice` 全市場查詢需付費等級（Backer/Sponsor）；免費等級只能帶 `data_id` 查單股。故均線歷史改對 top-N 逐檔抓（200 檔 < 600/hr）。
-- **FinMind 流量與快取**：免 token 300/hr、有 token 600/hr。逐檔歷史用 parquet 快取，之後每天只增量抓最新一天。若觸發 rate limit（402），已快取的股票會自動降級沿用快取，不中斷整批。**建議填 `FINMIND_TOKEN`** 並避免短時間重複跑。
-- **題材分類品質瓶頸在「公司業務描述」**：目前只餵官方產業別，LLM 對冷門中小型題材股可能判得不準。要更準可改餵公司主營業務描述，或加掛人工維護的概念股對照表。
-- **均線資料不足**：上市未滿 240 個交易日者，無法確認 240 日均線，一律視為「未站上」排除。

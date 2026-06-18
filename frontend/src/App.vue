@@ -123,6 +123,7 @@ const filteredAndSortedStocks = computed(() => {
           <h1>台股動能與題材掃描</h1>
           <p class="subtitle">自動化多因子選股儀表板</p>
           <p class="logic-desc">💡 <strong>長線保護短線交集邏輯</strong>：結合大盤多空動態調整門檻，嚴格篩出具備「均線多頭」與「法人籌碼」的長線資優生後，再依據「單日強勢漲幅」進行交集排序。</p>
+          <p class="logic-desc">⏱️ <strong>更新頻率</strong>：每個交易日（週一至週五）下午 18:00 自動執行選股與題材分析排程。</p>
         </div>
         <div class="hero-right">
           <div class="market-indicator" :class="marketClass">
