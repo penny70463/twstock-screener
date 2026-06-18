@@ -197,6 +197,49 @@ def native_momentum_scores(p: dict[str, pd.DataFrame],
     return score, atr
 
 
+def deployed_score_panel(p: dict[str, pd.DataFrame]
+                         ) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """「混合評分（動能60＋趨勢25＋量能15）」變體——已被否決，保留供重現對照。
+
+    #3 保真度驗證的結果：此混合排名比純動能（--strategy native）差
+    （5y 夏普 1.41→1.14、8y 0.82→0.61，且周轉約 2.5 倍），因趨勢/量能子項
+    反覆翻動造成過度換股。故 src/advisor/us_screener 上線版已改為純動能排名，
+    本函式僅用於 `--strategy deployed` 重現「為何不混合」的對照。
+    """
+    close, high, low, vol = p["close"], p["high"], p["low"], p["volume"]
+    ma200 = close.rolling(200).mean()
+
+    # 動能 60：波動率調整 12-1 動能的橫斷面百分位
+    ret = close.shift(21) / close.shift(252) - 1
+    mvol = close.pct_change().rolling(252).std()
+    mom = ret / mvol.replace(0, np.nan)
+    rs_pct = mom.rank(axis=1, pct=True) * 100
+    mom_dim = rs_pct / 100 * 60.0
+
+    # 趨勢 25：站上200日線10 + 200日線上揚8 + 距52週高15%內7
+    high252 = close.rolling(252, min_periods=config.MIN_BARS).max()
+    above = close > ma200
+    trend_dim = (above * 10.0
+                 + (ma200 > ma200.shift(21)) * 8.0
+                 + (close >= high252 * 0.85) * 7.0)
+
+    # 量能 15：近月量>近季量8 + 漲日量>跌日量7
+    chg = close.diff()
+    up_vol = vol.where(chg > 0).rolling(20, min_periods=1).mean()
+    dn_vol = vol.where(chg < 0).rolling(20, min_periods=1).mean()
+    vol_dim = ((vol.rolling(20).mean() > vol.rolling(60).mean()) * 8.0
+               + (up_vol.fillna(0) > dn_vol.fillna(0)) * 7.0)
+
+    total = mom_dim + trend_dim + vol_dim
+    eligible = (mom > 0) & above & ma200.notna()
+    score = total.where(eligible)
+
+    prev_c = close.shift(1)
+    tr = np.maximum(high - low, np.maximum((high - prev_c).abs(), (low - prev_c).abs()))
+    atr = tr.ewm(alpha=1 / config.ATR_PERIOD, adjust=False).mean()
+    return score, atr
+
+
 def trend_filter_thresholds(index: pd.DatetimeIndex, period: str,
                             trend_filter: bool = True) -> pd.DataFrame:
     """雙動能的市場腿：S&P500 > 200 日線 → 滿倉(1.0)，否則空手(0.0)。
@@ -515,8 +558,9 @@ def main():
     parser.add_argument("--compare", action="store_true", help="比較所有曝險變體")
     parser.add_argument("--factor", choices=["tech", "earnings"], default="tech",
                         help="tech=純技術(v1)；earnings=加盈餘驚奇+EPS年增維(v2)")
-    parser.add_argument("--strategy", choices=["tw", "native"], default="tw",
-                        help="tw=台股移植策略；native=美股原生12-1動能+雙動能趨勢濾網")
+    parser.add_argument("--strategy", choices=["tw", "native", "deployed"], default="tw",
+                        help="tw=台股移植；native=純波動率調整動能；"
+                             "deployed=上線混合評分(動能60+趨勢25+量能15，複刻 us_screener)")
     parser.add_argument("--universe", choices=["megacap", "sp500"], default="megacap",
                         help="megacap=70檔權值股(有存活者偏誤)；"
                              "sp500=歷史成分股point-in-time(消除偏誤)")
@@ -570,17 +614,21 @@ def main():
         run_search(panels, membership, args)
         return
 
-    # 美股原生策略：橫斷面動能 + 雙動能濾網，定頻、無緊停損
-    if args.strategy == "native":
-        score, atr = native_momentum_scores(
-            panels, formation=FORMATION_MAP[args.formation],
-            vol_adjust=args.vol_adjust)
+    # 動能類策略：橫斷面動能 + 雙動能濾網，定頻、無緊停損
+    if args.strategy in ("native", "deployed"):
+        if args.strategy == "deployed":
+            score, atr = deployed_score_panel(panels)
+            desc = "上線混合評分(動能60+趨勢25+量能15)"
+        else:
+            score, atr = native_momentum_scores(
+                panels, formation=FORMATION_MAP[args.formation],
+                vol_adjust=args.vol_adjust)
+            desc = f"純動能({args.formation}{'＋波調' if args.vol_adjust else ''})"
         if membership is not None:
             score = score.where(membership)  # 每日只排名「當時的成分股」
         tf = not args.no_trend_filter
         thr = trend_filter_thresholds(panels["close"].index, args.period, trend_filter=tf)
-        print(f"【4/4】美股原生動能（{args.formation} 動能"
-              f"{'＋波動率調整' if args.vol_adjust else ''}、前 {args.top} 強等權、"
+        print(f"【4/4】{desc}（前 {args.top} 強等權、"
               f"每 {args.rebalance} 日調倉、大盤濾網{'開' if tf else '關'}、無緊停損）…")
         equity, trades = simulate(panels, score, atr, thr, args.top,
                                   rebalance_days=args.rebalance, use_stops=False)

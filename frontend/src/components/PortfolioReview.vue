@@ -230,9 +230,9 @@ const enrichedPositions = computed(() => {
       shortTerm = { ...msg }; swing = { ...msg }; longTerm = { ...msg };
     } else {
       const threshold = props.marketState?.threshold || 70
-      // 動能/趨勢維度滿分台美不同（台股動能35/趨勢30；美股動能60/趨勢25），門檻隨市場調整
-      const momStrong = props.market === 'US' ? 30 : 15   // 動能達標（約相對強度前段）
-      const trendOk = props.market === 'US' ? 10 : 12     // 長線趨勢達標（美股=站上200日線）
+      // 維度級距台美不同：台股動能0-35/趨勢0-30；美股為純動能策略，動能=總分(0-100百分位)、趨勢0-100
+      const momStrong = props.market === 'US' ? 50 : 15   // 動能達標（美股=相對強度前50%）
+      const trendOk = props.market === 'US' ? 40 : 12     // 長線趨勢達標（美股=站上200日線）
 
       // 短線：重動能與短期訊號（台股訊號含「強勢/金叉/齊揚」；美股含「動能多方/逼近52週高」）
       if (momScore >= momStrong || signals.includes('強勢') || signals.includes('金叉')
