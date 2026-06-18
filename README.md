@@ -13,11 +13,13 @@
 - **後端 (Python)**：
   - 每天下午 18:00 自動在 Mac 背景執行 `run_daily.sh`。
   - 呼叫 `src/pipeline.py` 串接強大的 Advisor 核心邏輯（整合大盤多空門檻、均線多頭排列、三大法人籌碼）。
-  - 取出符合長線保護條件且「當日漲幅強勢」的標的，送交 NVIDIA LLM 分類題材。
+  - 除了過濾出「高分強勢股」送交 NVIDIA LLM 分類題材外，亦會產出包含全市場 600 檔標的評分狀態的 `universe.json`。
   - 將結果存為 JSON 檔並自動 Git Commit & Push 到 GitHub。
 - **前端 (Vue 3 + Vite)**：
   - 位於 `frontend/` 目錄，部署於 Vercel。
-  - 使用者開啟網頁時，瀏覽器會直接從 GitHub Raw 抓取最新的 `latest.json` 進行渲染，速度極快且無需後端伺服器。
+  - 包含「🚀 強勢股掃描」與「💼 我的存股體檢」雙頁籤。
+  - 使用者開啟網頁時，瀏覽器會直接從 GitHub Raw 抓取最新的 `latest.json` 與 `universe.json` 進行渲染，速度極快且無需後端伺服器。
+  - **隱私安全**：使用者的存股紀錄（股數、成本）會直接記錄在瀏覽器的 `localStorage` 中，無需登入系統，且資料不會離開使用者的裝置。
 
 ## 目錄結構
 
@@ -31,6 +33,7 @@ twstock-screener/
 │   └── pipeline.py      # 每日排程主邏輯串接
 ├── frontend/            # Vue 3 靜態儀表板前端
 │   ├── src/App.vue      # 儀表板 UI (玻璃特效、排序、篩選)
+│   ├── src/components/  # UI 元件庫 (包含 PortfolioReview 存股體檢)
 │   └── package.json     # 前端依賴
 └── data/results/        # 輸出的 JSON 資料存放區
 ```
