@@ -1,6 +1,6 @@
-# 台股動能與題材掃描儀表板 (twstock-screener)
+# 台美股動能與題材掃描儀表板 (twstock-screener)
 
-結合長線技術指標、法人籌碼與短線動能的全自動化多因子選股系統，並使用 LLM 進行每日題材族群分類。
+結合長線技術指標、法人籌碼與短線動能的全自動化多因子選股系統，支援**台股**與**美股**雙引擎，並使用 LLM 進行每日題材族群分類。
 
 ## 系統架構（前後端分離）
 
@@ -11,14 +11,15 @@
 ```
 
 - **後端 (Python)**：
-  - 每天下午 18:00 自動在 Mac 背景執行 `run_daily.sh`。
+  - 每天下午 16:00 自動在 Mac 背景執行 `run_daily.sh`。
   - 呼叫 `src/pipeline.py` 串接強大的 Advisor 核心邏輯（整合大盤多空門檻、均線多頭排列、三大法人籌碼）。
   - 除了過濾出「高分強勢股」送交 NVIDIA LLM 分類題材外，亦會產出包含全市場 600 檔標的評分狀態的 `universe.json`。
   - 將結果存為 JSON 檔並自動 Git Commit & Push 到 GitHub。
 - **前端 (Vue 3 + Vite)**：
   - 位於 `frontend/` 目錄，部署於 Vercel。
   - 包含「🚀 強勢股掃描」與「💼 我的存股體檢」雙頁籤。
-  - 使用者開啟網頁時，瀏覽器會直接從 GitHub Raw 抓取最新的 `latest.json` 與 `universe.json` 進行渲染，速度極快且無需後端伺服器。
+  - 支援「🇹🇼 台股 / 🇺🇸 美股」市場一鍵切換。
+  - 使用者開啟網頁時，瀏覽器會直接從 GitHub Raw 抓取最新的 `latest_tw.json` 或 `latest_us.json` 進行渲染，速度極快且無需後端伺服器。
   - **隱私安全**：使用者的存股紀錄（股數、成本）會直接記錄在瀏覽器的 `localStorage` 中，無需登入系統，且資料不會離開使用者的裝置。
 
 ## 目錄結構
@@ -69,6 +70,6 @@ npm run dev
 要讓系統每天自動更新資料並推送到 GitHub，請在終端機輸入 `crontab -e` 並加入以下設定：
 
 ```bash
-# 每個交易日 (週一至週五) 的 18:00 執行
-0 18 * * 1-5 /你的絕對路徑/twstock-screener/run_daily.sh >> /你的絕對路徑/twstock-screener/cron_log.txt 2>&1
+# 每個交易日 (週一至週五) 的 16:00 執行
+0 16 * * 1-5 /你的絕對路徑/twstock-screener/run_daily.sh >> /你的絕對路徑/twstock-screener/cron_log.txt 2>&1
 ```
