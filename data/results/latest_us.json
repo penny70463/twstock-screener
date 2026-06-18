@@ -1,6 +1,6 @@
 {
   "date": "2026-06-18",
-  "generated_at": "2026-06-18T15:13:53+08:00",
+  "generated_at": "2026-06-18T15:17:46+08:00",
   "params": {
     "top_n": 200,
     "advisor_threshold": 70
@@ -104,5 +104,20 @@
       "change_pct": 0.7
     }
   ],
-  "themes": []
+  "themes": [
+    {
+      "name": "其他",
+      "reason": "此清單包含美國大型股（工業與金融業），不屬於台股特定投資題材分群。",
+      "stocks": [
+        {
+          "code": "CAT",
+          "name": "CAT"
+        },
+        {
+          "code": "JPM",
+          "name": "JPM"
+        }
+      ]
+    }
+  ]
 }
