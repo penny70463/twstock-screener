@@ -269,34 +269,40 @@ def load_name_map() -> dict[str, str]:
         return {}
 
 
+# 追蹤用大盤與板塊 ETF（供前端「存股體檢」與題材參考；不參與動能選股排名）
+US_ETFS = ["SPY", "VOO", "QQQ", "DIA", "IWM", "SMH", "SOXX", "SOXQ",
+           "XLE", "XLF", "XLV", "XLP", "XLU", "XLI", "XLB", "XLRE", "XLK", "XLY", "ARKK"]
+
+
 def us_listings() -> pd.DataFrame:
-    """取得美股清單 (S&P 500 + 熱門 ETF) 作為初始宇宙"""
+    """美股選股池：完整 S&P 500 現役成分股（含 GICS 產業）＋ 追蹤 ETF。
+
+    成分股清單來自 Wikipedia（src/advisor/sp500_history），約 500 檔，
+    取代原本手寫的 ~70 檔權值股——讓動能選股有足夠的橫斷面廣度
+    （回測證實動能策略需要 broad universe 才穩定）。網路失敗時退回 ETF 清單。
+    """
+    from . import sp500_history
+
     records = []
-    # 常見大盤與板塊 ETF
-    etfs = ["SPY", "VOO", "QQQ", "DIA", "IWM", "SMH", "SOXX", "SOXQ", "XLE", "XLF", "XLV", "XLP", "XLU", "XLI", "XLB", "XLRE", "XLK", "XLY", "ARKK"]
-    for sym in etfs:
+    for sym in US_ETFS:
         records.append({
             "code": sym, "name": sym + " ETF", "yahoo": sym, "market": "US",
             "close": 100, "trade_value": 1e9, "industry": "ETF"
         })
-        
-    mega_caps = [
-        "AAPL", "MSFT", "NVDA", "GOOGL", "AMZN", "META", "BRK-B", "LLY", "AVGO", "TSLA",
-        "JPM", "WMT", "UNH", "XOM", "V", "PG", "MA", "JNJ", "HD", "ORCL",
-        "COST", "ABBV", "MRK", "CVX", "CRM", "BAC", "NFLX", "AMD", "KO", "PEP",
-        "TMO", "LIN", "ADBE", "DIS", "WFC", "CSCO", "MCD", "QCOM", "ABT", "INTU",
-        "IBM", "AMAT", "CAT", "GE", "TXN", "DHR", "VZ", "NOW", "PFE", "PM",
-        "MU", "UBER", "INTC", "ISRG", "SYK", "LOW", "SPGI", "HON", "BA", "COP",
-        "BKNG", "PLTR", "ARM", "SMCI", "SNOW", "CRWD", "DDOG", "NET", "PANW", "FTNT"
-    ]
-    for sym in mega_caps:
-        records.append({
-            "code": sym, "name": sym, "yahoo": sym, "market": "US",
-            "close": 100, "trade_value": 1e9, "industry": "Mega Cap / Tech"
-        })
-        
+
+    try:
+        for c in sp500_history.current_constituents():
+            records.append({
+                "code": c["code"], "name": c["name"] or c["code"],
+                "yahoo": c["code"], "market": "US",
+                "close": 100, "trade_value": 1e9,
+                "industry": c["sector"] or "S&P 500",
+            })
+    except Exception as e:
+        print(f"  ! 取得 S&P 500 成分股失敗，退回僅 ETF 清單：{e}")
+
     df = pd.DataFrame(records)
-    df = df.drop_duplicates(subset=["code"])
+    df = df.drop_duplicates(subset=["code"]).reset_index(drop=True)
     _save_name_map(df)
     return df
 

@@ -230,23 +230,27 @@ const enrichedPositions = computed(() => {
       shortTerm = { ...msg }; swing = { ...msg }; longTerm = { ...msg };
     } else {
       const threshold = props.marketState?.threshold || 70
-      
-      // 短線：重動能與短期訊號
-      if (momScore >= 15 || signals.includes('強勢') || signals.includes('金叉') || signals.includes('齊揚')) {
+      // 動能/趨勢維度滿分台美不同（台股動能35/趨勢30；美股動能60/趨勢25），門檻隨市場調整
+      const momStrong = props.market === 'US' ? 30 : 15   // 動能達標（約相對強度前段）
+      const trendOk = props.market === 'US' ? 10 : 12     // 長線趨勢達標（美股=站上200日線）
+
+      // 短線：重動能與短期訊號（台股訊號含「強勢/金叉/齊揚」；美股含「動能多方/逼近52週高」）
+      if (momScore >= momStrong || signals.includes('強勢') || signals.includes('金叉')
+          || signals.includes('齊揚') || signals.includes('動能多方') || signals.includes('逼近52週高')) {
         shortTerm = { suggestion: '✅ 續抱', class: 'text-green-400', reason: `動能強勢`, stop: stockData['短線停損'] }
       } else {
         shortTerm = { suggestion: '📉 建議減碼', class: 'text-yellow-400', reason: `動能轉弱`, stop: stockData['短線停損'] }
       }
-      
-      // 波段：重總分
+
+      // 波段：重總分（總分為 0-100，台美同口徑）
       if (score >= threshold) {
         swing = { suggestion: '✅ 續抱', class: 'text-green-400', reason: `總分達標`, stop: stockData['波段停損'] }
       } else {
         swing = { suggestion: '📉 建議減碼', class: 'text-yellow-400', reason: `總分偏低`, stop: stockData['波段停損'] }
       }
-      
-      // 長線：重趨勢 (例如趨勢分數有拿到 12分以上)
-      if (trendScore >= 12) {
+
+      // 長線：重趨勢（台股趨勢>=12；美股站上200日線即趨勢>=10）
+      if (trendScore >= trendOk) {
         longTerm = { suggestion: '✅ 續抱', class: 'text-green-400', reason: `長線多頭`, stop: stockData['長線停損'] }
       } else {
         longTerm = { suggestion: '⚠️ 破線出清', class: 'text-red-400', reason: `長線翻空`, stop: stockData['長線停損'] }

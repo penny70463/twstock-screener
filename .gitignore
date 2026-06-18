@@ -8,6 +8,14 @@ __pycache__/
 # 快取的歷史 K 線（體積大，不進版控）
 data/cache/
 
+# 回測用的大型歷史快取與中間產物（體積大／可重生，不進版控）
+src/advisor/cache/hist_3y_*.pkl
+src/advisor/cache/hist_5y_*.pkl
+src/advisor/cache/hist_8y_*.pkl
+src/advisor/cache/us_earnings_*.pkl
+src/advisor/cache/sp500_wiki_*.json
+data/results/equity_curve_us.csv
+
 # 每日產出結果保留（給 Streamlit 讀），但忽略過大的中間檔
 data/raw/
 

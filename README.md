@@ -12,8 +12,10 @@
 
 - **後端 (Python)**：
   - 每天下午 16:00 自動在 Mac 背景執行 `run_daily.sh`。
-  - 呼叫 `src/pipeline.py` 串接強大的 Advisor 核心邏輯（整合大盤多空門檻、均線多頭排列、三大法人籌碼）。
-  - 除了過濾出「高分強勢股」送交 NVIDIA LLM 分類題材外，亦會產出包含全市場 600 檔標的評分狀態的 `universe.json`。
+  - 呼叫 `src/pipeline.py` 串接 Advisor 核心邏輯，並依市場採用各自最適策略：
+    - **台股**：五因子（趨勢／動能／量能／三大法人籌碼／月營收）＋大盤多空動態門檻。
+    - **美股**：橫斷面動能策略（`src/advisor/us_screener.py`）——以「波動率調整的 12-1 月相對動能」對**完整 S&P 500 成分股**排名，僅保留站上 200 日線者。此策略經 `backtest_us.py`（含 point-in-time 成分股、消除存活者偏誤）回測驗證，是台股五因子直接移植美股失效後的替代方案。
+  - 除了過濾出「高分強勢股」送交 NVIDIA LLM 分類題材外，亦會產出包含全市場標的評分狀態的 `universe.json`。
   - 將結果存為 JSON 檔並自動 Git Commit & Push 到 GitHub。
 - **前端 (Vue 3 + Vite)**：
   - 位於 `frontend/` 目錄，部署於 Vercel。

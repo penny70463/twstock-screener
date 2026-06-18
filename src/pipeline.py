@@ -17,6 +17,7 @@ from src.classifier import classify_themes
 from src.advisor import data as adv_data
 from src.advisor import market as adv_market
 from src.advisor import screener as adv_screener
+from src.advisor import us_screener as adv_us_screener
 
 def _step(label: str, t0: float, verbose: bool) -> float:
     now = time.time()
@@ -50,9 +51,10 @@ def run(market: str = "TW", classify: bool = True, verbose: bool = True) -> dict
     if verbose:
         print(f"[{datetime.now(TW_TZ).date()}] 大盤狀態: {market_state['label']}, 建議門檻: {threshold}", flush=True)
     
-    # 4. 執行 Advisor 多因子選股
-    screened_df, universe_df = adv_screener.run_screen(universe, history, inst, revenue, threshold, market=market)
-    _step("Advisor 評分與篩選完成", t0, verbose)
+    # 4. 執行選股：台股用五因子；美股用橫斷面動能策略（回測驗證的美股原生策略）
+    screener = adv_us_screener if market == "US" else adv_screener
+    screened_df, universe_df = screener.run_screen(universe, history, inst, revenue, threshold, market=market)
+    _step("評分與篩選完成", t0, verbose)
     
     if screened_df.empty:
         if verbose: print("  ! 今日無股票通過 Advisor 篩選門檻", flush=True)
@@ -69,12 +71,17 @@ def run(market: str = "TW", classify: bool = True, verbose: bool = True) -> dict
             change_pcts.append(0.0)
             
     screened_df["change_pct"] = change_pcts
-    
-    # 過濾出今天上漲的，並依照漲幅由高到低排序，只取前 top_n 送給 LLM
-    result = screened_df[screened_df["change_pct"] > 0].sort_values("change_pct", ascending=False).head(settings.top_n)
-    
-    if verbose:
-        print(f"  通過 Advisor 門檻且今日上漲共 {len(result)} 檔（排序取前 {settings.top_n}）", flush=True)
+
+    if market == "US":
+        # 動能策略：按動能總分排序（非當日漲幅；持倉型策略不追單日跳動）
+        result = screened_df.sort_values("總分", ascending=False).head(settings.top_n)
+        if verbose:
+            print(f"  通過動能門檻共 {len(result)} 檔（按總分排序取前 {settings.top_n}）", flush=True)
+    else:
+        # 台股：長線保護短線，過濾出今天上漲的，依漲幅排序取前 top_n 送給 LLM
+        result = screened_df[screened_df["change_pct"] > 0].sort_values("change_pct", ascending=False).head(settings.top_n)
+        if verbose:
+            print(f"  通過 Advisor 門檻且今日上漲共 {len(result)} 檔（排序取前 {settings.top_n}）", flush=True)
         
     # 為了相容前端顯示，將欄位名稱對齊
     result = result.rename(columns={

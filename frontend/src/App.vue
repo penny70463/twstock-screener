@@ -186,7 +186,7 @@ const isSparklineUp = (prices) => {
           <h1>{{ activeMarket === 'TW' ? '台股' : '美股' }}動能與題材掃描</h1>
           <p class="subtitle">自動化多因子選股儀表板</p>
           <p class="logic-desc" v-if="activeMarket === 'TW'">💡 <strong>長線保護短線交集邏輯</strong>：結合大盤多空動態調整門檻，嚴格篩出具備「均線多頭」與「法人籌碼」的長線資優生後，再依據「單日強勢漲幅」進行交集排序。</p>
-          <p class="logic-desc" v-else>💡 <strong>純動能與技術分析邏輯</strong>：結合標普500大盤多空動態調整門檻，專注於「均線多頭」與「相對強度 (RS)」之純技術面強勢股，再依據短線動能排序。</p>
+          <p class="logic-desc" v-else>💡 <strong>橫斷面動能策略（S&P 500 全成分股）</strong>：以「波動率調整的 12-1 月相對動能」對全 S&P 500 排名，僅保留站上 200 日線的趨勢強勢股，依動能總分排序。此為回測（含 point-in-time 成分股、消除存活者偏誤）驗證後，最適合美股的低周轉動能邏輯。</p>
           <p class="logic-desc">⏱️ <strong>更新頻率</strong>：每個交易日（週一至週五）下午 16:00 自動執行選股與題材分析排程。</p>
         </div>
         <div class="hero-right">
