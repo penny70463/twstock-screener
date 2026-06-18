@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import json
 import time
+import os
+import requests
 from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
@@ -107,6 +109,12 @@ def run(classify: bool = True, verbose: bool = True) -> dict:
         json.dumps(universe_payload, ensure_ascii=False, indent=2), encoding="utf-8"
     )
     
+    # 產生可用日期清單 (Time Travel)
+    _generate_available_dates()
+    
+    # 發送 Line 廣播推播 (若有設定 Token)
+    _send_line_broadcast(payload, result)
+    
     return payload
 
 def _build_universe_payload(on_date: date, universe_df: pd.DataFrame, market_state: dict) -> dict:
@@ -148,3 +156,64 @@ def _save(payload: dict, on_date: date) -> None:
         (RESULT_DIR / f"{name}.json").write_text(
             json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
         )
+
+def _generate_available_dates() -> None:
+    """掃描 results 資料夾，產生可用的歷史日期清單"""
+    import re
+    date_pattern = re.compile(r"^(\d{4}-\d{2}-\d{2})\.json$")
+    dates = []
+    if RESULT_DIR.exists():
+        for f in RESULT_DIR.iterdir():
+            match = date_pattern.match(f.name)
+            if match:
+                dates.append(match.group(1))
+    dates.sort(reverse=True) # 最新日期在前
+    (RESULT_DIR / "available_dates.json").write_text(
+        json.dumps(dates, ensure_ascii=False), encoding="utf-8"
+    )
+
+def _send_line_broadcast(payload: dict, result_df: pd.DataFrame) -> None:
+    """發送 Line 廣播推播"""
+    token = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
+    if not token or payload is None:
+        return
+        
+    on_date = payload["date"]
+    market_label = payload["market_state"]["label"]
+    threshold = payload["market_state"]["threshold"]
+    
+    themes = payload.get("themes", [])
+    theme_names = "、".join([t["theme"] for t in themes[:3]]) if themes else "無明顯題材"
+    
+    # 挑出最強 3 檔
+    top_stocks = []
+    if not result_df.empty:
+        for r in result_df.head(3).itertuples():
+            name = getattr(r, "stock_name", "") or ""
+            top_stocks.append(f"{r.stock_id} {name}")
+    top_stocks_str = "、".join(top_stocks) if top_stocks else "無"
+    
+    message = (
+        f"【台股動能掃描 {on_date}】\n"
+        f"📊 大盤狀態：{market_label} (門檻 {threshold}分)\n"
+        f"🔥 熱門題材：{theme_names}\n"
+        f"🚀 強勢指標：{top_stocks_str}\n\n"
+        f"🔗 點此查看完整排行榜與持股體檢：\n"
+        f"https://twstock-screener.vercel.app/"
+    )
+    
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {token}"
+    }
+    data = {
+        "messages": [{"type": "text", "text": message}]
+    }
+    try:
+        res = requests.post("https://api.line.me/v2/bot/message/broadcast", headers=headers, json=data, timeout=10)
+        if res.status_code == 200:
+            print("  [+] Line 廣播推播發送成功！", flush=True)
+        else:
+            print(f"  [-] Line 推播失敗: {res.text}", flush=True)
+    except Exception as e:
+        print(f"  [-] Line 推播發生例外錯誤: {e}", flush=True)

@@ -20,8 +20,9 @@ RSI_PERIOD, RSI_LOW, RSI_HIGH = 14, 50, 75
 VOL_SURGE_RATIO = 2.0
 VOL_SURGE_MIN_GAIN = 0.02
 ATR_PERIOD = 14
-ATR_STOP_MULT = 2.0         # 停損 = 收盤 - N 倍 ATR
-
+ATR_STOP_MULT_SHORT = 1.0         # 短線停損 = 收盤 - 1.0 倍 ATR
+ATR_STOP_MULT_SWING = 1.5         # 波段停損 = 收盤 - 1.5 倍 ATR
+ATR_STOP_MULT_LONG = 2.5          # 長線停損 = 收盤 - 2.5 倍 ATR
 # ── 硬性排除（一票否決）──────────────────────────────────────
 MAX_OFF_HIGH = 0.30         # 距 52 週高點不得超過 30%（深度回檔 = 趨勢已壞）
 MAX_GAIN_20D = 0.40         # 20 日漲幅上限 40%（避免追過熱 / 處置股風險）

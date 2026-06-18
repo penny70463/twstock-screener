@@ -9,25 +9,21 @@ export default defineConfig({
     {
       name: 'serve-local-data',
       configureServer(server) {
-        server.middlewares.use('/api/latest.json', (req, res) => {
-          const filePath = path.resolve(__dirname, '../data/results/latest.json');
-          if (fs.existsSync(filePath)) {
-            res.setHeader('Content-Type', 'application/json');
-            res.end(fs.readFileSync(filePath));
-          } else {
-            res.statusCode = 404;
-            res.end(JSON.stringify({ error: 'File not found' }));
+        server.middlewares.use((req, res, next) => {
+          if (req.url.startsWith('/api/') && req.url.endsWith('.json')) {
+            const filename = req.url.split('/').pop();
+            const filePath = path.resolve(__dirname, '../data/results/', filename);
+            if (fs.existsSync(filePath)) {
+              res.setHeader('Content-Type', 'application/json');
+              res.end(fs.readFileSync(filePath));
+              return;
+            } else {
+              res.statusCode = 404;
+              res.end(JSON.stringify({ error: 'File not found' }));
+              return;
+            }
           }
-        });
-        server.middlewares.use('/api/universe.json', (req, res) => {
-          const filePath = path.resolve(__dirname, '../data/results/universe.json');
-          if (fs.existsSync(filePath)) {
-            res.setHeader('Content-Type', 'application/json');
-            res.end(fs.readFileSync(filePath));
-          } else {
-            res.statusCode = 404;
-            res.end(JSON.stringify({ error: 'File not found' }));
-          }
+          next();
         });
       }
     }

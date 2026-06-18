@@ -160,21 +160,34 @@ def score_stock(code: str, df: pd.DataFrame, rs_pct: float,
 
     sig_today = {name: bool(fn(df).iloc[-1]) for name, fn in signals.ALL_SIGNALS.items()}
 
+    is_etf = not (len(code) == 4 and code.isdigit())
+
+    ch_score = None if is_etf else chips_score(code, df, inst)
+    rev_score = None if is_etf else revenue_score(code, revenue)
+
     dims = [  # (得分, 權重)；得分為 None 表示該維度無資料
         (trend_score(df), config.W_TREND),
         (momentum_score(rs_pct, sig_today), config.W_MOMENTUM),
         (volume_score(df, sig_today), config.W_VOLUME),
-        (chips_score(code, df, inst), config.W_CHIPS),
-        (revenue_score(code, revenue), config.W_REVENUE),
+        (ch_score, config.W_CHIPS),
+        (rev_score, config.W_REVENUE),
     ]
     avail_w = sum(w for s, w in dims if s is not None)
     total = sum(s for s, _w in dims if s is not None) / avail_w * 100
 
     t, m, v, ch, rev = (s for s, _w in dims)
     close = float(df["Close"].iloc[-1])
-    stop = close - config.ATR_STOP_MULT * float(atr(df).iloc[-1])
-    risk_per_share = max(close - stop, 1e-9)
-    lots = int(config.CAPITAL * config.RISK_PER_TRADE / risk_per_share / 1000)
+    atr_val = float(atr(df).iloc[-1])
+    
+    def calc_strategy(mult):
+        stop = close - mult * atr_val
+        risk_per_share = max(close - stop, 1e-9)
+        lots = int(config.CAPITAL * config.RISK_PER_TRADE / risk_per_share / 1000)
+        return round(stop, 2), max(lots, 0)
+        
+    stop_short, lots_short = calc_strategy(config.ATR_STOP_MULT_SHORT)
+    stop_swing, lots_swing = calc_strategy(config.ATR_STOP_MULT_SWING)
+    stop_long, lots_long = calc_strategy(config.ATR_STOP_MULT_LONG)
 
     def _r(x):
         return round(x, 1) if x is not None else None
@@ -184,7 +197,8 @@ def score_stock(code: str, df: pd.DataFrame, rs_pct: float,
         "趨勢": _r(t), "動能": _r(m), "量能": _r(v),
         "籌碼": _r(ch), "營收": _r(rev),
         "收盤價": round(close, 2),
-        "停損價": round(stop, 2),
-        "建議張數": max(lots, 0),
+        "短線停損": stop_short, "短線張數": lots_short,
+        "波段停損": stop_swing, "波段張數": lots_swing,
+        "長線停損": stop_long,  "長線張數": lots_long,
         "訊號": "、".join(n for n, on in sig_today.items() if on),
     }

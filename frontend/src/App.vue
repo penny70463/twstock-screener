@@ -7,12 +7,15 @@ const data = ref(null)
 const loading = ref(true)
 const error = ref(null)
 
-// 開發環境抓取本地 API (由 vite.config.js 提供)，正式環境抓取 GitHub Raw
-const DATA_URL = import.meta.env.DEV 
-  ? '/api/latest.json' 
-  : 'https://raw.githubusercontent.com/penny70463/twstock-screener/master/data/results/latest.json'
+const availableDates = ref([])
+const selectedDate = ref('latest')
 
-onMounted(async () => {
+const fetchData = async () => {
+  loading.value = true
+  error.value = null
+  const DATA_URL = import.meta.env.DEV 
+    ? `/api/${selectedDate.value}.json` 
+    : `https://raw.githubusercontent.com/penny70463/twstock-screener/master/data/results/${selectedDate.value}.json`
   try {
     const response = await fetch(DATA_URL, { cache: 'no-store' })
     if (!response.ok) throw new Error('Failed to fetch data')
@@ -22,6 +25,31 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
+}
+
+const fetchDates = async () => {
+  const URL = import.meta.env.DEV 
+    ? '/api/available_dates.json' 
+    : 'https://raw.githubusercontent.com/penny70463/twstock-screener/master/data/results/available_dates.json'
+  try {
+    const res = await fetch(URL, { cache: 'no-store' })
+    if (res.ok) {
+      availableDates.value = await res.json()
+    }
+  } catch (e) {
+    console.error("No dates found")
+  }
+}
+
+import { watch } from 'vue'
+
+onMounted(() => {
+  fetchDates()
+  fetchData()
+})
+
+watch(selectedDate, () => {
+  fetchData()
 })
 
 const marketLabel = computed(() => data.value?.market_state?.label || '未知')
@@ -105,6 +133,25 @@ const filteredAndSortedStocks = computed(() => {
 
   return result
 })
+// 產生 Sparkline SVG polyline points
+const getSparklinePoints = (prices) => {
+  if (!prices || prices.length === 0) return ''
+  const max = Math.max(...prices)
+  const min = Math.min(...prices)
+  const range = max - min === 0 ? 1 : max - min
+  
+  // viewBox="0 0 100 30"
+  return prices.map((p, i) => {
+    const x = (i / (prices.length - 1)) * 100
+    const y = 30 - ((p - min) / range) * 30
+    return `${x},${y}`
+  }).join(' ')
+}
+
+const isSparklineUp = (prices) => {
+  if (!prices || prices.length < 2) return true
+  return prices[prices.length - 1] >= prices[0]
+}
 </script>
 
 <template>
@@ -132,7 +179,14 @@ const filteredAndSortedStocks = computed(() => {
             <span class="indicator-dot"></span>
             大盤狀態：{{ marketLabel }} (門檻 {{ data.market_state?.threshold }} 分)
           </div>
-          <div class="update-time">
+          <div class="date-selector" v-if="availableDates.length > 0">
+            <label for="date-select" class="text-sm text-gray-400 mr-2">📅 歷史回顧：</label>
+            <select id="date-select" v-model="selectedDate" class="date-dropdown">
+              <option value="latest">最新 (Latest)</option>
+              <option v-for="d in availableDates" :key="d" :value="d">{{ d }}</option>
+            </select>
+          </div>
+          <div class="update-time mt-2">
             更新時間：{{ new Date(data.generated_at).toLocaleString() }}
           </div>
         </div>
@@ -206,6 +260,7 @@ const filteredAndSortedStocks = computed(() => {
               <tr>
                 <th @click="setSort('stock_id')" class="sortable">代號 <span v-if="sortKey==='stock_id'">{{ sortOrder === 'asc' ? '▲' : '▼' }}</span></th>
                 <th @click="setSort('stock_name')" class="sortable">名稱 <span v-if="sortKey==='stock_name'">{{ sortOrder === 'asc' ? '▲' : '▼' }}</span></th>
+                <th>近20日走勢</th>
                 <th @click="setSort('industry_category')" class="sortable">產業別 <span v-if="sortKey==='industry_category'">{{ sortOrder === 'asc' ? '▲' : '▼' }}</span></th>
                 <th @click="setSort('change_pct')" class="sortable">今日漲幅 <span v-if="sortKey==='change_pct'">{{ sortOrder === 'asc' ? '▲' : '▼' }}</span></th>
                 <th @click="setSort('總分')" class="sortable">綜合評分 <span v-if="sortKey==='總分'">{{ sortOrder === 'asc' ? '▲' : '▼' }}</span></th>
@@ -216,6 +271,15 @@ const filteredAndSortedStocks = computed(() => {
               <tr v-for="stock in filteredAndSortedStocks" :key="stock.stock_id">
                 <td class="font-mono">{{ stock.stock_id }}</td>
                 <td class="font-bold">{{ stock.stock_name }}</td>
+                <td>
+                  <svg v-if="stock.sparkline && stock.sparkline.length > 0" class="sparkline" viewBox="0 0 100 30" preserveAspectRatio="none">
+                    <polyline 
+                      :points="getSparklinePoints(stock.sparkline)" 
+                      :stroke="isSparklineUp(stock.sparkline) ? '#4ade80' : '#f87171'"
+                      fill="none" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round"
+                    />
+                  </svg>
+                </td>
                 <td><span class="industry-tag">{{ stock.industry_category }}</span></td>
                 <td :class="stock.change_pct > 0 ? 'text-up' : 'text-down'">
                   {{ stock.change_pct > 0 ? '+' : '' }}{{ stock.change_pct }}%
@@ -398,6 +462,27 @@ body {
 .update-time {
   font-size: 0.85rem;
   color: var(--text-muted);
+}
+
+.date-selector {
+  display: flex;
+  align-items: center;
+}
+
+.date-dropdown {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.5rem;
+  outline: none;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.date-dropdown option {
+  background: var(--panel-bg);
+  color: white;
 }
 
 /* Sections */
@@ -663,5 +748,11 @@ body {
   .hero-right {
     align-items: flex-start;
   }
+}
+
+.sparkline {
+  width: 80px;
+  height: 30px;
+  display: block;
 }
 </style>

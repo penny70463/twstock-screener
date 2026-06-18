@@ -93,28 +93,44 @@ const enrichedPositions = computed(() => {
     const pl = currentValue - costValue
     const plPct = (pl / costValue) * 100
 
-    let suggestion = '未知'
-    let suggestionClass = 'text-gray-400'
     let score = stockData ? stockData['總分'] : 0
-    let reason = ''
+    let signals = stockData ? (stockData['訊號'] || '') : ''
+    let trendScore = stockData ? stockData['趨勢'] : 0
+    let momScore = stockData ? stockData['動能'] : 0
+
+    const defaultAdvice = { suggestion: '未知', class: 'text-gray-400', reason: '', stop: 0 }
+    let shortTerm = { ...defaultAdvice }
+    let swing = { ...defaultAdvice }
+    let longTerm = { ...defaultAdvice }
 
     if (!stockData) {
-      suggestion = '無資料'
-      reason = '非上市前600大或無歷史資料'
-    } else if (stockData['訊號'] && stockData['訊號'].includes('未通過')) {
-      suggestion = '⚠️ 建議出清'
-      suggestionClass = 'text-red-400'
-      reason = stockData['訊號']
+      const msg = { suggestion: '無資料', class: 'text-gray-400', reason: '非上市前600大或無歷史資料', stop: 0 }
+      shortTerm = { ...msg }; swing = { ...msg }; longTerm = { ...msg };
+    } else if (signals.includes('未通過')) {
+      const msg = { suggestion: '⚠️ 建議出清', class: 'text-red-400', reason: signals, stop: 0 }
+      shortTerm = { ...msg }; swing = { ...msg }; longTerm = { ...msg };
     } else {
       const threshold = props.marketState?.threshold || 70
-      if (score >= threshold) {
-        suggestion = '✅ 續抱'
-        suggestionClass = 'text-green-400'
-        reason = `總分 ${score} 達標 (${threshold})`
+      
+      // 短線：重動能與短期訊號
+      if (momScore >= 15 || signals.includes('強勢') || signals.includes('金叉') || signals.includes('齊揚')) {
+        shortTerm = { suggestion: '✅ 續抱', class: 'text-green-400', reason: `動能強勢`, stop: stockData['短線停損'] }
       } else {
-        suggestion = '📉 建議減碼'
-        suggestionClass = 'text-yellow-400'
-        reason = `總分 ${score} 未達標 (${threshold})`
+        shortTerm = { suggestion: '📉 建議減碼', class: 'text-yellow-400', reason: `動能轉弱`, stop: stockData['短線停損'] }
+      }
+      
+      // 波段：重總分
+      if (score >= threshold) {
+        swing = { suggestion: '✅ 續抱', class: 'text-green-400', reason: `總分達標`, stop: stockData['波段停損'] }
+      } else {
+        swing = { suggestion: '📉 建議減碼', class: 'text-yellow-400', reason: `總分偏低`, stop: stockData['波段停損'] }
+      }
+      
+      // 長線：重趨勢 (例如趨勢分數有拿到 12分以上)
+      if (trendScore >= 12) {
+        longTerm = { suggestion: '✅ 續抱', class: 'text-green-400', reason: `長線多頭`, stop: stockData['長線停損'] }
+      } else {
+        longTerm = { suggestion: '⚠️ 破線出清', class: 'text-red-400', reason: `長線翻空`, stop: stockData['長線停損'] }
       }
     }
 
@@ -127,10 +143,10 @@ const enrichedPositions = computed(() => {
       pl,
       plPct,
       score,
-      suggestion,
-      suggestionClass,
-      reason,
-      signals: stockData ? stockData['訊號'] : ''
+      shortTerm,
+      swing,
+      longTerm,
+      signals
     }
   }).sort((a, b) => b.plPct - a.plPct)
 })
@@ -188,6 +204,25 @@ const exposureAdvice = computed(() => {
     }
   }
 })
+// 產生 Sparkline SVG polyline points
+const getSparklinePoints = (prices) => {
+  if (!prices || prices.length === 0) return ''
+  const max = Math.max(...prices)
+  const min = Math.min(...prices)
+  const range = max - min === 0 ? 1 : max - min
+  
+  // viewBox="0 0 100 30"
+  return prices.map((p, i) => {
+    const x = (i / (prices.length - 1)) * 100
+    const y = 30 - ((p - min) / range) * 30
+    return `${x},${y}`
+  }).join(' ')
+}
+
+const isSparklineUp = (prices) => {
+  if (!prices || prices.length < 2) return true
+  return prices[prices.length - 1] >= prices[0]
+}
 </script>
 
 <template>
@@ -251,8 +286,9 @@ const exposureAdvice = computed(() => {
               <th>代號名稱</th>
               <th>股數</th>
               <th>均價/現價</th>
+              <th>近20日走勢</th>
               <th>未實現損益</th>
-              <th>AI 診斷建議</th>
+              <th>診斷建議 (短/波/長)</th>
               <th>操作</th>
             </tr>
           </thead>
@@ -268,6 +304,15 @@ const exposureAdvice = computed(() => {
                 <div class="font-bold">${{ pos.currentPrice.toFixed(2) }}</div>
               </td>
               <td>
+                <svg v-if="pos.score && universe.find(s => String(s.stock_id) === String(pos.id))?.sparkline?.length > 0" class="sparkline" viewBox="0 0 100 30" preserveAspectRatio="none">
+                  <polyline 
+                    :points="getSparklinePoints(universe.find(s => String(s.stock_id) === String(pos.id)).sparkline)" 
+                    :stroke="isSparklineUp(universe.find(s => String(s.stock_id) === String(pos.id)).sparkline) ? '#4ade80' : '#f87171'"
+                    fill="none" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round"
+                  />
+                </svg>
+              </td>
+              <td>
                 <div :class="pos.pl >= 0 ? 'text-green-400' : 'text-red-400'" class="font-bold">
                   {{ pos.pl > 0 ? '+' : '' }}{{ formatCurrency(pos.pl) }}
                 </div>
@@ -275,9 +320,24 @@ const exposureAdvice = computed(() => {
                   {{ pos.pl > 0 ? '+' : '' }}{{ pos.plPct.toFixed(2) }}%
                 </div>
               </td>
-              <td>
-                <div class="font-bold" :class="pos.suggestionClass">{{ pos.suggestion }}</div>
-                <div class="text-xs text-gray-400 mt-1 max-w-xs whitespace-normal">{{ pos.reason }}</div>
+              <td class="advice-cell">
+                <div class="advice-block">
+                  <div class="advice-row" :title="pos.shortTerm.reason">
+                    <span class="advice-label">短:</span>
+                    <span class="font-bold text-sm" :class="pos.shortTerm.class">{{ pos.shortTerm.suggestion }}</span>
+                    <span v-if="pos.shortTerm.stop" class="text-xs text-gray-400 ml-1">(防守 ${{ pos.shortTerm.stop }})</span>
+                  </div>
+                  <div class="advice-row" :title="pos.swing.reason">
+                    <span class="advice-label">波:</span>
+                    <span class="font-bold text-sm" :class="pos.swing.class">{{ pos.swing.suggestion }}</span>
+                    <span v-if="pos.swing.stop" class="text-xs text-gray-400 ml-1">(防守 ${{ pos.swing.stop }})</span>
+                  </div>
+                  <div class="advice-row" :title="pos.longTerm.reason">
+                    <span class="advice-label">長:</span>
+                    <span class="font-bold text-sm" :class="pos.longTerm.class">{{ pos.longTerm.suggestion }}</span>
+                    <span v-if="pos.longTerm.stop" class="text-xs text-gray-400 ml-1">(防守 ${{ pos.longTerm.stop }})</span>
+                  </div>
+                </div>
               </td>
               <td>
                 <button @click="removePosition(pos.id)" class="delete-btn">移除</button>
@@ -448,5 +508,30 @@ const exposureAdvice = computed(() => {
   font-size: 0.95rem;
   line-height: 1.5;
   opacity: 0.9;
+}
+
+.sparkline {
+  width: 80px;
+  height: 30px;
+  display: block;
+}
+
+.advice-cell {
+  vertical-align: middle;
+}
+.advice-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.advice-row {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.advice-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  width: 1.5rem;
 }
 </style>
