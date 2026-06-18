@@ -11,7 +11,7 @@ from pathlib import Path
 from openai import OpenAI
 
 from config import RESULT_DIR, settings
-from src.prompts import THEME_MERGE_PROMPT, THEME_SYSTEM_PROMPT
+from src.prompts import get_prompts
 
 
 def _client() -> OpenAI:
@@ -32,14 +32,16 @@ def _client() -> OpenAI:
 _BATCH_SIZE = 30
 
 
-def classify_themes(stocks: list[dict]) -> dict:
+def classify_themes(stocks: list[dict], market: str = "TW") -> dict:
     """stocks: [{"code","name","industry"}...] -> {"themes":[{name,reason,stocks:[{code,name}]}]}。
 
     分批呼叫 LLM（避開 CI 長請求被砍），各批結果再依題材名合併。LLM 只回 code，名稱本地補回。
+    market 決定用台股或美股的題材 prompt。
     """
     if not stocks:
         return {"themes": []}
 
+    system_prompt, merge_prompt = get_prompts(market)
     name_map = {s["code"]: s.get("name", s["code"]) for s in stocks}
     client = _client()
     batches = [stocks[i : i + _BATCH_SIZE] for i in range(0, len(stocks), _BATCH_SIZE)]
@@ -48,7 +50,7 @@ def classify_themes(stocks: list[dict]) -> dict:
     for bi, batch in enumerate(batches, 1):
         if bi > 1:
             time.sleep(1.5)  # 批次間留白，降低 free tier 突發限流機率
-        themes = _classify_batch(client, batch, bi)
+        themes = _classify_batch(client, batch, bi, system_prompt)
         print(f"    批次 {bi}/{len(batches)}（{len(batch)} 檔）→ {len(themes)} 題材", flush=True)
         raw_themes.extend(themes)
 
@@ -60,7 +62,7 @@ def classify_themes(stocks: list[dict]) -> dict:
     #   多檔（>1 批）才需要；單批沒有跨批碎片問題。
     final = stage1
     if len(batches) > 1 and stage1:
-        consolidated = _consolidate(client, stage1)
+        consolidated = _consolidate(client, stage1, merge_prompt)
         if consolidated:
             print(f"    階段二歸併：{len(stage1)} → {len(consolidated)} 題材", flush=True)
             final = consolidated
@@ -70,10 +72,10 @@ def classify_themes(stocks: list[dict]) -> dict:
     return {"themes": _attach_all(final, name_map)}
 
 
-def _classify_batch(client: OpenAI, batch: list[dict], bi: int) -> list[dict]:
+def _classify_batch(client: OpenAI, batch: list[dict], bi: int, system_prompt: str) -> list[dict]:
     """單批分類，回傳原始 theme dict 清單（含 codes，尚未補名稱）。失敗回空清單。"""
     messages = [
-        {"role": "system", "content": THEME_SYSTEM_PROMPT},
+        {"role": "system", "content": system_prompt},
         {"role": "user", "content": json.dumps(batch, ensure_ascii=False)},
     ]
     try:
@@ -119,11 +121,11 @@ def _merge_exact(raw_themes: list[dict]) -> list[dict]:
 _CONSOLIDATE_RETRIES = 3
 
 
-def _consolidate(client: OpenAI, themes: list[dict]) -> list[dict] | None:
+def _consolidate(client: OpenAI, themes: list[dict], merge_prompt: str) -> list[dict] | None:
     """階段二：把碎片化題材丟回 LLM 做語意歸併。輸入小、重試成本低，故重試數次救連線中斷。"""
     payload = [{"name": t["name"], "codes": t["codes"]} for t in themes]
     messages = [
-        {"role": "system", "content": THEME_MERGE_PROMPT},
+        {"role": "system", "content": merge_prompt},
         {"role": "user", "content": json.dumps(payload, ensure_ascii=False)},
     ]
     last = ""

@@ -105,7 +105,7 @@ def run(market: str = "TW", classify: bool = True, verbose: bool = True) -> dict
         if verbose:
             print(f"  LLM 分類中（{len(stocks)} 檔）...", flush=True)
         try:
-            themes = classify_themes(stocks)
+            themes = classify_themes(stocks, market=market)
         except Exception as e:
             print(f"  ! LLM 題材分類失敗: {e}", flush=True)
         _step("LLM 分類完成", t0, verbose)

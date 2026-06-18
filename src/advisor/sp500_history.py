@@ -43,6 +43,19 @@ def current_constituents() -> list[dict]:
     return _fetch_all()["details"]
 
 
+def _newest_cache() -> dict | None:
+    """讀取最近一次的成分股快取（不限當日），供 Wikipedia 抓取失敗時的持久後備。"""
+    files = sorted(CACHE_DIR.glob("sp500_wiki_*.json"), reverse=True)
+    for f in files:
+        try:
+            d = json.loads(f.read_text())
+            if "details" in d:
+                return d
+        except Exception:
+            continue
+    return None
+
+
 def _fetch_all() -> dict:
     path = _cache_path()
     if path.exists():
@@ -53,6 +66,18 @@ def _fetch_all() -> dict:
         except Exception:
             pass
 
+    try:
+        return _download_and_parse(path)
+    except Exception as e:
+        # Wikipedia 抓取/解析失敗 → 退回最近一次成功的快取（避免線上單點故障）
+        fallback = _newest_cache()
+        if fallback is not None:
+            print(f"  ! S&P 500 成分股抓取失敗（{e}），改用最近一次快取（{len(fallback['details'])} 檔）")
+            return fallback
+        raise
+
+
+def _download_and_parse(path: Path) -> dict:
     html = requests.get(WIKI_URL, headers=HEADERS, timeout=30).text
     tabs = pd.read_html(io.StringIO(html))
     cur = tabs[0]
