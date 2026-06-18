@@ -1,6 +1,6 @@
 {
   "date": "2026-06-18",
-  "generated_at": "2026-06-18T14:30:44+08:00",
+  "generated_at": "2026-06-18T15:05:43+08:00",
   "params": {
     "top_n": 200,
     "advisor_threshold": 70
@@ -19,7 +19,7 @@
       "stock_id": "CAT",
       "stock_name": "CAT",
       "市場": "US",
-      "industry_category": "",
+      "industry_category": "Mega Cap / Tech",
       "close": 955.92,
       "總分": 74.1,
       "趨勢": 30.0,
@@ -63,7 +63,7 @@
       "stock_id": "JPM",
       "stock_name": "JPM",
       "市場": "US",
-      "industry_category": "",
+      "industry_category": "Mega Cap / Tech",
       "close": 333.46,
       "總分": 73.1,
       "趨勢": 24.0,
@@ -104,5 +104,20 @@
       "change_pct": 0.7
     }
   ],
-  "themes": []
+  "themes": [
+    {
+      "name": "其他",
+      "reason": "此清單包含工業設備與金融服務巨頭，不屬於特定台股科技題材，故歸類為其他。",
+      "stocks": [
+        {
+          "code": "CAT",
+          "name": "CAT"
+        },
+        {
+          "code": "JPM",
+          "name": "JPM"
+        }
+      ]
+    }
+  ]
 }
