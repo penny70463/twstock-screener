@@ -434,6 +434,66 @@ def compute_metrics(equity: pd.Series, trades: pd.DataFrame) -> dict:
     return m
 
 
+def export_comparison(equity: pd.Series, history: dict, period: str,
+                      top_n: int, path) -> None:
+    """輸出「主動動能策略 vs 被動 SPY/QQQ」累積績效 JSON，供前端美股頁渲染。
+
+    曲線正規化為起點 100、週頻抽樣縮小檔案；含各自指標與誠實申報文字。
+    """
+    import json
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+
+    eq = equity / equity.iloc[0] * 100
+    cols = {"strategy": eq}
+    # SPY/QQQ 直接下載（sp500 成分股池不含這些 ETF），對齊策略日期
+    bm = yf.download(["SPY", "QQQ"], auto_adjust=True, progress=False,
+                     start=eq.index[0], end=eq.index[-1] + pd.Timedelta(days=1))
+    if isinstance(bm.columns, pd.MultiIndex):
+        bm = bm["Close"]
+    for sym in ("SPY", "QQQ"):
+        if sym in bm.columns:
+            b = bm[sym].reindex(eq.index).ffill()
+            cols[sym.lower()] = b / b.iloc[0] * 100
+    curve = pd.DataFrame(cols).dropna()
+    weekly = curve.iloc[::5]  # 週頻抽樣
+    if weekly.index[-1] != curve.index[-1]:
+        weekly = pd.concat([weekly, curve.iloc[[-1]]])
+
+    series = [{"date": d.strftime("%Y-%m-%d"),
+               **{k: round(float(v), 2) for k, v in row.items()}}
+              for d, row in weekly.iterrows()]
+
+    m = compute_metrics(equity, pd.DataFrame())
+    metrics_out = {"strategy": {"cagr": round(m["cagr"] * 100, 1),
+                                "mdd": round(m["mdd"] * 100, 1),
+                                "sharpe": round(m["sharpe"], 2),
+                                "total": round(m["total"] * 100, 1)}}
+    for sym in ("SPY", "QQQ"):
+        b = benchmark(equity.index, sym)
+        metrics_out[sym] = {"cagr": round(b["cagr"] * 100, 1),
+                            "mdd": round(b["mdd"] * 100, 1),
+                            "sharpe": round(b["sharpe"], 2),
+                            "total": round(b["total"] * 100, 1)}
+
+    payload = {
+        "generated_at": datetime.now(ZoneInfo("Asia/Taipei")).isoformat(timespec="seconds"),
+        "period": period,
+        "start": eq.index[0].strftime("%Y-%m-%d"),
+        "end": eq.index[-1].strftime("%Y-%m-%d"),
+        "strategy_label": f"動能策略（前{top_n}強、月頻、波動率調整12-1動能）",
+        "universe": "S&P 500 point-in-time（已消除存活者偏誤）",
+        "caveat": ("此為 point-in-time 回測（已消除存活者偏誤）。動能策略全週期"
+                   "可小贏買進持有，但回撤相當或更深、且純多頭區間常輸 QQQ——"
+                   "主動的價值在跨週期，不是穩定超額。過去績效不代表未來。"),
+        "metrics": metrics_out,
+        "series": series,
+    }
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=False, indent=2)
+    print(f"  對照績效已輸出至 {path}（{len(series)} 點）")
+
+
 def sub_sharpe(equity: pd.Series) -> float:
     eq = equity / equity.iloc[0]
     ret = eq.pct_change().dropna()
@@ -566,6 +626,8 @@ def main():
                              "sp500=歷史成分股point-in-time(消除偏誤)")
     parser.add_argument("--search", action="store_true",
                         help="策略參數搜尋（強制 sp500 乾淨池，跨前後半期評估防過擬合）")
+    parser.add_argument("--export", metavar="PATH", default=None,
+                        help="輸出主動vs被動對照績效 JSON（給前端美股頁用）")
     parser.add_argument("--formation", choices=["6-1", "12-1", "mix"], default="12-1",
                         help="native 動能形成期")
     parser.add_argument("--vol-adjust", action="store_true",
@@ -633,6 +695,8 @@ def main():
         equity, trades = simulate(panels, score, atr, thr, args.top,
                                   rebalance_days=args.rebalance, use_stops=False)
         report(equity, trades, biased=(membership is None))
+        if args.export:
+            export_comparison(equity, history, args.period, args.top, args.export)
         OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
         equity.to_csv(OUTPUT_DIR / "equity_curve_us.csv")
         print("\n  權益曲線已存至 data/results/equity_curve_us.csv")

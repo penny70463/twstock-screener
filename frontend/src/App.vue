@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import PortfolioReview from './components/PortfolioReview.vue'
+import StrategyComparison from './components/StrategyComparison.vue'
 
 const activeMarket = ref('TW')
 const activeTab = ref('screener')
@@ -246,6 +247,9 @@ const isSparklineUp = (prices) => {
 
       <!-- Screener Tab Content -->
       <template v-if="activeTab === 'screener'">
+        <!-- 美股：主動 vs 被動 績效對照 -->
+        <StrategyComparison v-if="activeMarket === 'US'" :key="activeMarket" />
+
         <!-- Leaderboard -->
         <section class="section">
         <div class="section-header">
