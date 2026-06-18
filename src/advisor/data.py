@@ -273,7 +273,7 @@ def us_listings() -> pd.DataFrame:
     """取得美股清單 (S&P 500 + 熱門 ETF) 作為初始宇宙"""
     records = []
     # 常見大盤與板塊 ETF
-    etfs = ["SPY", "QQQ", "DIA", "IWM", "SMH", "SOXX", "XLE", "XLF", "XLV", "XLP", "XLU", "XLI", "XLB", "XLRE", "XLK", "XLY", "ARKK"]
+    etfs = ["SPY", "VOO", "QQQ", "DIA", "IWM", "SMH", "SOXX", "SOXQ", "XLE", "XLF", "XLV", "XLP", "XLU", "XLI", "XLB", "XLRE", "XLK", "XLY", "ARKK"]
     for sym in etfs:
         records.append({
             "code": sym, "name": sym + " ETF", "yahoo": sym, "market": "US",
