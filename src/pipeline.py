@@ -206,13 +206,30 @@ def _send_line_broadcast(payload: dict, result_df: pd.DataFrame) -> None:
         "Content-Type": "application/json",
         "Authorization": f"Bearer {token}"
     }
-    data = {
-        "messages": [{"type": "text", "text": message}]
-    }
+    
+    allowed_ids_str = os.getenv("LINE_ALLOWED_USER_IDS", "")
+    allowed_ids = [uid.strip() for uid in allowed_ids_str.split(",") if uid.strip()]
+    
+    if allowed_ids:
+        # 使用 Multicast (指定發送)
+        data = {
+            "to": allowed_ids,
+            "messages": [{"type": "text", "text": message}]
+        }
+        api_url = "https://api.line.me/v2/bot/message/multicast"
+        print(f"  [>] Line 使用 Multicast 發送給 {len(allowed_ids)} 個特定使用者...", flush=True)
+    else:
+        # 使用 Broadcast (群發)
+        data = {
+            "messages": [{"type": "text", "text": message}]
+        }
+        api_url = "https://api.line.me/v2/bot/message/broadcast"
+        print(f"  [>] Line 使用 Broadcast 發送給所有使用者...", flush=True)
+
     try:
-        res = requests.post("https://api.line.me/v2/bot/message/broadcast", headers=headers, json=data, timeout=10)
+        res = requests.post(api_url, headers=headers, json=data, timeout=10)
         if res.status_code == 200:
-            print("  [+] Line 廣播推播發送成功！", flush=True)
+            print("  [+] Line 推播發送成功！", flush=True)
         else:
             print(f"  [-] Line 推播失敗: {res.text}", flush=True)
     except Exception as e:
