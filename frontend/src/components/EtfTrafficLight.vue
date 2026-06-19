@@ -17,6 +17,8 @@ onMounted(async () => {
   } catch (e) {
     error.value = e.message
   }
+})
+
 const props = defineProps({
   market: {
     type: String,
