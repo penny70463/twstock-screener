@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 
 const etfData = ref(null)
 const error = ref(null)
@@ -17,6 +17,19 @@ onMounted(async () => {
   } catch (e) {
     error.value = e.message
   }
+const props = defineProps({
+  market: {
+    type: String,
+    required: true
+  }
+})
+
+const filteredEtfs = computed(() => {
+  if (!etfData.value || !etfData.value.etfs) return []
+  return etfData.value.etfs.filter(etf => {
+    const isTw = etf.code.includes('.TW')
+    return props.market === 'TW' ? isTw : !isTw
+  })
 })
 
 const getSignalClass = (signal) => {
@@ -30,11 +43,11 @@ const getSignalClass = (signal) => {
 </script>
 
 <template>
-  <div class="etf-traffic-light" v-if="etfData && etfData.etfs && etfData.etfs.length > 0">
+  <div class="etf-traffic-light" v-if="filteredEtfs.length > 0">
     <div class="section-title">🚦 核心 ETF 存股紅綠燈</div>
     <div class="etf-cards">
       <div 
-        v-for="etf in etfData.etfs" 
+        v-for="etf in filteredEtfs" 
         :key="etf.code" 
         class="etf-card glass-panel"
         :class="getSignalClass(etf.signal)"

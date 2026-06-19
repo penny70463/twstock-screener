@@ -232,7 +232,7 @@ const isSparklineUp = (prices) => {
       />
 
       <!-- ETF Traffic Light -->
-      <EtfTrafficLight />
+      <EtfTrafficLight :market="activeMarket" />
 
       <!-- Tab Navigation -->
       <div class="tabs-container">
@@ -654,6 +654,9 @@ body {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 1.5rem;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
 }
 
 .theme-card {
