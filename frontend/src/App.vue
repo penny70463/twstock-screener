@@ -664,9 +664,6 @@ body {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 1.5rem;
-  max-height: 400px;
-  overflow-y: auto;
-  padding-right: 0.5rem;
 }
 
 .theme-card {
@@ -701,6 +698,9 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+  max-height: 180px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
 }
 
 .stock-pill {
