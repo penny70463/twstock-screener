@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
 import PortfolioReview from './components/PortfolioReview.vue'
+import EtfTrafficLight from './components/EtfTrafficLight.vue'
 
 const activeMarket = ref('TW')
 const activeTab = ref('screener')
@@ -223,6 +224,15 @@ const isSparklineUp = (prices) => {
           今日無題材分類資料。
         </div>
       </section>
+
+      <!-- Dashboard Metrics -->
+      <DashboardMetrics 
+        v-if="data && data.market_state" 
+        :market-state="data.market_state" 
+      />
+
+      <!-- ETF Traffic Light -->
+      <EtfTrafficLight />
 
       <!-- Tab Navigation -->
       <div class="tabs-container">
