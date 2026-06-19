@@ -433,8 +433,10 @@ body {
 /* Hero Banner */
 .hero-banner {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  gap: 1.5rem;
   padding: 2rem;
   margin-bottom: 2rem;
   background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
@@ -452,6 +454,14 @@ body {
   margin: 0;
   color: var(--text-muted);
   font-size: 1.1rem;
+}
+
+.hero-left .logic-desc {
+  margin-top: 1rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+  max-width: 600px;
 }
 
 .hero-right {
@@ -814,3 +824,10 @@ body {
   display: block;
 }
 </style>
+
+@media (max-width: 850px) {
+  .hero-right {
+    align-items: flex-start;
+  }
+}
+
