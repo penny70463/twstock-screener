@@ -47,11 +47,23 @@
 - 🔴 **空頭觀望 (價格 < 200MA)**：跌破長期生命線，趨勢轉弱。**200MA 即為出場防守底線**，跌破建議轉移資金至避險資產，站回再買。
 - *註：ETF 管理費會直接反映在淨值與收盤價的扣除中，因此看技術線圖即可，無需額外扣除管理費成本。*
 
+## 📊 週末自動覆盤 (Weekly Review)
+
+每週六早上 10:00，系統會自動在 **GitHub Actions** 上執行覆盤程式，比對「當週選出的台美股 Top 30」與「最新收盤價」，計算策略的勝率與報酬率，並透過 LINE 推播發送覆盤摘要。
+
+**特色**：
+- 不需要 LLM、不會 timeout、零 API 費用（純 yfinance + 數學計算）
+- 不需要開電腦，完全在 GitHub Actions 雲端執行
+- 支援在 GitHub Actions 頁面手動觸發 (`workflow_dispatch`) 進行測試
+- 覆盤結果會自動存為 `data/results/weekly_review.json` 並 commit 到 master
+
 ## 目錄結構
 
 ```text
 twstock-screener/
 ├── run_daily.sh         # Mac 自動化排程入口 (Cron)
+├── run_pipeline.py      # 每日掃描主程式
+├── weekly_review.py     # 週末自動覆盤（GitHub Actions 執行）
 ├── config.py            # 環境變數與設定
 ├── src/
 │   ├── advisor/         # 核心多因子評分引擎 (趨勢、籌碼、量能、市場狀態)
@@ -61,6 +73,8 @@ twstock-screener/
 │   ├── src/App.vue      # 儀表板 UI (玻璃特效、排序、篩選)
 │   ├── src/components/  # UI 元件庫 (包含 PortfolioReview 存股體檢)
 │   └── package.json     # 前端依賴
+├── .github/workflows/
+│   └── weekly-review.yml  # 週末覆盤 GitHub Actions 排程
 └── data/results/        # 輸出的 JSON 資料存放區
 ```
 
