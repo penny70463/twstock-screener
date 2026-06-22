@@ -701,6 +701,26 @@ body {
   max-height: 180px;
   overflow-y: auto;
   padding-right: 0.5rem;
+  /* 為了在手機上也有明顯的捲動提示，強制顯示 scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(59, 130, 246, 0.4) transparent;
+}
+
+.theme-stocks::-webkit-scrollbar {
+  width: 6px;
+}
+
+.theme-stocks::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.theme-stocks::-webkit-scrollbar-thumb {
+  background-color: rgba(59, 130, 246, 0.4);
+  border-radius: 4px;
+}
+
+.theme-stocks::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(59, 130, 246, 0.6);
 }
 
 .stock-pill {
