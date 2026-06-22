@@ -1,27 +1,28 @@
 {
-  "date": "2026-06-19",
+  "date": "2026-06-22",
+  "generated_at": "2026-06-22T16:09:57",
   "etfs": [
     {
       "code": "0050.TW",
       "name": "元大台灣50",
-      "price": 106.0,
-      "ma50": 95.03,
-      "ma200": 72.38,
+      "price": 111.15,
+      "ma50": 96.23,
+      "ma200": 72.95,
       "signal": "green",
       "desc": "多頭續航",
-      "entry_price": 95.03,
-      "exit_price": 72.38
+      "entry_price": 96.23,
+      "exit_price": 72.95
     },
     {
       "code": "0056.TW",
       "name": "元大高股息",
-      "price": 51.95,
-      "ma50": 45.25,
-      "ma200": 37.83,
+      "price": 54.05,
+      "ma50": 45.86,
+      "ma200": 38.04,
       "signal": "green",
       "desc": "多頭續航",
-      "entry_price": 45.25,
-      "exit_price": 37.83
+      "entry_price": 45.86,
+      "exit_price": 38.04
     },
     {
       "code": "VOO",
