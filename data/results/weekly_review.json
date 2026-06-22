@@ -1,0 +1,478 @@
+{
+  "review_date": "2026-06-22",
+  "generated_at": "2026-06-22T16:08:03+08:00",
+  "markets": [
+    {
+      "market": "TW",
+      "select_date": "2026-06-22",
+      "review_date": "2026-06-22",
+      "total": 30,
+      "win_count": 0,
+      "win_rate": 0.0,
+      "avg_return": 0.0,
+      "top3": [
+        {
+          "name": "聯傑",
+          "ret": -0.0
+        },
+        {
+          "name": "聯茂",
+          "ret": 0.0
+        },
+        {
+          "name": "凌陽",
+          "ret": 0.0
+        }
+      ],
+      "bottom3": [],
+      "details": [
+        {
+          "code": "3094.TW",
+          "name": "聯傑",
+          "base_price": 41.8,
+          "current_price": 41.8,
+          "return_pct": -0.0
+        },
+        {
+          "code": "6213.TW",
+          "name": "聯茂",
+          "base_price": 308.0,
+          "current_price": 308.0,
+          "return_pct": 0.0
+        },
+        {
+          "code": "3317.TWO",
+          "name": "尼克森",
+          "base_price": 97.1,
+          "current_price": 97.1,
+          "return_pct": -0.0
+        },
+        {
+          "code": "3711.TW",
+          "name": "日月光投控",
+          "base_price": 674.0,
+          "current_price": 674.0,
+          "return_pct": 0.0
+        },
+        {
+          "code": "5464.TWO",
+          "name": "霖宏",
+          "base_price": 81.0,
+          "current_price": 81.0,
+          "return_pct": 0.0
+        },
+        {
+          "code": "2369.TW",
+          "name": "菱生",
+          "base_price": 40.5,
+          "current_price": 40.5,
+          "return_pct": 0.0
+        },
+        {
+          "code": "2426.TW",
+          "name": "鼎元",
+          "base_price": 89.9,
+          "current_price": 89.9,
+          "return_pct": 0.0
+        },
+        {
+          "code": "6138.TWO",
+          "name": "茂達",
+          "base_price": 394.0,
+          "current_price": 394.0,
+          "return_pct": 0.0
+        },
+        {
+          "code": "6271.TW",
+          "name": "同欣電",
+          "base_price": 266.5,
+          "current_price": 266.5,
+          "return_pct": 0.0
+        },
+        {
+          "code": "3034.TW",
+          "name": "聯詠",
+          "base_price": 567.0,
+          "current_price": 567.0,
+          "return_pct": 0.0
+        },
+        {
+          "code": "6715.TW",
+          "name": "嘉基",
+          "base_price": 518.0,
+          "current_price": 518.0,
+          "return_pct": 0.0
+        },
+        {
+          "code": "6719.TW",
+          "name": "力智",
+          "base_price": 286.0,
+          "current_price": 286.0,
+          "return_pct": 0.0
+        },
+        {
+          "code": "2337.TW",
+          "name": "旺宏",
+          "base_price": 185.5,
+          "current_price": 185.5,
+          "return_pct": 0.0
+        },
+        {
+          "code": "7712.TWO",
+          "name": "博盛半導體",
+          "base_price": 202.5,
+          "current_price": 202.5,
+          "return_pct": 0.0
+        },
+        {
+          "code": "5285.TW",
+          "name": "界霖",
+          "base_price": 102.5,
+          "current_price": 102.5,
+          "return_pct": 0.0
+        },
+        {
+          "code": "1727.TW",
+          "name": "中華化",
+          "base_price": 102.0,
+          "current_price": 102.0,
+          "return_pct": 0.0
+        },
+        {
+          "code": "6525.TW",
+          "name": "捷敏-KY",
+          "base_price": 155.0,
+          "current_price": 155.0,
+          "return_pct": 0.0
+        },
+        {
+          "code": "00631L.TW",
+          "name": "元大台灣50正2",
+          "base_price": 41.32,
+          "current_price": 41.32,
+          "return_pct": -0.0
+        },
+        {
+          "code": "1802.TW",
+          "name": "台玻",
+          "base_price": 76.6,
+          "current_price": 76.6,
+          "return_pct": -0.0
+        },
+        {
+          "code": "00685L.TW",
+          "name": "群益臺灣加權正2",
+          "base_price": 329.55,
+          "current_price": 329.55,
+          "return_pct": -0.0
+        },
+        {
+          "code": "00663L.TW",
+          "name": "國泰臺灣加權正2",
+          "base_price": 120.2,
+          "current_price": 120.2,
+          "return_pct": -0.0
+        },
+        {
+          "code": "6208.TWO",
+          "name": "日揚",
+          "base_price": 106.0,
+          "current_price": 106.0,
+          "return_pct": 0.0
+        },
+        {
+          "code": "8081.TW",
+          "name": "致新",
+          "base_price": 341.5,
+          "current_price": 341.5,
+          "return_pct": 0.0
+        },
+        {
+          "code": "6411.TWO",
+          "name": "晶焱",
+          "base_price": 114.0,
+          "current_price": 114.0,
+          "return_pct": 0.0
+        },
+        {
+          "code": "6415.TW",
+          "name": "矽力*-KY",
+          "base_price": 673.0,
+          "current_price": 673.0,
+          "return_pct": 0.0
+        },
+        {
+          "code": "5434.TW",
+          "name": "崇越",
+          "base_price": 506.0,
+          "current_price": 506.0,
+          "return_pct": 0.0
+        },
+        {
+          "code": "5351.TWO",
+          "name": "鈺創",
+          "base_price": 99.8,
+          "current_price": 99.8,
+          "return_pct": 0.0
+        },
+        {
+          "code": "00888.TWO",
+          "name": "永豐台灣ESG",
+          "base_price": 38.74,
+          "current_price": 38.74,
+          "return_pct": 0.0
+        },
+        {
+          "code": "2401.TW",
+          "name": "凌陽",
+          "base_price": 34.0,
+          "current_price": 34.0,
+          "return_pct": 0.0
+        },
+        {
+          "code": "8016.TW",
+          "name": "矽創",
+          "base_price": 315.0,
+          "current_price": 315.0,
+          "return_pct": 0.0
+        }
+      ]
+    },
+    {
+      "market": "US",
+      "select_date": "2026-06-19",
+      "review_date": "2026-06-22",
+      "total": 30,
+      "win_count": 0,
+      "win_rate": 0.0,
+      "avg_return": 0.0,
+      "top3": [
+        {
+          "name": "Sandisk",
+          "ret": 0.0
+        },
+        {
+          "name": "Lumentum",
+          "ret": 0.0
+        },
+        {
+          "name": "Quanta Services",
+          "ret": 0.0
+        }
+      ],
+      "bottom3": [],
+      "details": [
+        {
+          "code": "SNDK",
+          "name": "Sandisk",
+          "base_price": 2184.75,
+          "current_price": 2184.75,
+          "return_pct": 0.0
+        },
+        {
+          "code": "LITE",
+          "name": "Lumentum",
+          "base_price": 850.0,
+          "current_price": 850.0,
+          "return_pct": 0.0
+        },
+        {
+          "code": "WDC",
+          "name": "Western Digital",
+          "base_price": 746.23,
+          "current_price": 746.23,
+          "return_pct": -0.0
+        },
+        {
+          "code": "CIEN",
+          "name": "Ciena",
+          "base_price": 428.22,
+          "current_price": 428.22,
+          "return_pct": 0.0
+        },
+        {
+          "code": "STX",
+          "name": "Seagate Technology",
+          "base_price": 1070.23,
+          "current_price": 1070.23,
+          "return_pct": -0.0
+        },
+        {
+          "code": "MU",
+          "name": "Micron Technology",
+          "base_price": 1133.99,
+          "current_price": 1133.99,
+          "return_pct": -0.0
+        },
+        {
+          "code": "INTC",
+          "name": "Intel",
+          "base_price": 133.99,
+          "current_price": 133.99,
+          "return_pct": 0.0
+        },
+        {
+          "code": "FIX",
+          "name": "Comfort Systems USA",
+          "base_price": 1967.41,
+          "current_price": 1967.41,
+          "return_pct": 0.0
+        },
+        {
+          "code": "SATS",
+          "name": "EchoStar",
+          "base_price": 109.17,
+          "current_price": 109.17,
+          "return_pct": -0.0
+        },
+        {
+          "code": "COHR",
+          "name": "Coherent Corp.",
+          "base_price": 389.57,
+          "current_price": 389.57,
+          "return_pct": 0.0
+        },
+        {
+          "code": "GLW",
+          "name": "Corning Inc.",
+          "base_price": 194.92,
+          "current_price": 194.92,
+          "return_pct": -0.0
+        },
+        {
+          "code": "GOOGL",
+          "name": "Alphabet Inc. (Class A)",
+          "base_price": 368.03,
+          "current_price": 368.03,
+          "return_pct": -0.0
+        },
+        {
+          "code": "GOOG",
+          "name": "Alphabet Inc. (Class C)",
+          "base_price": 367.46,
+          "current_price": 367.46,
+          "return_pct": -0.0
+        },
+        {
+          "code": "CAT",
+          "name": "Caterpillar Inc.",
+          "base_price": 985.82,
+          "current_price": 985.82,
+          "return_pct": 0.0
+        },
+        {
+          "code": "TER",
+          "name": "Teradyne",
+          "base_price": 437.92,
+          "current_price": 437.92,
+          "return_pct": 0.0
+        },
+        {
+          "code": "LRCX",
+          "name": "Lam Research",
+          "base_price": 389.04,
+          "current_price": 389.04,
+          "return_pct": 0.0
+        },
+        {
+          "code": "WBD",
+          "name": "Warner Bros. Discovery",
+          "base_price": 26.2,
+          "current_price": 26.2,
+          "return_pct": 0.0
+        },
+        {
+          "code": "AMD",
+          "name": "Advanced Micro Devices",
+          "base_price": 537.37,
+          "current_price": 537.37,
+          "return_pct": -0.0
+        },
+        {
+          "code": "CMI",
+          "name": "Cummins",
+          "base_price": 716.86,
+          "current_price": 716.86,
+          "return_pct": -0.0
+        },
+        {
+          "code": "JNJ",
+          "name": "Johnson & Johnson",
+          "base_price": 228.39,
+          "current_price": 228.39,
+          "return_pct": -0.0
+        },
+        {
+          "code": "VRT",
+          "name": "Vertiv",
+          "base_price": 333.05,
+          "current_price": 333.05,
+          "return_pct": -0.0
+        },
+        {
+          "code": "ALB",
+          "name": "Albemarle Corporation",
+          "base_price": 160.35,
+          "current_price": 160.35,
+          "return_pct": 0.0
+        },
+        {
+          "code": "KEYS",
+          "name": "Keysight Technologies",
+          "base_price": 363.67,
+          "current_price": 363.67,
+          "return_pct": 0.0
+        },
+        {
+          "code": "NUE",
+          "name": "Nucor",
+          "base_price": 243.83,
+          "current_price": 243.83,
+          "return_pct": 0.0
+        },
+        {
+          "code": "VTRS",
+          "name": "Viatris",
+          "base_price": 15.37,
+          "current_price": 15.37,
+          "return_pct": -0.0
+        },
+        {
+          "code": "AMAT",
+          "name": "Applied Materials",
+          "base_price": 617.11,
+          "current_price": 617.11,
+          "return_pct": -0.0
+        },
+        {
+          "code": "BNY",
+          "name": "BNY Mellon",
+          "base_price": 143.63,
+          "current_price": 143.63,
+          "return_pct": 0.0
+        },
+        {
+          "code": "ROST",
+          "name": "Ross Stores",
+          "base_price": 232.8,
+          "current_price": 232.8,
+          "return_pct": 0.0
+        },
+        {
+          "code": "PWR",
+          "name": "Quanta Services",
+          "base_price": 702.25,
+          "current_price": 702.25,
+          "return_pct": 0.0
+        },
+        {
+          "code": "ADI",
+          "name": "Analog Devices",
+          "base_price": 434.46,
+          "current_price": 434.46,
+          "return_pct": -0.0
+        }
+      ]
+    }
+  ]
+}

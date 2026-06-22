@@ -1,0 +1,50 @@
+name: weekly-review
+
+on:
+  schedule:
+    # 每週六 UTC 02:00 = 台灣 10:00
+    - cron: "0 2 * * 6"
+  workflow_dispatch: {}  # 允許手動觸發（用於測試）
+
+permissions:
+  contents: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install deps
+        run: pip install yfinance pandas requests python-dotenv pyarrow lxml
+
+      - name: Run weekly review
+        env:
+          PYTHONUNBUFFERED: "1"
+          LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          LINE_ALLOWED_USER_IDS: ${{ secrets.LINE_ALLOWED_USER_IDS }}
+        run: python -u weekly_review.py
+
+      - name: Commit review results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f data/results/weekly_review.json
+          if git diff --cached --quiet; then
+            echo "No changes."
+            exit 0
+          fi
+          git commit -m "chore: weekly review $(date -u +%F)"
+          for i in 1 2 3; do
+            git pull --rebase --autostash origin master \
+              && git push origin master \
+              && exit 0
+            echo "push 衝突，重試 $i ..."
+            sleep 5
+          done
+          echo "push 連續失敗" && exit 1
