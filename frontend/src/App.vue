@@ -786,8 +786,8 @@ body {
 }
 
 .signal-container {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: max-content max-content;
   gap: 0.4rem;
 }
 
@@ -799,6 +799,7 @@ body {
   border: 1px solid rgba(167, 139, 250, 0.3);
   border-radius: 4px;
   white-space: nowrap;
+  text-align: center;
 }
 
 /* States */
