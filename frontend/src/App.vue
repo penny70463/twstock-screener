@@ -834,21 +834,18 @@ body {
     align-items: flex-start;
     gap: 1.5rem;
   }
+  .hero-left h1 {
+    font-size: 1.75rem;
+  }
   .hero-right {
     align-items: flex-start;
   }
 }
 
-.sparkline {
-  width: 80px;
-  height: 30px;
-  display: block;
-}
+  .sparkline {
+    width: 80px;
+    height: 30px;
+    display: block;
+  }
 </style>
-
-@media (max-width: 850px) {
-  .hero-right {
-    align-items: flex-start;
-  }
-}
 
