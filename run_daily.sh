@@ -11,6 +11,9 @@ export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
 # 啟動虛擬環境
 source .venv/bin/activate
 
+# 若執行過程中發生錯誤，則觸發錯誤通知
+trap 'python notify_error.py' ERR
+
 echo "========================================"
 echo "執行時間：$(date)"
 echo "開始執行股票篩選..."
