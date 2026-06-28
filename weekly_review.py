@@ -11,7 +11,7 @@ import json
 import os
 import re
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -39,21 +39,57 @@ except ImportError:
 # ---------------------------------------------------------------------------
 # 核心邏輯
 # ---------------------------------------------------------------------------
-def _load_latest(market: str) -> dict | None:
-    """讀取最近一次的選股結果 JSON。"""
-    path = RESULT_DIR / f"latest_{market.lower()}.json"
-    if not path.exists():
-        print(f"  [!] 找不到 {path}，跳過 {market} 市場")
+def _load_weekly_data(market: str) -> dict | None:
+    """讀取過去 7 天內該市場的所有選股結果，並彙整出唯一清單與最早入榜的基準價格。"""
+    today = datetime.now(TW_TZ).date()
+    # 從 7 天前到 1 天前 (確保舊的在前，新的在後，這樣 earliest 才會是最早入榜那天的價錢)
+    past_7_days = [(today - timedelta(days=i)).isoformat() for i in range(7, 0, -1)]
+    
+    unique_stocks = {}
+    
+    for date_str in past_7_days:
+        path = RESULT_DIR / f"{date_str}_{market.lower()}.json"
+        if not path.exists():
+            continue
+            
+        with open(path, "r", encoding="utf-8") as f:
+            try:
+                data = json.load(f)
+                screened = data.get("screened", [])
+                for s in screened[:TOP_N]:
+                    stock_id = s["stock_id"]
+                    if stock_id not in unique_stocks:
+                        unique_stocks[stock_id] = {
+                            "stock_id": stock_id,
+                            "stock_name": s.get("stock_name", ""),
+                            "close": s.get("close", 0),
+                            "總分": s.get("總分", 0),
+                            "市場": s.get("市場", ""),
+                            "first_select_date": date_str
+                        }
+            except Exception as e:
+                print(f"  [!] 讀取 {path} 失敗: {e}")
+                
+    if not unique_stocks:
+        print(f"  [!] 找不到過去 7 天的 {market} 資料")
         return None
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
+        
+    # 找出實際有資料的第一天和最後一天
+    valid_dates = [s["first_select_date"] for s in unique_stocks.values()]
+    start_str = min(valid_dates)[5:] if valid_dates else "unknown"
+    end_str = max(valid_dates)[5:] if valid_dates else "unknown"
+        
+    return {
+        "date": f"本週 ({start_str} ~ {end_str})",
+        "screened": list(unique_stocks.values())
+    }
 
 
 def _build_tickers(screened: list[dict], market: str) -> tuple[list[str], dict]:
     """從選股清單建立 yfinance ticker 列表與對照表。"""
     tickers = []
     mapping = {}
-    for s in screened[:TOP_N]:
+    for s in screened:  # 不要再切 [:TOP_N]，因為 _load_weekly_data 已經篩選過每天的前 N 名了
         if market == "TW":
             suffix = ".TW" if s.get("市場") == "上市" else ".TWO"
             ticker = f"{s['stock_id']}{suffix}"
@@ -93,7 +129,7 @@ def _fetch_current_prices(tickers: list[str]) -> dict[str, float]:
 
 def review_market(market: str) -> dict | None:
     """對單一市場執行覆盤，回傳績效摘要 dict。"""
-    data = _load_latest(market)
+    data = _load_weekly_data(market)
     if not data:
         return None
 
