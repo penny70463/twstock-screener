@@ -238,19 +238,35 @@ def _check_health(current_summaries: list[dict]) -> list[str]:
         # 收集本週 + 歷史的勝率與報酬
         win_rates = []
         avg_returns = []
+        seen_weeks = set()
 
         # 本週
         current = next((s for s in current_summaries if s["market"] == market), None)
         if current:
             win_rates.append(current["win_rate"])
             avg_returns.append(current["avg_return"])
+            today_iso = datetime.now(TW_TZ).date().isocalendar()
+            seen_weeks.add(f"{today_iso[0]}-W{today_iso[1]}")
 
         # 歷史
         for review in past_reviews:
+            rev_date_str = review.get("review_date")
+            if not rev_date_str:
+                continue
+            try:
+                dt = datetime.strptime(rev_date_str, "%Y-%m-%d").date()
+                iso_week = f"{dt.isocalendar()[0]}-W{dt.isocalendar()[1]}"
+            except ValueError:
+                continue
+                
+            if iso_week in seen_weeks:
+                continue
+                
             for ms in review.get("markets", []):
                 if ms["market"] == market:
                     win_rates.append(ms["win_rate"])
                     avg_returns.append(ms["avg_return"])
+                    seen_weeks.add(iso_week)
 
         if len(win_rates) < 2:
             continue  # 至少要有 2 週才能判斷趨勢
