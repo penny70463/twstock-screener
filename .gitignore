@@ -27,3 +27,6 @@ cron_log.txt
 patch_advisor.py
 test_adv_pipeline.py
 scratch/
+
+# 警報系統的本機狀態檔（每台機器獨立，不進版控）
+data/results/alert_state.json
