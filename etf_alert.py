@@ -75,7 +75,7 @@ def _check_exposure(market_label: str, market_key: str, market_state: dict,
         print(f"  [i] {market_label}：首次記錄曝險水位 {int(curr_exp*100)}%，建立基準。")
         return
 
-    change = curr_exp - old_exp
+    change = round(curr_exp - old_exp, 4)
     vol = market_state.get("realized_vol", "N/A")
 
     # 水位下降超過門檻 → 風險警報
