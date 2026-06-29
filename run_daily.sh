@@ -22,6 +22,9 @@ echo "開始執行股票篩選..."
 # (Python 會自動去讀取資料夾底下的 .env 檔案)
 python -u run_pipeline.py
 
+echo "執行 ETF 警報系統..."
+python -u etf_alert.py
+
 echo "執行完畢，準備將結果推播到 GitHub..."
 
 # 以下照搬 GitHub Actions 裡面的自動 Push 邏輯
