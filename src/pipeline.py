@@ -114,7 +114,7 @@ def run(market: str = "TW", classify: bool = True, verbose: bool = True) -> dict
     try:
         close_panel = pd.DataFrame({code: df["Close"] for code, df in history.items() if df is not None and "Close" in df.columns})
         if not close_panel.empty:
-            exposure_info = adv_market.get_exposure_live(close_panel)
+            exposure_info = adv_market.get_exposure_live(close_panel, market=market)
             market_state["exposure"] = exposure_info["exposure"]
             market_state["trend_score"] = exposure_info["trend"]
             market_state["breadth"] = exposure_info["breadth"]

@@ -61,12 +61,19 @@ def breadth_series(close_panel: pd.DataFrame) -> pd.Series:
     return above / valid
 
 
-def exposure_series(twii_close: pd.Series, breadth: pd.Series) -> pd.Series:
+def _vol_target(market: str = "TW") -> float:
+    """依市場回傳對應的目標波動率。"""
+    return config.VOL_TARGET_US if market == "US" else config.VOL_TARGET_TW
+
+
+def exposure_series(twii_close: pd.Series, breadth: pd.Series,
+                    market: str = "TW") -> pd.Series:
     """連續目標水位（0–1，5% 階梯）。
 
     水位 = (趨勢分級 × 0.5 + 市場寬度 × 0.5) × 波動率縮放
     回測（exposure --compare）與每日顧問共用同一條公式，避免兩套邏輯漂移。
     """
+    vol_target = _vol_target(market)
     ma60 = twii_close.rolling(60).mean()
     ma120 = twii_close.rolling(120).mean()
     # 趨勢分級：三個條件各佔權重，0–1 共 8 級，比多空三分細
@@ -78,20 +85,23 @@ def exposure_series(twii_close: pd.Series, breadth: pd.Series) -> pd.Series:
     base = config.EXP_W_TREND * trend + config.EXP_W_BREADTH * b
     # 波動率目標化：年化波動超標時等比例縮水位
     realized = twii_close.pct_change().rolling(20).std() * np.sqrt(252)
-    vol_scale = (config.VOL_TARGET / realized).clip(upper=1.0)
+    vol_scale = (vol_target / realized).clip(upper=1.0)
     expo = (base * vol_scale).clip(0, 1)
     return (expo / config.EXP_STEP).round() * config.EXP_STEP
 
 
-def get_exposure_live(close_panel: pd.DataFrame) -> dict:
+def get_exposure_live(close_panel: pd.DataFrame, market: str = "TW") -> dict:
     """今日的連續目標水位與三因子拆解（顧問/UI 顯示用）"""
-    twii = yf.download("^TWII", period="1y", auto_adjust=True, progress=False)
-    if isinstance(twii.columns, pd.MultiIndex):
-        twii.columns = twii.columns.get_level_values(0)
-    c = twii["Close"].dropna()
+    index_symbol = "^TWII" if market == "TW" else "^GSPC"
+    vol_target = _vol_target(market)
+
+    idx = yf.download(index_symbol, period="1y", auto_adjust=True, progress=False)
+    if isinstance(idx.columns, pd.MultiIndex):
+        idx.columns = idx.columns.get_level_values(0)
+    c = idx["Close"].dropna()
 
     breadth = breadth_series(close_panel)
-    expo = exposure_series(c, breadth)
+    expo = exposure_series(c, breadth, market=market)
 
     ma60 = c.rolling(60).mean()
     ma120 = c.rolling(120).mean()
@@ -104,5 +114,5 @@ def get_exposure_live(close_panel: pd.DataFrame) -> dict:
         "trend": round(trend, 2),
         "breadth": round(float(breadth.iloc[-1]) * 100, 1),
         "realized_vol": round(realized * 100, 1),
-        "vol_scale": round(min(1.0, config.VOL_TARGET / realized), 2),
+        "vol_scale": round(min(1.0, vol_target / realized), 2),
     }
