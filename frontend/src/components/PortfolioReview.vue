@@ -17,7 +17,7 @@ const loading = ref(true)
 const error = ref(null)
 
 const UNIVERSE_URL = computed(() => {
-  const fileName = `universe_${props.market.toLowerCase()}.json`
+  const fileName = props.market === 'ETF' ? 'latest_etf.json' : `universe_${props.market.toLowerCase()}.json`
   return import.meta.env.DEV 
     ? `/api/${fileName}` 
     : `https://raw.githubusercontent.com/penny70463/twstock-screener/master/data/results/${fileName}`
@@ -76,7 +76,16 @@ const fetchUniverse = async () => {
     const res = await fetch(UNIVERSE_URL.value, { cache: 'no-store' })
     if (!res.ok) throw new Error('Failed to fetch universe data')
     const data = await res.json()
-    universe.value = data.stocks || []
+    
+    if (props.market === 'ETF') {
+      universe.value = (data.etfs || []).map(e => ({
+        stock_id: e.code.replace('.TW', ''),
+        stock_name: e.name,
+        close: e.price
+      }))
+    } else {
+      universe.value = data.stocks || []
+    }
   } catch (e) {
     error.value = e.message
   } finally {
