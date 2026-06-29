@@ -303,42 +303,57 @@ const formatCurrency = (val) => {
   return new Intl.NumberFormat('zh-TW', { style: 'currency', currency: currency, maximumFractionDigits: digits }).format(val)
 }
 
-// 曝險控管建議
+// 曝險控管建議（三因子連續水位模型）
 const exposureAdvice = computed(() => {
   if (totalPortfolioValue.value <= 0) return null
 
   const regime = props.marketState?.label || '未知'
-  let targetRatio = 1.0 // 預設多頭 100%
-  if (regime === '盤整') targetRatio = 0.5
-  if (regime === '空頭') targetRatio = 0.0
+
+  // 優先使用後端三因子連續水位模型；若後端尚未提供，才用粗略三分法
+  let targetRatio
+  let factorDetail = ''
+  const hasExposureModel = props.marketState?.exposure !== undefined
+
+  if (hasExposureModel) {
+    targetRatio = props.marketState.exposure
+    const trend = props.marketState.trend_score ?? '-'
+    const breadth = props.marketState.breadth ?? '-'
+    const vol = props.marketState.realized_vol ?? '-'
+    const volScale = props.marketState.vol_scale ?? '-'
+    factorDetail = `\n📐 三因子拆解：趨勢分級 ${trend}｜市場寬度 ${breadth}%｜波動率 ${vol}%（縮放 ×${volScale}）`
+  } else {
+    targetRatio = 1.0
+    if (regime === '盤整' || regime === '中性') targetRatio = 0.5
+    if (regime === '空頭') targetRatio = 0.0
+  }
 
   const stocksValue = enrichedPositions.value.reduce((sum, p) => sum + p.currentValue, 0)
   const targetStockValue = totalPortfolioValue.value * targetRatio
   const excess = stocksValue - targetStockValue
+  const targetPct = Math.round(targetRatio * 100)
 
-  if (excess > 0) {
+  if (excess > totalPortfolioValue.value * 0.03) {
     return {
       status: 'warning',
       icon: '⚠️',
-      title: '曝險過高，建議減碼',
-      message: `目前大盤為【${regime}】，建議總持股水位應降至 ${targetRatio * 100}%。您的持股比例偏高，建議收回 ${formatCurrency(excess)} 的現金。請優先考慮從下方「建議減碼/出清」的標的開始賣出。`,
+      title: '曝險偏高，建議適度減碼',
+      message: `目前大盤為【${regime}】，三因子模型建議持股水位為 ${targetPct}%。您的持股比例偏高，建議收回約 ${formatCurrency(excess)} 的現金。請優先考慮從下方「建議減碼/出清」的標的開始賣出。${factorDetail}`,
       cssClass: 'bg-yellow-900/40 border-yellow-500/50 text-yellow-100'
     }
-  } else if (excess < 0) {
-    // excess is negative, so -excess is the amount we can buy
+  } else if (excess < -totalPortfolioValue.value * 0.03) {
     return {
       status: 'success',
       icon: '✅',
       title: '資金充裕，可適度建倉',
-      message: `目前大盤為【${regime}】，建議總持股水位為 ${targetRatio * 100}%。您目前資金水位安全，仍有 ${formatCurrency(-excess)} 的額度可以考慮買進「強勢股掃描」中的高分標的。`,
+      message: `目前大盤為【${regime}】，三因子模型建議持股水位為 ${targetPct}%。您目前仍有 ${formatCurrency(-excess)} 的額度可以考慮買進「強勢股掃描」中的高分標的。${factorDetail}`,
       cssClass: 'bg-green-900/40 border-green-500/50 text-green-100'
     }
   } else {
     return {
       status: 'safe',
       icon: '🛡️',
-      title: '水位安全',
-      message: `目前大盤為【${regime}】，您的持股水位剛好符合大盤目標比例 (${targetRatio * 100}%)，部位控管非常良好！`,
+      title: '水位均衡',
+      message: `目前大盤為【${regime}】，三因子模型建議持股水位為 ${targetPct}%，您的部位配置非常良好！${factorDetail}`,
       cssClass: 'bg-blue-900/40 border-blue-500/50 text-blue-100'
     }
   }
