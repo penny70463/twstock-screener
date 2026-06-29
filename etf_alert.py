@@ -85,12 +85,19 @@ def _check_exposure(market_label: str, market_key: str, market_state: dict,
             f"波動率升至 {vol}%，三因子建議持股水位從 {int(old_exp*100)}% 降至 {int(curr_exp*100)}%！"
             f"請優先停利波動大的部位換取現金。"
         )
-    # 水位上升超過門檻且回到滿水位 → 警報解除
-    elif change >= EXPOSURE_CHANGE_THRESHOLD and curr_exp >= 1.0:
+    # 水位重新回到滿水位（不論變化量大小）→ 警報解除
+    elif curr_exp >= 1.0 and old_exp < 1.0:
         alerts.append(
             f"✅【{market_label}警報解除】"
             f"市場波動回穩，建議水位從 {int(old_exp*100)}% 恢復至 100%！"
             f"手邊現金可重新投入核心 ETF。"
+        )
+    # 尚未滿水位，但大幅好轉 → 風險緩解（可分批買回）
+    elif curr_exp < 1.0 and change >= EXPOSURE_CHANGE_THRESHOLD:
+        alerts.append(
+            f"📈【{market_label}風險緩解】"
+            f"建議水位從 {int(old_exp*100)}% 回升至 {int(curr_exp*100)}%，"
+            f"波動率降至 {vol}%，可考慮適度分批買回。"
         )
 
 
