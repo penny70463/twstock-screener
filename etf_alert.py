@@ -168,7 +168,7 @@ def _check_etf_signals(old_state: dict, new_state: dict, alerts: list) -> None:
         return
 
     etf_data = json.loads(latest_etf_file.read_text(encoding="utf-8"))
-    WATCHLIST = ["0050.TW", "VOO", "SMH", "SOXQ"]
+    WATCHLIST = ["0050.TW", "VOO", "SMH", "SOXQ", "2330.TW", "00981A.TW"]
 
     for etf in etf_data.get("etfs", []):
         code = etf.get("code")
@@ -215,7 +215,8 @@ def _calc_kd(df: pd.DataFrame, period: int = 9) -> tuple[pd.Series, pd.Series]:
 def _check_kd_cross(old_state: dict, new_state: dict, alerts: list) -> None:
     """檢查持倉 ETF 的 KD 是否發生黃金交叉或死亡交叉。"""
     WATCHLIST = {"0050.TW": "元大台灣50", "VOO": "S&P 500",
-                 "SMH": "半導體 (SMH)", "SOXQ": "半導體 (SOXQ)"}
+                 "SMH": "半導體 (SMH)", "SOXQ": "半導體 (SOXQ)",
+                 "2330.TW": "台積電", "00981A.TW": "統一增長"}
 
     for code, name in WATCHLIST.items():
         try:

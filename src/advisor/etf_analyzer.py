@@ -13,7 +13,9 @@ ETF_LIST = {
     "VOO": "VOO",
     "QQQ": "QQQ",
     "SMH": "SMH",
-    "SOXQ": "SOXQ"
+    "SOXQ": "SOXQ",
+    "2330.TW": "2330.TW",
+    "00981A.TW": "00981A.TW"
 }
 
 ETF_NAMES = {
@@ -22,7 +24,9 @@ ETF_NAMES = {
     "VOO": "S&P 500",
     "QQQ": "Nasdaq 100",
     "SMH": "半導體 (SMH)",
-    "SOXQ": "半導體 (SOXQ)"
+    "SOXQ": "半導體 (SOXQ)",
+    "2330.TW": "台積電",
+    "00981A.TW": "統一增長"
 }
 
 def analyze_etfs() -> list[dict]:
