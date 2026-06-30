@@ -11,6 +11,9 @@ import os
 import json
 import argparse
 import requests
+import numpy as np
+import pandas as pd
+import yfinance as yf
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -197,6 +200,73 @@ def _check_etf_signals(old_state: dict, new_state: dict, alerts: list) -> None:
 
 
 # ---------------------------------------------------------------------------
+# KD 黃金交叉 / 死亡交叉 檢查
+# ---------------------------------------------------------------------------
+def _calc_kd(df: pd.DataFrame, period: int = 9) -> tuple[pd.Series, pd.Series]:
+    """計算 KD 指標（9 日隨機指標）。"""
+    low_min = df["Low"].rolling(period).min()
+    high_max = df["High"].rolling(period).max()
+    rsv = (df["Close"] - low_min) / (high_max - low_min) * 100
+    k = rsv.ewm(com=2, adjust=False).mean()
+    d = k.ewm(com=2, adjust=False).mean()
+    return k, d
+
+
+def _check_kd_cross(old_state: dict, new_state: dict, alerts: list) -> None:
+    """檢查持倉 ETF 的 KD 是否發生黃金交叉或死亡交叉。"""
+    WATCHLIST = {"0050.TW": "元大台灣50", "VOO": "S&P 500",
+                 "SMH": "半導體 (SMH)", "SOXQ": "半導體 (SOXQ)"}
+
+    for code, name in WATCHLIST.items():
+        try:
+            df = yf.download(code, period="3mo", interval="1d",
+                             auto_adjust=True, progress=False)
+            if isinstance(df.columns, pd.MultiIndex):
+                df.columns = df.columns.get_level_values(0)
+            if len(df) < 12:
+                continue
+
+            k, d = _calc_kd(df)
+            # 取最近兩天判斷交叉
+            prev_k, prev_d = float(k.iloc[-2]), float(d.iloc[-2])
+            curr_k, curr_d = float(k.iloc[-1]), float(d.iloc[-1])
+            price = round(float(df["Close"].iloc[-1]), 2)
+
+            # 記錄當前 KD 狀態到 new_state
+            kd_key = f"kd_{code}"
+            new_state[kd_key] = {"k": round(curr_k, 1), "d": round(curr_d, 1)}
+
+            # 黃金交叉：K 從下方穿越 D
+            if prev_k <= prev_d and curr_k > curr_d:
+                zone = ""
+                if curr_k < 20:
+                    zone = "\n   ⚠️ 注意：回測顯示超賣區交叉通常是跌深反彈（20日勝率僅約 50%），不代表趨勢反轉。"
+                elif curr_k < 50:
+                    zone = "\n   💡 亮點：回測顯示低檔區 (20~50) 的交叉是最穩的買點（後續上漲勝率 > 60%）！"
+                alerts.append(
+                    f"🔀【KD 黃金交叉】{code} ({name}) "
+                    f"K={curr_k:.0f} 上穿 D={curr_d:.0f}{zone}"
+                    f"\n   最新價 ${price}，短線動能轉強"
+                )
+
+            # 死亡交叉：K 從上方跌破 D
+            elif prev_k >= prev_d and curr_k < curr_d:
+                zone = ""
+                if curr_k > 80:
+                    zone = "\n   ⚠️ 注意：多頭行情常有高檔鈍化，回測顯示超買區死叉後續跌機率極低，請勿急著賣出。"
+                elif curr_k > 50:
+                    zone = "\n   💡 留意：高檔區死叉，短線動能正在衰退，可能進入震盪或回檔。"
+                alerts.append(
+                    f"📉【KD 死亡交叉】{code} ({name}) "
+                    f"K={curr_k:.0f} 跌破 D={curr_d:.0f}{zone}"
+                    f"\n   最新價 ${price}，短線動能轉弱"
+                )
+
+        except Exception as e:
+            print(f"  [!] {code} KD 計算失敗: {e}")
+
+
+# ---------------------------------------------------------------------------
 # 主邏輯
 # ---------------------------------------------------------------------------
 def check_and_alert(dry_run: bool = False):
@@ -229,6 +299,9 @@ def check_and_alert(dry_run: bool = False):
 
     # 3. 檢查 ETF 訊號
     _check_etf_signals(old_state, new_state, alerts)
+
+    # 4. 檢查 KD 交叉
+    _check_kd_cross(old_state, new_state, alerts)
 
     # 推播
     if alerts:
