@@ -111,7 +111,7 @@ def _check_exposure(market_label: str, market_key: str, market_state: dict,
 SIGNAL_TRANSITIONS = {
     ("green", "yellow"): {
         "emoji": "🟡",
-        "title": "逢低佈局提醒",
+        "title": "核心部位｜逢低佈局提醒",
         "desc": lambda code, name, price, ma50, ma200: (
             f"{code} ({name}) 跌破 50 日均線，進入長線回檔買點區！"
             f"最新價 ${price} (季線壓力 ${ma50})"
@@ -119,7 +119,7 @@ SIGNAL_TRANSITIONS = {
     },
     ("yellow", "green"): {
         "emoji": "🟢",
-        "title": "轉強加碼提醒",
+        "title": "核心部位｜轉強加碼提醒",
         "desc": lambda code, name, price, ma50, ma200: (
             f"{code} ({name}) 洗盤結束，重新站上 50 日均線！"
             f"最新價 ${price} (防守價 ${ma50})"
@@ -127,7 +127,7 @@ SIGNAL_TRANSITIONS = {
     },
     ("red", "yellow"): {
         "emoji": "🟡",
-        "title": "初步止穩提醒",
+        "title": "核心部位｜初步止穩提醒",
         "desc": lambda code, name, price, ma50, ma200: (
             f"{code} ({name}) 重新站回 200 日均線，空頭趨勢初步解除！"
             f"最新價 ${price} (仍需站穩 50 日均線 ${ma50} 才確認多頭)"
@@ -135,7 +135,7 @@ SIGNAL_TRANSITIONS = {
     },
     ("red", "green"): {
         "emoji": "🟢",
-        "title": "多頭確認提醒",
+        "title": "核心部位｜多頭確認提醒",
         "desc": lambda code, name, price, ma50, ma200: (
             f"{code} ({name}) 直接從空頭翻多，站上 50 日與 200 日均線！"
             f"最新價 ${price} (防守價 ${ma50})"
@@ -143,7 +143,7 @@ SIGNAL_TRANSITIONS = {
     },
     ("green", "red"): {
         "emoji": "🔴",
-        "title": "破線警報",
+        "title": "核心部位｜破線警報",
         "desc": lambda code, name, price, ma50, ma200: (
             f"{code} ({name}) 急跌破 200 日長期均線，長線趨勢轉空！"
             f"最新價 ${price} (請嚴格執行停損)"
@@ -151,7 +151,7 @@ SIGNAL_TRANSITIONS = {
     },
     ("yellow", "red"): {
         "emoji": "🔴",
-        "title": "破線警報",
+        "title": "核心部位｜破線警報",
         "desc": lambda code, name, price, ma50, ma200: (
             f"{code} ({name}) 跌破 200 日長期均線，長線趨勢轉空！"
             f"最新價 ${price} (請嚴格執行停損)"
@@ -244,7 +244,7 @@ def _check_kd_cross(old_state: dict, new_state: dict, alerts: list) -> None:
                 elif curr_k < 50:
                     zone = "\n   💡 亮點：回測顯示低檔區 (20~50) 的交叉是最穩的買點（後續上漲勝率 > 60%）！"
                 alerts.append(
-                    f"🔀【KD 黃金交叉】{code} ({name}) "
+                    f"🔀【衛星部位｜KD 黃金交叉】{code} ({name}) "
                     f"K={curr_k:.0f} 上穿 D={curr_d:.0f}{zone}"
                     f"\n   最新價 ${price}，短線動能轉強"
                 )
@@ -257,7 +257,7 @@ def _check_kd_cross(old_state: dict, new_state: dict, alerts: list) -> None:
                 elif curr_k > 50:
                     zone = "\n   💡 留意：高檔區死叉，短線動能正在衰退，可能進入震盪或回檔。"
                 alerts.append(
-                    f"📉【KD 死亡交叉】{code} ({name}) "
+                    f"📉【衛星部位｜KD 死亡交叉】{code} ({name}) "
                     f"K={curr_k:.0f} 跌破 D={curr_d:.0f}{zone}"
                     f"\n   最新價 ${price}，短線動能轉弱"
                 )
