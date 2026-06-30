@@ -66,6 +66,15 @@
 - 支援在 GitHub Actions 頁面手動觸發 (`workflow_dispatch`) 進行測試
 - 覆盤結果會自動存為 `data/results/weekly_review.json` 並 commit 到 master
 
+## 🗓 每月 ETF 策略自動驗證 (Monthly Review)
+
+系統內建全自動的策略體檢機制，避免因為市場結構改變導致 KD 策略失效。
+這支程式潛伏在每日的 `run_daily.sh` 中，但**僅會在每個月的第一個交易日**真正執行回測。
+
+**特色防護機制**：
+- **最小樣本防呆**：回測過去 3 年資料，若交叉發生次數未滿 4 次（例如剛上市不久的 00981A），系統會判定「樣本不足，持續觀察」，**絕對不會**因為 1、2 次失敗就誤報策略衰退，避免假警報干擾操作。
+- **自動通知**：當勝率健康（>= 50%）時發送安心推播；若勝率跌破 50%，則會發出🚨警告，提醒您重新檢視標的適合度。
+
 ## 目錄結構
 
 ```text
@@ -73,6 +82,7 @@ twstock-screener/
 ├── run_daily.sh         # Mac 自動化排程入口 (Cron)
 ├── run_pipeline.py      # 每日掃描主程式
 ├── etf_alert.py         # 每日 ETF 與大盤自動進出場警報 (LINE)
+├── etf_monthly_review.py # 每月 ETF 警報策略自動回測驗證 (整合於日更排程)
 ├── weekly_review.py     # 週末自動覆盤（GitHub Actions 執行）
 ├── config.py            # 環境變數與設定
 ├── src/

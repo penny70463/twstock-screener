@@ -25,6 +25,9 @@ python -u run_pipeline.py
 echo "執行 ETF 警報系統..."
 python -u etf_alert.py
 
+echo "執行 ETF 每月體檢 (內部自動判斷日期)..."
+python -u etf_monthly_review.py
+
 echo "執行完畢，準備將結果推播到 GitHub..."
 
 # 以下照搬 GitHub Actions 裡面的自動 Push 邏輯
