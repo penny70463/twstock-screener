@@ -244,8 +244,9 @@ def _check_kd_cross(old_state: dict, new_state: dict, alerts: list) -> None:
                     zone = "\n   ⚠️ 注意：回測顯示超賣區交叉通常是跌深反彈（20日勝率僅約 50%），不代表趨勢反轉。"
                 elif curr_k < 50:
                     zone = "\n   💡 亮點：回測顯示低檔區 (20~50) 的交叉是最穩的買點（後續上漲勝率 > 60%）！"
+                role = "核心部位" if code in ["0050.TW", "VOO"] else "衛星部位"
                 alerts.append(
-                    f"🔀【衛星部位｜KD 黃金交叉】{code} ({name}) "
+                    f"🔀【{role}｜KD 黃金交叉】{code} ({name}) "
                     f"K={curr_k:.0f} 上穿 D={curr_d:.0f}{zone}"
                     f"\n   最新價 ${price}，短線動能轉強"
                 )
@@ -257,8 +258,9 @@ def _check_kd_cross(old_state: dict, new_state: dict, alerts: list) -> None:
                     zone = "\n   ⚠️ 注意：多頭行情常有高檔鈍化，回測顯示超買區死叉後續跌機率極低，請勿急著賣出。"
                 elif curr_k > 50:
                     zone = "\n   💡 留意：高檔區死叉，短線動能正在衰退，可能進入震盪或回檔。"
+                role = "核心部位" if code in ["0050.TW", "VOO"] else "衛星部位"
                 alerts.append(
-                    f"📉【衛星部位｜KD 死亡交叉】{code} ({name}) "
+                    f"📉【{role}｜KD 死亡交叉】{code} ({name}) "
                     f"K={curr_k:.0f} 跌破 D={curr_d:.0f}{zone}"
                     f"\n   最新價 ${price}，短線動能轉弱"
                 )
