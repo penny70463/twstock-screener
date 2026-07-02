@@ -92,5 +92,9 @@ ADV_ADD_MARGIN = 10         # 總分高於門檻達 N 分 → 可考慮加碼
 MAX_POSITION_WEIGHT = 0.15  # 單一持股佔總資產上限（加碼建議的天花板）
 MAX_INDUSTRY_WEIGHT = 0.35  # 單一產業佔個股部位上限（超標警示；動能選股天然群聚）
 PF_MAX_PER_INDUSTRY = 3     # 回測/建議：同產業最多持有檔數（10 檔組合）
+# 每日選股清單的單一產業前綴佔比上限：排行榜任一前段內同產業佔比不得超過
+# 此比例（如 Top10 內最多 4 檔），超額者延後名次（不剔除）並標記 capped，
+# 讓排行榜頂部（LINE Top 3 / 前端前段）自然分散，避免單一產業 beta 主導
+SCREEN_MAX_INDUSTRY_RATIO = 0.40
 CASH_RATIO_BEAR = 0.50      # 空頭市場建議最低現金比重
 CASH_RATIO_NEUTRAL = 0.25   # 中性市場建議最低現金比重

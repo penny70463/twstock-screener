@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import math
 import time
 import os
 import requests
@@ -14,6 +15,7 @@ import pandas as pd
 
 from config import RESULT_DIR, settings
 from src.classifier import classify_themes
+from src.advisor import config as adv_config
 from src.advisor import data as adv_data
 from src.advisor import market as adv_market
 from src.advisor import screener as adv_screener
@@ -24,6 +26,43 @@ def _step(label: str, t0: float, verbose: bool) -> float:
     if verbose:
         print(f"  [+{now - t0:6.1f}s] {label}", flush=True)
     return now
+
+def _apply_industry_cap(df: pd.DataFrame, ratio: float = adv_config.SCREEN_MAX_INDUSTRY_RATIO) -> pd.DataFrame:
+    """單一產業前綴佔比上限：清單任一前段內同產業佔比不得超過 ratio（不剔除）。
+
+    逐位置重建排序：第 p 名時同產業最多 ceil(ratio*p) 檔（如 Top10 內最多 4 檔），
+    超額者順延至後方位置，被延後的股票標記 capped=True。
+    動能選股天然群聚於強勢產業；此上限保留產業聚焦特性，
+    但避免單一產業 beta 主導排行榜頂部（LINE Top 3 / 前端前段）。
+    無產業資料者不設限。
+    """
+    if df.empty or "產業" not in df.columns:
+        return df
+    remaining: list = []  # (原始名次, index, 產業)
+    for rank, (idx, ind) in enumerate(zip(df.index, df["產業"])):
+        ind = ind.strip() if isinstance(ind, str) else ""
+        remaining.append((rank, idx, ind))
+    counts: dict[str, int] = {}
+    ordered: list = []   # (index, capped)
+    while remaining:
+        pos = len(ordered) + 1
+        cap = max(1, math.ceil(ratio * pos))
+        pick = next(
+            (i for i, (_, _, ind) in enumerate(remaining)
+             if not ind or counts.get(ind, 0) + 1 <= cap),
+            None,
+        )
+        if pick is None:
+            # 剩餘全數超額：依原排序附於尾端並標記
+            ordered.extend((idx, True) for _, idx, _ in remaining)
+            break
+        rank, idx, ind = remaining.pop(pick)
+        if ind:
+            counts[ind] = counts.get(ind, 0) + 1
+        ordered.append((idx, rank < pos - 1))  # 最終名次比原名次差 → 被上限延後
+    out = df.loc[[idx for idx, _ in ordered]].copy()
+    out["capped"] = [capped for _, capped in ordered]
+    return out
 
 def run(market: str = "TW", classify: bool = True, verbose: bool = True) -> dict:
     t0 = time.time()
@@ -82,7 +121,15 @@ def run(market: str = "TW", classify: bool = True, verbose: bool = True) -> dict
         result = screened_df[screened_df["change_pct"] > 0].sort_values("change_pct", ascending=False).head(settings.top_n)
         if verbose:
             print(f"  通過 Advisor 門檻且今日上漲共 {len(result)} 檔（排序取前 {settings.top_n}）", flush=True)
-        
+
+    # 5.5 產業集中度上限：排行榜任一前段內同產業佔比 ≤ 上限，超額者延後名次（不剔除）
+    result = _apply_industry_cap(result)
+    if verbose and "capped" in result.columns:
+        n_capped = int(result["capped"].sum())
+        if n_capped:
+            print(f"  產業集中度上限 {adv_config.SCREEN_MAX_INDUSTRY_RATIO:.0%}："
+                  f"{n_capped} 檔超額延後名次", flush=True)
+
     # 為了相容前端顯示，將欄位名稱對齊
     result = result.rename(columns={
         "代號": "stock_id",
