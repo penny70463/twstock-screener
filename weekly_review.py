@@ -56,7 +56,7 @@ def _load_weekly_data(market: str) -> dict | None:
             try:
                 data = json.load(f)
                 screened = data.get("screened", [])
-                for s in screened[:TOP_N]:
+                for rank, s in enumerate(screened[:TOP_N], start=1):
                     stock_id = s["stock_id"]
                     if stock_id not in unique_stocks:
                         unique_stocks[stock_id] = {
@@ -65,7 +65,10 @@ def _load_weekly_data(market: str) -> dict | None:
                             "close": s.get("close", 0),
                             "總分": s.get("總分", 0),
                             "市場": s.get("市場", ""),
-                            "first_select_date": date_str
+                            "first_select_date": date_str,
+                            # 首次入榜當日名次與產業上限標記（分段績效統計用）
+                            "first_rank": rank,
+                            "capped": s.get("capped"),
                         }
             except Exception as e:
                 print(f"  [!] 讀取 {path} 失敗: {e}")
@@ -100,8 +103,25 @@ def _build_tickers(screened: list[dict], market: str) -> tuple[list[str], dict]:
             "name": s.get("stock_name", ""),
             "base_price": s.get("close", 0),
             "score": s.get("總分", 0),
+            "first_rank": s.get("first_rank"),
+            "capped": s.get("capped"),
         }
     return tickers, mapping
+
+
+def _segment_stats(df: pd.DataFrame, mask: pd.Series) -> dict | None:
+    """計算一個分段（遮罩）的勝率與平均報酬。樣本為 0 時回傳 None。"""
+    seg = df[mask]
+    if seg.empty:
+        return None
+    total = len(seg)
+    win_count = int((seg["return_pct"] > 0).sum())
+    return {
+        "total": total,
+        "win_count": win_count,
+        "win_rate": round(win_count / total * 100, 1),
+        "avg_return": round(seg["return_pct"].mean(), 2),
+    }
 
 
 def _fetch_current_prices(tickers: list[str]) -> dict[str, float]:
@@ -125,6 +145,27 @@ def _fetch_current_prices(tickers: list[str]) -> dict[str, float]:
         except (KeyError, TypeError):
             pass
     return prices
+
+
+def _format_segments(segments: dict) -> str:
+    """分段統計摘要成單行文字，如 Top3 67%(+1.2%) / Top10 55%(+0.4%) / 全部 45%(-0.8%)。"""
+    labels = [("top3", "Top3"), ("top10", "Top10"), ("all", "全部")]
+    parts = []
+    for key, label in labels:
+        s = segments.get(key)
+        if s:
+            parts.append(f"{label} {s['win_rate']}%({s['avg_return']:+.1f}%)")
+    return " / ".join(parts)
+
+
+def _format_capped(capped_stats: dict) -> str:
+    """capped 分組摘要成單行文字。"""
+    parts = []
+    for key, label in [("uncapped", "主榜"), ("capped", "被延後")]:
+        s = capped_stats.get(key)
+        if s:
+            parts.append(f"{label} {s['win_rate']}%({s['avg_return']:+.1f}%, n={s['total']})")
+    return " vs ".join(parts)
 
 
 def review_market(market: str) -> dict | None:
@@ -157,6 +198,8 @@ def review_market(market: str) -> dict | None:
             "base_price": base,
             "current_price": round(current, 2),
             "return_pct": ret,
+            "first_rank": mapping[ticker]["first_rank"],
+            "capped": mapping[ticker]["capped"],
         })
 
     if not results:
@@ -168,6 +211,22 @@ def review_market(market: str) -> dict | None:
     win_count = int((res_df["return_pct"] > 0).sum())
     total = len(res_df)
     win_rate = round(win_count / total * 100, 1)
+
+    # 分段統計：量測對象對齊實際行動對象（LINE Top 3 / 排行榜前段）
+    rank = res_df["first_rank"].fillna(TOP_N + 1)
+    segments = {
+        "top3": _segment_stats(res_df, rank <= 3),
+        "top10": _segment_stats(res_df, rank <= 10),
+        "all": _segment_stats(res_df, rank <= TOP_N + 1),
+    }
+
+    # capped 分組績效：驗證產業集中度上限的實際效果（舊資料無此欄位則為 None）
+    capped_stats = None
+    if res_df["capped"].notna().any():
+        capped_stats = {
+            "capped": _segment_stats(res_df, res_df["capped"] == True),  # noqa: E712
+            "uncapped": _segment_stats(res_df, res_df["capped"] == False),  # noqa: E712
+        }
 
     # 最強 / 最弱
     top3 = res_df.head(3)[["name", "return_pct"]].values.tolist()
@@ -183,6 +242,8 @@ def review_market(market: str) -> dict | None:
         "win_count": win_count,
         "win_rate": win_rate,
         "avg_return": avg_ret,
+        "segments": segments,
+        "capped_stats": capped_stats,
         "top3": [{"name": n, "ret": r} for n, r in top3],
         "bottom3": [{"name": n, "ret": r} for n, r in bottom3],
         "details": results,
@@ -193,6 +254,9 @@ def review_market(market: str) -> dict | None:
     print(f"\n  {market_label} 覆盤結果 (選股日: {select_date})")
     print(f"  ✅ 勝率: {win_rate}% ({win_count}/{total})")
     print(f"  📈 平均報酬: {'+' if avg_ret >= 0 else ''}{avg_ret}%")
+    print(f"  🎯 分段: {_format_segments(segments)}")
+    if capped_stats:
+        print(f"  🏭 產業上限: {_format_capped(capped_stats)}")
     print(f"  🏆 最強: {', '.join(f'{n} {r:+.2f}%' for n, r in top3)}")
     if bottom3:
         print(f"  ⚠️ 最弱: {', '.join(f'{n} {r:+.2f}%' for n, r in bottom3)}")
@@ -319,10 +383,16 @@ def send_line_review(summaries: list[dict], alerts: list[str] | None = None) -> 
         block = (
             f"\n📍 {market_label} (選股日: {s['select_date']})\n"
             f"✅ 勝率: {s['win_rate']}% ({s['win_count']}/{s['total']})\n"
-            f"📈 平均報酬: {'+' if s['avg_return'] >= 0 else ''}{s['avg_return']}%\n"
-            f"🏆 最強: {top_str}"
+            f"📈 平均報酬: {'+' if s['avg_return'] >= 0 else ''}{s['avg_return']}%"
         )
-        
+
+        if s.get("segments"):
+            block += f"\n🎯 分段: {_format_segments(s['segments'])}"
+        if s.get("capped_stats"):
+            block += f"\n🏭 產業上限: {_format_capped(s['capped_stats'])}"
+
+        block += f"\n🏆 最強: {top_str}"
+
         if s["bottom3"]:
             bottom_str = "、".join(f"{b['name']} {b['ret']:+.1f}%" for b in s["bottom3"])
             block += f"\n⚠️ 最弱: {bottom_str}"
