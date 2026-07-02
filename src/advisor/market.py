@@ -62,8 +62,30 @@ def breadth_series(close_panel: pd.DataFrame) -> pd.Series:
 
 
 def _vol_target(market: str = "TW") -> float:
-    """依市場回傳對應的目標波動率。"""
+    """依市場回傳對應的固定目標波動率。"""
     return config.VOL_TARGET_US if market == "US" else config.VOL_TARGET_TW
+
+
+def vol_target_series(realized: pd.Series, market: str = "TW",
+                      adaptive: bool | None = None) -> pd.Series:
+    """目標波動率序列：固定常數或滾動一年分位數（依 VOL_TARGET_ADAPTIVE）。
+
+    自適應模式下，目標 = 近一年 20 日實現波動率的分位數，夾在 floor/cap 之間；
+    語義從「絕對波動目標」變成「短期波動高於自身一年常態才縮水位」，
+    修正固定目標在高波動制度下的長期欠配。資料不足一年時退回固定目標。
+    """
+    fixed = _vol_target(market)
+    if adaptive is None:
+        adaptive = config.VOL_TARGET_ADAPTIVE
+    if not adaptive:
+        return pd.Series(fixed, index=realized.index)
+    if market == "US":
+        floor, cap = config.VOL_TARGET_FLOOR_US, config.VOL_TARGET_CAP_US
+    else:
+        floor, cap = config.VOL_TARGET_FLOOR_TW, config.VOL_TARGET_CAP_TW
+    tgt = realized.rolling(config.VOL_TARGET_WINDOW, min_periods=126).quantile(
+        config.VOL_TARGET_QUANTILE)
+    return tgt.clip(floor, cap).fillna(fixed)
 
 
 def exposure_series(twii_close: pd.Series, breadth: pd.Series,
@@ -73,7 +95,6 @@ def exposure_series(twii_close: pd.Series, breadth: pd.Series,
     水位 = (趨勢分級 × 0.5 + 市場寬度 × 0.5) × 波動率縮放
     回測（exposure --compare）與每日顧問共用同一條公式，避免兩套邏輯漂移。
     """
-    vol_target = _vol_target(market)
     ma60 = twii_close.rolling(60).mean()
     ma120 = twii_close.rolling(120).mean()
     # 趨勢分級：三個條件各佔權重，0–1 共 8 級，比多空三分細
@@ -83,8 +104,9 @@ def exposure_series(twii_close: pd.Series, breadth: pd.Series,
     b = ((breadth.reindex(twii_close.index).ffill() - config.BREADTH_LOW)
          / (config.BREADTH_HIGH - config.BREADTH_LOW)).clip(0, 1)
     base = config.EXP_W_TREND * trend + config.EXP_W_BREADTH * b
-    # 波動率目標化：年化波動超標時等比例縮水位
+    # 波動率目標化：年化波動超標時等比例縮水位（目標可為固定或滾動分位數）
     realized = twii_close.pct_change().rolling(20).std() * np.sqrt(252)
+    vol_target = vol_target_series(realized, market)
     vol_scale = (vol_target / realized).clip(upper=1.0)
     expo = (base * vol_scale).clip(0, 1)
     return (expo / config.EXP_STEP).round() * config.EXP_STEP
@@ -93,9 +115,9 @@ def exposure_series(twii_close: pd.Series, breadth: pd.Series,
 def get_exposure_live(close_panel: pd.DataFrame, market: str = "TW") -> dict:
     """今日的連續目標水位與三因子拆解（顧問/UI 顯示用）"""
     index_symbol = "^TWII" if market == "TW" else "^GSPC"
-    vol_target = _vol_target(market)
 
-    idx = yf.download(index_symbol, period="1y", auto_adjust=True, progress=False)
+    # 2 年：自適應目標需要一年以上的實現波動率歷史（rolling 252）
+    idx = yf.download(index_symbol, period="2y", auto_adjust=True, progress=False)
     if isinstance(idx.columns, pd.MultiIndex):
         idx.columns = idx.columns.get_level_values(0)
     c = idx["Close"].dropna()
@@ -108,11 +130,14 @@ def get_exposure_live(close_panel: pd.DataFrame, market: str = "TW") -> dict:
     trend = float((c.iloc[-1] > ma60.iloc[-1]) * 0.4
                   + (ma60.iloc[-1] > ma120.iloc[-1]) * 0.3
                   + (ma60.iloc[-1] > ma60.iloc[-11]) * 0.3)
-    realized = float(c.pct_change().rolling(20).std().iloc[-1] * np.sqrt(252))
+    realized_s = c.pct_change().rolling(20).std() * np.sqrt(252)
+    realized = float(realized_s.iloc[-1])
+    vol_target = float(vol_target_series(realized_s, market).iloc[-1])
     return {
         "exposure": float(expo.iloc[-1]),
         "trend": round(trend, 2),
         "breadth": round(float(breadth.iloc[-1]) * 100, 1),
         "realized_vol": round(realized * 100, 1),
+        "vol_target": round(vol_target * 100, 1),
         "vol_scale": round(min(1.0, vol_target / realized), 2),
     }

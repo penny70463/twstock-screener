@@ -27,38 +27,48 @@ def _step(label: str, t0: float, verbose: bool) -> float:
         print(f"  [+{now - t0:6.1f}s] {label}", flush=True)
     return now
 
-def _apply_industry_cap(df: pd.DataFrame, ratio: float = adv_config.SCREEN_MAX_INDUSTRY_RATIO) -> pd.DataFrame:
-    """單一產業前綴佔比上限：清單任一前段內同產業佔比不得超過 ratio（不剔除）。
+def _apply_industry_cap(
+    df: pd.DataFrame,
+    ratio: float = adv_config.SCREEN_MAX_INDUSTRY_RATIO,
+    group_ratio: float = adv_config.SCREEN_MAX_GROUP_RATIO,
+) -> pd.DataFrame:
+    """單一產業／產業大類前綴佔比上限：清單任一前段內不得超過上限（不剔除）。
 
-    逐位置重建排序：第 p 名時同產業最多 ceil(ratio*p) 檔（如 Top10 內最多 4 檔），
+    逐位置重建排序：第 p 名時細產業最多 ceil(ratio*p) 檔（如 Top10 內最多 4 檔）、
+    產業大類最多 ceil(group_ratio*p) 檔（如電子族群 Top10 內最多 6 檔），
     超額者順延至後方位置，被延後的股票標記 capped=True。
     動能選股天然群聚於強勢產業；此上限保留產業聚焦特性，
     但避免單一產業 beta 主導排行榜頂部（LINE Top 3 / 前端前段）。
-    無產業資料者不設限。
+    無產業資料者不設限；不屬於任何大類的產業僅受細產業上限。
     """
     if df.empty or "產業" not in df.columns:
         return df
-    remaining: list = []  # (原始名次, index, 產業)
+    remaining: list = []  # (原始名次, index, 產業, 大類)
     for rank, (idx, ind) in enumerate(zip(df.index, df["產業"])):
         ind = ind.strip() if isinstance(ind, str) else ""
-        remaining.append((rank, idx, ind))
+        remaining.append((rank, idx, ind, adv_config.INDUSTRY_GROUPS.get(ind, "")))
     counts: dict[str, int] = {}
+    gcounts: dict[str, int] = {}
     ordered: list = []   # (index, capped)
     while remaining:
         pos = len(ordered) + 1
         cap = max(1, math.ceil(ratio * pos))
+        gcap = max(1, math.ceil(group_ratio * pos))
         pick = next(
-            (i for i, (_, _, ind) in enumerate(remaining)
-             if not ind or counts.get(ind, 0) + 1 <= cap),
+            (i for i, (_, _, ind, grp) in enumerate(remaining)
+             if (not ind or counts.get(ind, 0) + 1 <= cap)
+             and (not grp or gcounts.get(grp, 0) + 1 <= gcap)),
             None,
         )
         if pick is None:
             # 剩餘全數超額：依原排序附於尾端並標記
-            ordered.extend((idx, True) for _, idx, _ in remaining)
+            ordered.extend((idx, True) for _, idx, _, _ in remaining)
             break
-        rank, idx, ind = remaining.pop(pick)
+        rank, idx, ind, grp = remaining.pop(pick)
         if ind:
             counts[ind] = counts.get(ind, 0) + 1
+        if grp:
+            gcounts[grp] = gcounts.get(grp, 0) + 1
         ordered.append((idx, rank < pos - 1))  # 最終名次比原名次差 → 被上限延後
     out = df.loc[[idx for idx, _ in ordered]].copy()
     out["capped"] = [capped for _, capped in ordered]
@@ -118,6 +128,8 @@ def run(market: str = "TW", classify: bool = True, verbose: bool = True) -> dict
             print(f"  通過動能門檻共 {len(result)} 檔（按總分排序取前 {settings.top_n}）", flush=True)
     else:
         # 台股：長線保護短線，過濾出今天上漲的，依漲幅排序取前 top_n 送給 LLM
+        # 回測驗證（2026-07，tests/backtest_tw_ranking.py）：漲幅排序在前瞻
+        # 5/10/20 日全面優於總分排序（如 20 日 12.8% vs 11.0%），維持現行邏輯
         result = screened_df[screened_df["change_pct"] > 0].sort_values("change_pct", ascending=False).head(settings.top_n)
         if verbose:
             print(f"  通過 Advisor 門檻且今日上漲共 {len(result)} 檔（排序取前 {settings.top_n}）", flush=True)
