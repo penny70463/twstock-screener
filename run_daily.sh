@@ -35,6 +35,11 @@ if ! python -u screen_pullback.py; then
   echo "回檔轉強篩選失敗，跳過（不影響其他結果）"
 fi
 
+echo "執行族群出量突破偵測 (screen_breakout.py)..."
+if ! python -u screen_breakout.py; then
+  echo "族群突破偵測失敗，跳過（不影響其他結果）"
+fi
+
 echo "統一發送每日 Line 訊息..."
 if ! python -u send_daily_line.py; then
   echo "Line 發送失敗，跳過（不影響結果推送）"

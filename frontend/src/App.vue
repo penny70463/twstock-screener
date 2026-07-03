@@ -3,6 +3,7 @@ import { ref, onMounted, computed, watch } from 'vue'
 import PortfolioReview from './components/PortfolioReview.vue'
 import EtfTrafficLight from './components/EtfTrafficLight.vue'
 import PullbackScreen from './components/PullbackScreen.vue'
+import ClusterBreakout from './components/ClusterBreakout.vue'
 
 const activeMarket = ref('TW')
 const activeTab = ref('screener')
@@ -59,8 +60,8 @@ watch(selectedDate, () => {
 
 watch(activeMarket, () => {
   selectedDate.value = 'latest'
-  // 回檔轉強僅台股提供，切到美股時退回強勢股掃描
-  if (activeMarket.value !== 'TW' && activeTab.value === 'pullback') {
+  // 回檔轉強、族群突破僅台股提供，切到美股時退回強勢股掃描
+  if (activeMarket.value !== 'TW' && ['pullback', 'cluster'].includes(activeTab.value)) {
     activeTab.value = 'screener'
   }
   fetchDates()
@@ -257,6 +258,14 @@ const isSparklineUp = (prices) => {
           📉 回檔轉強
         </button>
         <button
+          v-if="activeMarket === 'TW'"
+          class="tab-btn"
+          :class="{ active: activeTab === 'cluster' }"
+          @click="activeTab = 'cluster'"
+        >
+          🔥 族群突破
+        </button>
+        <button
           class="tab-btn"
           :class="{ active: activeTab === 'portfolio' }"
           @click="activeTab = 'portfolio'"
@@ -341,6 +350,11 @@ const isSparklineUp = (prices) => {
       <!-- Pullback Tab Content -->
       <template v-if="activeTab === 'pullback'">
         <PullbackScreen />
+      </template>
+
+      <!-- Cluster Breakout Tab Content -->
+      <template v-if="activeTab === 'cluster'">
+        <ClusterBreakout />
       </template>
 
       <!-- Portfolio Tab Content -->

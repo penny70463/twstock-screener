@@ -43,10 +43,27 @@ def _format_pullback(data: dict) -> str:
     return f"📉 回檔轉強（台股 {len(stocks)} 檔）\n🎯 回檔最深：{top}"
 
 
+def _format_breakout(data: dict) -> str:
+    """族群出量突破段落：今日有點火（>=2 檔）的族群，至多 3 個"""
+    themes = [t for t in data.get("themes", [])
+              if t.get("fired_today_count", 0) >= 2
+              and t.get("name") not in ("未分類", "其他")]
+    if not themes:
+        return "🔥 族群突破：今日無族群點火"
+    lines = ["🔥 族群出量突破（近10日）"]
+    for t in themes[:3]:
+        fired = [m["stock_name"] for m in t["stocks"] if m.get("fired_today")]
+        names = "、".join(fired[:6]) + ("…" if len(fired) > 6 else "")
+        lines.append(f"・{t['name']}：今日 {t['fired_today_count']} 檔"
+                     f"（累計 {t['count']}）{names}")
+    return "\n".join(lines)
+
+
 # 各選股腳本的訊息段落登記表：(結果檔名, 格式函式)
-# 新選股腳本 → 輸出 JSON（含 date 與 screened 欄位）→ 在此加一筆
+# 新選股腳本 → 輸出 JSON（含 date 與 screened/themes 欄位）→ 在此加一筆
 SCREEN_SECTIONS = [
     ("pullback_tw.json", _format_pullback),
+    ("cluster_tw.json", _format_breakout),
 ]
 
 
