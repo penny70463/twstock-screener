@@ -28,10 +28,17 @@ python -u etf_alert.py
 echo "執行 ETF 每月體檢 (內部自動判斷日期)..."
 python -u etf_monthly_review.py
 
+echo "執行回檔轉強篩選 (screen_pullback.py)..."
+# 放在 if 內：失敗（如觀測站限流）只提示，不中斷主要排程與推播
+if ! python -u screen_pullback.py; then
+  echo "回檔轉強篩選失敗，跳過（不影響其他結果）"
+fi
+
 echo "執行完畢，準備將結果推播到 GitHub..."
 
 # 以下照搬 GitHub Actions 裡面的自動 Push 邏輯
 git add -f data/results/*.json
+git add -f data/results/screen_pullback_result_*.csv 2>/dev/null || true
 if git diff --cached --quiet; then
   echo "沒有新結果，跳過 Push。"
   exit 0
