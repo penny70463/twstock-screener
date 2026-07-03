@@ -23,13 +23,14 @@
 
 相依套件：pandas yfinance requests lxml
 輸出：終端表格 + data/results/screen_pullback_result_YYYYMMDD.csv
+     + data/results/pullback_tw.json（前端「回檔轉強」頁簽資料來源）
 （run_daily.sh 每日排程會執行並隨其他結果一併 commit 同步）
 """
 import io
 import json
 import sys
 import time
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 
 import pandas as pd
@@ -148,6 +149,7 @@ def main() -> None:
     print("步驟 3/3：套用價格條件 ...", flush=True)
     counts = {"資料足夠": 0, "c1_均線之上": 0, "c3_曾回檔7%": 0, "c4_轉強": 0}
     hits = []
+    hits_json = []
     for code, tk in tickers.items():
         try:
             df = raw[tk].dropna(subset=["Close"])
@@ -206,8 +208,41 @@ def main() -> None:
             f"{m1}月YoY%": r["yoy_a"], f"{m1}月MoM%": r["mom_a"],
             f"{m2}月YoY%": r["yoy_b"], f"{m2}月MoM%": r["mom_b"],
         })
+        hits_json.append({
+            "stock_id": code, "stock_name": uni[code]["stock_name"],
+            "market": uni[code].get("市場", ""),
+            "industry_category": uni[code].get("industry_category", ""),
+            "close": round(close, 2),
+            "month_high": round(high, 2),
+            "pullback_pct": round(depth * 100, 1),
+            "dist_ma60_pct": round((close / ma60 - 1) * 100, 1),
+            "dist_ma240_pct": round((close / ma240 - 1) * 100, 1),
+            "revenue": [
+                {"month": f"{y1}-{m1:02d}", "yoy": float(r["yoy_a"]),
+                 "mom": float(r["mom_a"])},
+                {"month": f"{y2}-{m2:02d}", "yoy": float(r["yoy_b"]),
+                 "mom": float(r["mom_b"])},
+            ],
+            "sparkline": [round(float(x), 2) for x in c.iloc[-20:]],
+        })
 
     print(f"\n漏斗統計: {counts}", flush=True)
+
+    # 前端 JSON：無任何個股有當日資料（非交易日）時不覆寫，保留前一交易日結果
+    if counts["資料足夠"] > 0:
+        hits_json.sort(key=lambda h: h["pullback_pct"], reverse=True)
+        payload = {
+            "date": ASOF,
+            "generated_at": datetime.now().isoformat(timespec="seconds"),
+            "params": {"pullback_pct": PULLBACK_PCT, "month_window": MONTH_WIN,
+                       "revenue_months": [f"{y1}-{m1:02d}", f"{y2}-{m2:02d}"]},
+            "screened": hits_json,
+        }
+        json_path = REPO / "data" / "results" / "pullback_tw.json"
+        json_path.write_text(json.dumps(payload, ensure_ascii=False),
+                             encoding="utf-8")
+        print(f"前端資料已更新：{json_path}（{len(hits_json)} 檔）")
+
     out = pd.DataFrame(hits)
     if out.empty:
         print("無符合全部四條件的個股（若全數卡在「資料足夠」，請確認基準日為交易日）")

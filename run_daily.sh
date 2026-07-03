@@ -20,7 +20,8 @@ echo "開始執行股票篩選..."
 
 # 執行主要的 Python 腳本
 # (Python 會自動去讀取資料夾底下的 .env 檔案)
-python -u run_pipeline.py
+# Line 推播改由最後的 send_daily_line.py 統一發送（合併各選股腳本結果）
+python -u run_pipeline.py --no-line
 
 echo "執行 ETF 警報系統..."
 python -u etf_alert.py
@@ -32,6 +33,11 @@ echo "執行回檔轉強篩選 (screen_pullback.py)..."
 # 放在 if 內：失敗（如觀測站限流）只提示，不中斷主要排程與推播
 if ! python -u screen_pullback.py; then
   echo "回檔轉強篩選失敗，跳過（不影響其他結果）"
+fi
+
+echo "統一發送每日 Line 訊息..."
+if ! python -u send_daily_line.py; then
+  echo "Line 發送失敗，跳過（不影響結果推送）"
 fi
 
 echo "執行完畢，準備將結果推播到 GitHub..."

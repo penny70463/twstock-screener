@@ -257,29 +257,31 @@ def _generate_available_dates(market: str = "TW") -> None:
         json.dumps(dates, ensure_ascii=False), encoding="utf-8"
     )
 
-def send_combined_line_broadcast(payloads: dict[str, dict]) -> None:
-    """發送合併的 Line 廣播推播"""
-    token = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
-    if not token or not payloads:
-        return
-        
+LINE_LINK_BLOCK = "🔗 點此查看完整排行榜與持股體檢：\nhttps://twstock-screener.vercel.app/"
+
+
+def compose_daily_blocks(payloads: dict[str, dict]) -> list[str]:
+    """組合每日訊息的段落（標題 + 各市場），不含結尾連結。
+
+    抽出供 send_daily_line.py 重用：統一發送步驟會在段落後
+    加上各選股腳本的段落再一起發送。"""
     messages = []
     # 取第一個有資料的日期
     on_date = next(iter(payloads.values()))["date"]
-    
+
     messages.append(f"【台美動能掃描 {on_date}】")
-    
+
     for market in ["TW", "US"]:
         if market not in payloads:
             continue
-            
+
         payload = payloads[market]
         market_label = payload["market_state"]["label"]
         threshold = payload["market_state"]["threshold"]
-        
+
         themes = payload.get("themes", [])
         theme_names = "、".join([t.get("name", "") for t in themes[:3]]) if themes else "無明顯題材"
-        
+
         # 挑出最強 3 檔
         screened = payload.get("screened", [])
         top_stocks = []
@@ -287,18 +289,31 @@ def send_combined_line_broadcast(payloads: dict[str, dict]) -> None:
             name = r.get("stock_name", "") or ""
             top_stocks.append(f"{r.get('stock_id')} {name}".strip())
         top_stocks_str = "、".join(top_stocks) if top_stocks else "無"
-        
+
         market_name = "🇹🇼台股" if market == "TW" else "🇺🇸美股"
         messages.append(
             f"📍 {market_name} ({market_label} {threshold}分)\n"
             f"🔥 題材：{theme_names}\n"
             f"🚀 指標：{top_stocks_str}"
         )
-        
-    messages.append(f"🔗 點此查看完整排行榜與持股體檢：\nhttps://twstock-screener.vercel.app/")
-    
-    message = "\n\n".join(messages)
-    
+
+    return messages
+
+
+def send_combined_line_broadcast(payloads: dict[str, dict]) -> None:
+    """發送合併的 Line 廣播推播"""
+    if not payloads:
+        return
+    message = "\n\n".join(compose_daily_blocks(payloads) + [LINE_LINK_BLOCK])
+    send_line_message(message)
+
+
+def send_line_message(message: str) -> None:
+    """發送單則 Line 文字訊息（multicast 或 broadcast，依環境變數）"""
+    token = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
+    if not token or not message:
+        return
+
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {token}"

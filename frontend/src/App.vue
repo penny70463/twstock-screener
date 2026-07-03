@@ -2,6 +2,7 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import PortfolioReview from './components/PortfolioReview.vue'
 import EtfTrafficLight from './components/EtfTrafficLight.vue'
+import PullbackScreen from './components/PullbackScreen.vue'
 
 const activeMarket = ref('TW')
 const activeTab = ref('screener')
@@ -58,6 +59,10 @@ watch(selectedDate, () => {
 
 watch(activeMarket, () => {
   selectedDate.value = 'latest'
+  // 回檔轉強僅台股提供，切到美股時退回強勢股掃描
+  if (activeMarket.value !== 'TW' && activeTab.value === 'pullback') {
+    activeTab.value = 'screener'
+  }
   fetchDates()
   fetchData()
 })
@@ -243,8 +248,16 @@ const isSparklineUp = (prices) => {
         >
           🚀 強勢股掃描
         </button>
-        <button 
-          class="tab-btn" 
+        <button
+          v-if="activeMarket === 'TW'"
+          class="tab-btn"
+          :class="{ active: activeTab === 'pullback' }"
+          @click="activeTab = 'pullback'"
+        >
+          📉 回檔轉強
+        </button>
+        <button
+          class="tab-btn"
           :class="{ active: activeTab === 'portfolio' }"
           @click="activeTab = 'portfolio'"
         >
@@ -323,6 +336,11 @@ const isSparklineUp = (prices) => {
           </div>
         </div>
       </section>
+      </template>
+
+      <!-- Pullback Tab Content -->
+      <template v-if="activeTab === 'pullback'">
+        <PullbackScreen />
       </template>
 
       <!-- Portfolio Tab Content -->

@@ -19,6 +19,8 @@ from src.advisor import etf_analyzer
 def main() -> int:
     parser = argparse.ArgumentParser(description="台美股強勢股篩選 + 題材分類")
     parser.add_argument("--no-llm", action="store_true", help="跳過 LLM 題材分類")
+    parser.add_argument("--no-line", action="store_true",
+                        help="跳過 Line 推播（排程改由 send_daily_line.py 統一發送）")
     parser.add_argument("--market", type=str, choices=["TW", "US", "ALL"], default="ALL", help="指定執行的市場 (TW, US, 或 ALL)")
     args = parser.parse_args()
 
@@ -50,7 +52,8 @@ def main() -> int:
     )
     print(f"[+] ETF 分析完成 -> data/results/latest_etf.json")
 
-    send_combined_line_broadcast(payloads)
+    if not args.no_line:
+        send_combined_line_broadcast(payloads)
         
     return 0
 
