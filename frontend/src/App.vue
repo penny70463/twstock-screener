@@ -5,6 +5,7 @@ import EtfTrafficLight from './components/EtfTrafficLight.vue'
 import PullbackScreen from './components/PullbackScreen.vue'
 import ClusterBreakout from './components/ClusterBreakout.vue'
 import GroupSeason from './components/GroupSeason.vue'
+import QuarterEnd from './components/QuarterEnd.vue'
 
 const activeMarket = ref('TW')
 const activeTab = ref('screener')
@@ -61,9 +62,9 @@ watch(selectedDate, () => {
 
 watch(activeMarket, () => {
   selectedDate.value = 'latest'
-  // 回檔轉強、族群突破、集團作帳僅台股提供，切到美股時退回強勢股掃描
+  // 回檔轉強、族群突破、集團作帳、季底法人僅台股提供，切到美股時退回強勢股掃描
   if (activeMarket.value !== 'TW'
-      && ['pullback', 'cluster', 'group'].includes(activeTab.value)) {
+      && ['pullback', 'cluster', 'group', 'quarter'].includes(activeTab.value)) {
     activeTab.value = 'screener'
   }
   fetchDates()
@@ -276,6 +277,14 @@ const isSparklineUp = (prices) => {
           🏢 集團作帳
         </button>
         <button
+          v-if="activeMarket === 'TW'"
+          class="tab-btn"
+          :class="{ active: activeTab === 'quarter' }"
+          @click="activeTab = 'quarter'"
+        >
+          📆 季底法人
+        </button>
+        <button
           class="tab-btn"
           :class="{ active: activeTab === 'portfolio' }"
           @click="activeTab = 'portfolio'"
@@ -370,6 +379,11 @@ const isSparklineUp = (prices) => {
       <!-- Group Season Tab Content -->
       <template v-if="activeTab === 'group'">
         <GroupSeason />
+      </template>
+
+      <!-- Quarter End Tab Content -->
+      <template v-if="activeTab === 'quarter'">
+        <QuarterEnd />
       </template>
 
       <!-- Portfolio Tab Content -->

@@ -74,12 +74,28 @@ def _format_group(data: dict) -> str | None:
     return line
 
 
+def _format_quarter(data: dict) -> str | None:
+    """季底法人段落：僅季底窗口（3/6/9/12月最後20日）且有名單時出現"""
+    if data.get("phase") not in ("preview", "active") or not data.get("stocks"):
+        return None
+    stocks = data["stocks"]
+    held = [s for s in stocks if not s.get("stop_hit")]
+    stopped = sum(1 for s in stocks if s.get("stop_hit"))
+    names = "、".join(f"{s['stock_id']} {s['stock_name']}" for s in held[:5])
+    tag = "預備名單" if data["phase"] == "preview" else "監控中"
+    line = f"📆 季底法人（投信 {tag} {len(held)} 檔）{names}"
+    if stopped:
+        line += f"\n🛑 已破線出場 {stopped} 檔"
+    return line
+
+
 # 各選股腳本的訊息段落登記表：(結果檔名, 格式函式)
 # 新選股腳本 → 輸出 JSON → 在此加一筆；格式函式回 None 表示該段落本日不顯示
 SCREEN_SECTIONS = [
     ("pullback_tw.json", _format_pullback),
     ("cluster_tw.json", _format_breakout),
     ("group_tw.json", _format_group),
+    ("quarter_tw.json", _format_quarter),
 ]
 
 
