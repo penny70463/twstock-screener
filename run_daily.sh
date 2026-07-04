@@ -40,6 +40,11 @@ if ! python -u screen_breakout.py; then
   echo "族群突破偵測失敗，跳過（不影響其他結果）"
 fi
 
+echo "執行集團作帳選股 (screen_group.py，非季節時僅更新狀態)..."
+if ! python -u screen_group.py; then
+  echo "集團作帳選股失敗，跳過（不影響其他結果）"
+fi
+
 echo "統一發送每日 Line 訊息..."
 if ! python -u send_daily_line.py; then
   echo "Line 發送失敗，跳過（不影響結果推送）"
@@ -49,7 +54,7 @@ echo "執行完畢，準備將結果推播到 GitHub..."
 
 # 以下照搬 GitHub Actions 裡面的自動 Push 邏輯
 git add -f data/results/*.json
-git add -f data/results/screen_pullback_result_*.csv 2>/dev/null || true
+git add -f data/results/screen_*_result_*.csv 2>/dev/null || true
 if git diff --cached --quiet; then
   echo "沒有新結果，跳過 Push。"
   exit 0

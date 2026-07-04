@@ -59,11 +59,27 @@ def _format_breakout(data: dict) -> str:
     return "\n".join(lines)
 
 
+def _format_group(data: dict) -> str | None:
+    """集團作帳段落：僅季節內（11~12月）且有名單時出現，其餘回 None 整段隱藏"""
+    if data.get("phase") not in ("preview", "active") or not data.get("stocks"):
+        return None
+    stocks = data["stocks"]
+    held = [s for s in stocks if not s.get("stop_hit")]
+    stopped = sum(1 for s in stocks if s.get("stop_hit"))
+    names = "、".join(f"{s['stock_id']} {s['stock_name']}" for s in held[:6])
+    tag = "預備名單" if data["phase"] == "preview" else "持有中"
+    line = f"🏢 集團作帳（{tag} {len(held)} 檔）{names}"
+    if stopped:
+        line += f"\n🛑 已破線出場 {stopped} 檔"
+    return line
+
+
 # 各選股腳本的訊息段落登記表：(結果檔名, 格式函式)
-# 新選股腳本 → 輸出 JSON（含 date 與 screened/themes 欄位）→ 在此加一筆
+# 新選股腳本 → 輸出 JSON → 在此加一筆；格式函式回 None 表示該段落本日不顯示
 SCREEN_SECTIONS = [
     ("pullback_tw.json", _format_pullback),
     ("cluster_tw.json", _format_breakout),
+    ("group_tw.json", _format_group),
 ]
 
 
@@ -93,7 +109,9 @@ def main() -> int:
         if data.get("date") != on_date:
             print(f"  ! {filename} 日期 {data.get('date')} 與主篩選 {on_date} 不符，略過", flush=True)
             continue
-        blocks.append(formatter(data))
+        section = formatter(data)
+        if section:
+            blocks.append(section)
 
     message = "\n\n".join(blocks + [LINE_LINK_BLOCK])
 
