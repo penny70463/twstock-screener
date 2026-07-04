@@ -73,6 +73,8 @@ fi
 echo "執行完畢，準備將結果推播到 GitHub..."
 
 # 以下照搬 GitHub Actions 裡面的自動 Push 邏輯
+# PIPELINE_COMMIT=1：告知 pre-commit hook 這是管線的合法結果 commit（見 scripts/githooks/pre-commit）
+export PIPELINE_COMMIT=1
 git add -f data/results/*.json
 git add -f data/results/screen_*_result_*.csv 2>/dev/null || true
 if git diff --cached --quiet; then

@@ -1,0 +1,42 @@
+#!/bin/bash
+# pre-commit — 環境層底線防護（對任何模型/工具/人皆生效）
+#
+# 1. 擋手動 commit data/results/（結果檔只能由管線 commit，run_daily.sh 會帶
+#    PIPELINE_COMMIT=1 放行；緊急手動放行：PIPELINE_COMMIT=1 git commit ...）
+# 2. 擋語法錯誤的 .py 進版（py_compile 底線）
+#
+# 緊急整體跳過：SKIP_HOOK=1 git commit ...
+set -u
+[ "${SKIP_HOOK:-0}" = "1" ] && exit 0
+
+cd "$(git rev-parse --show-toplevel)"
+PY=".venv/bin/python"
+[ -x "$PY" ] || PY="python3"
+
+staged=$(git diff --cached --name-only --diff-filter=ACM)
+
+# ---- 1. data/results/ 只允許管線 commit ----
+if [ "${PIPELINE_COMMIT:-0}" != "1" ]; then
+  results=$(echo "$staged" | grep '^data/results/' || true)
+  if [ -n "$results" ]; then
+    echo "pre-commit 拒絕：以下 data/results/ 檔案只能由管線（run_daily.sh）commit，不得手動提交：" >&2
+    echo "$results" | sed 's/^/  - /' >&2
+    echo "確定是管線產物要補 commit：PIPELINE_COMMIT=1 git commit ..." >&2
+    exit 1
+  fi
+fi
+
+# ---- 2. staged .py 語法檢查 ----
+staged_py=$(echo "$staged" | grep '\.py$' || true)
+if [ -n "$staged_py" ]; then
+  while IFS= read -r f; do
+    [ -f "$f" ] || continue
+    if ! "$PY" -m py_compile "$f" 2>/tmp/precommit_syntax_err; then
+      echo "pre-commit 拒絕：$f 語法錯誤：" >&2
+      tail -3 /tmp/precommit_syntax_err >&2
+      exit 1
+    fi
+  done <<< "$staged_py"
+fi
+
+exit 0

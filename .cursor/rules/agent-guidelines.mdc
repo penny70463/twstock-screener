@@ -1,0 +1,21 @@
+---
+description: 專案代理行為準則與技術說明（單一來源：AGENTS.md + CLAUDE.md）
+alwaysApply: true
+---
+
+本專案的行為準則與技術說明採單一來源，開始任何任務前必須遵守下列兩份檔案的全部內容：
+
+@AGENTS.md
+
+@CLAUDE.md
+
+重點摘要（詳細判準以 AGENTS.md 原文為準）：
+
+- 對話回覆用繁體中文，git commit 用英文
+- 宣告完成前必跑 `scripts/verify_done.sh`，任何 FAIL 都不得宣告完成
+- 改 `src/advisor/config.py` 參數必跑 `tests/backtest_*.py` 附前後對比，否則不得宣告完成
+- 警報驗證一律 `python etf_alert.py --dry-run`，絕不真發 LINE
+- 不手改 `data/results/` 下的 JSON
+- 同一方法最多重試兩輪，第三次原樣重試被禁止——換方法或如實回報卡點
+- 不可逆動作（推播、push、刪 cache）先問使用者
+- 不確定就查，查不到標「未驗證」，禁止編造財務數據與回測結果
