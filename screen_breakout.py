@@ -10,6 +10,8 @@
 1. 掃描股票池近 10 個交易日的所有出量突破事件
 2. 觸發過的股票丟給 LLM 題材分類（重用 src/classifier.py，不用產業別）
 3. 依「今日點火檔數、累計檔數」排序輸出族群清單
+4. 每檔附「每日出場線」= max(進場參考價x0.85, 波段最高收盤x0.75)，
+   收盤跌破出場（3 年 3,625 個波段回測選定的停損停利規則，收盤確認執行）
 
 資料來源：
 - 股價：yfinance 6 個月日線；台股最新一日 Yahoo 常缺漏，
@@ -30,6 +32,7 @@ import json
 import sys
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import yfinance as yf
 
@@ -47,6 +50,12 @@ WINDOW = 10          # 事件觀察窗口（交易日）
 BREAK_DAYS = 60      # 突破 N 日收盤新高
 VOL_MULT = 2.0       # 量能門檻：20 日均量的倍數
 MIN_CHG = 0.035      # 事件日最低漲幅
+WAVE_GAP = 10        # 相鄰事件間隔 <= N 日視為同一波（與回測一致）
+
+# 每日出場線（2026-07 3年/3625波段回測選定：期望 +20.4%/筆，收盤確認執行）
+# 出場線 = max(進場參考價 x (1-停損), 波段最高收盤 x (1-移動停利))，收盤跌破出場
+EXIT_STOP = 0.15     # 初始停損：進場參考價（波段首日的隔日開盤）往下 15%
+EXIT_TRAIL = 0.25    # 移動停利：波段最高收盤回檔 25%
 
 
 def main() -> None:
@@ -98,17 +107,46 @@ def main() -> None:
         vol20 = v.shift(1).rolling(20).mean()
         chg = c.pct_change()
         mask = (c > hh) & (v >= VOL_MULT * vol20) & (chg >= MIN_CHG)
-        win = df.index[-WINDOW:]
-        fired = [d for d in win if bool(mask.loc[d])]
-        if not fired:
+        idxs = np.flatnonzero(mask.to_numpy())
+        if len(idxs) == 0:
             continue
-        last = fired[-1]
-        events_by_stock[code] = [d.strftime("%m-%d") for d in fired]
+        # 只看最新一波：從最後事件往回串連（間隔 <= WAVE_GAP 視為同一波）
+        wave = [int(idxs[-1])]
+        for i in idxs[::-1][1:]:
+            if wave[-1] - int(i) <= WAVE_GAP:
+                wave.append(int(i))
+            else:
+                break
+        wave = wave[::-1]
+        recent = [i for i in wave if i >= len(df) - WINDOW]
+        if not recent:
+            continue
+        last = df.index[recent[-1]]
+        events_by_stock[code] = [df.index[i].strftime("%m-%d") for i in recent]
+
+        # 每日出場線：進場參考 = 波段首日的隔日開盤；波段首日就是基準日時，
+        # 尚未進場 → 出場線以基準日收盤 x (1-停損) 起算（隔日進場後自動修正）
+        first_i = wave[0]
+        close_now = float(c.iloc[-1])
+        if first_i + 1 < len(df):
+            entry_ref = float(df["Open"].iloc[first_i + 1])
+            peak = float(c.iloc[first_i + 1:].max())
+            exit_line = max(entry_ref * (1 - EXIT_STOP), peak * (1 - EXIT_TRAIL))
+            exit_hit = close_now < exit_line
+        else:
+            entry_ref = None
+            exit_line = close_now * (1 - EXIT_STOP)
+            exit_hit = False
+
         today_info[code] = {
-            "close": round(float(c.iloc[-1]), 2),
+            "close": round(close_now, 2),
             "chg_pct": round(float(chg.iloc[-1]) * 100, 1),
             "fired_today": last.strftime("%Y-%m-%d") == ASOF,
-            "vol_x": round(float(v.loc[last] / vol20.loc[last]), 1),
+            "vol_x": round(float(v.iloc[recent[-1]] / vol20.iloc[recent[-1]]), 1),
+            "wave_start": df.index[first_i].strftime("%Y-%m-%d"),
+            "entry_ref": round(entry_ref, 2) if entry_ref else None,
+            "exit_line": round(exit_line, 2),
+            "exit_hit": bool(exit_hit),
         }
 
     if has_asof == 0:
@@ -149,6 +187,8 @@ def main() -> None:
                 "close": info["close"], "chg_pct": info["chg_pct"],
                 "fired_dates": events_by_stock[code],
                 "fired_today": info["fired_today"], "vol_x": info["vol_x"],
+                "wave_start": info["wave_start"], "entry_ref": info["entry_ref"],
+                "exit_line": info["exit_line"], "exit_hit": info["exit_hit"],
             })
         if not members:
             continue
@@ -166,7 +206,8 @@ def main() -> None:
         "date": ASOF,
         "generated_at": dt.datetime.now().isoformat(timespec="seconds"),
         "params": {"window_days": WINDOW, "break_days": BREAK_DAYS,
-                   "vol_mult": VOL_MULT, "min_chg": MIN_CHG},
+                   "vol_mult": VOL_MULT, "min_chg": MIN_CHG,
+                   "exit_stop": EXIT_STOP, "exit_trail": EXIT_TRAIL},
         "themes": out_themes,
     }
     OUT_JSON.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
@@ -180,6 +221,10 @@ def main() -> None:
                 "產業": m["industry_category"], "收盤": m["close"],
                 "當日漲%": m["chg_pct"], "今日點火": "是" if m["fired_today"] else "",
                 "量倍數": m["vol_x"], "觸發日": " ".join(m["fired_dates"]),
+                "波段起日": m["wave_start"],
+                "進場參考": m["entry_ref"] if m["entry_ref"] else "明日開盤",
+                "出場線": m["exit_line"],
+                "已破線": "出場" if m["exit_hit"] else "",
             })
     pd.DataFrame(rows).to_csv(OUT_CSV, index=False, encoding="utf-8-sig")
     print(f"已存檔：{OUT_CSV}")

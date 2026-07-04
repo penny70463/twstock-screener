@@ -43,6 +43,12 @@ const totalStocks = computed(() =>
         接連跟進。此頁追蹤近 10 個交易日觸發的個股並以 AI 分群，「🔥 今日點火」越多的族群，
         代表擴散越活躍。<strong>股名旁 * 為基準日當天觸發。</strong>
       </p>
+      <p class="logic-desc cluster-desc">
+        🛡️ <strong>每日出場線</strong>（3 年回測選定）：出場線 = max(進場參考價×0.85,
+        波段最高收盤×0.75)，只會上移不會下移，<strong>收盤跌破即出場</strong>。滑鼠移到
+        個股上可查看出場線；<span class="broken-demo">已跌破的個股會以刪除線標示</span>。
+        進場參考價 = 波段首日的隔日開盤價。
+      </p>
 
       <div class="theme-grid" v-if="themes.length > 0">
         <div v-for="(theme, idx) in themes" :key="idx" class="glass-panel theme-card">
@@ -56,8 +62,8 @@ const totalStocks = computed(() =>
             <span
               v-for="stock in theme.stocks" :key="stock.stock_id"
               class="stock-pill"
-              :class="{ 'pill-fired': stock.fired_today }"
-              :title="`收盤 ${stock.close}｜當日 ${stock.chg_pct > 0 ? '+' : ''}${stock.chg_pct}%｜量 ${stock.vol_x}x｜觸發日 ${stock.fired_dates.join(' ')}`"
+              :class="{ 'pill-fired': stock.fired_today, 'pill-broken': stock.exit_hit }"
+              :title="`收盤 ${stock.close}｜當日 ${stock.chg_pct > 0 ? '+' : ''}${stock.chg_pct}%｜量 ${stock.vol_x}x｜觸發日 ${stock.fired_dates.join(' ')}｜進場參考 ${stock.entry_ref ?? '明日開盤'}｜出場線 ${stock.exit_line ?? '—'}${stock.exit_hit ? '（已跌破，出場）' : ''}`"
             >
               {{ stock.stock_name }} ({{ stock.stock_id }}){{ stock.fired_today ? ' *' : '' }}
             </span>
@@ -103,5 +109,11 @@ const totalStocks = computed(() =>
   color: #fdba74;
   border-color: rgba(251, 146, 60, 0.45);
   font-weight: 600;
+}
+
+.pill-broken,
+.broken-demo {
+  text-decoration: line-through;
+  opacity: 0.55;
 }
 </style>
