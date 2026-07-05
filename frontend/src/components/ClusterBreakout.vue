@@ -25,6 +25,28 @@ onMounted(async () => {
 const themes = computed(() => data.value?.themes || [])
 const totalStocks = computed(() =>
   themes.value.reduce((sum, t) => sum + t.count, 0))
+
+// 浮動 tooltip：不能用 pill 的 ::after——.theme-stocks 是 overflow-y 捲動容器，
+// 超出的部分會被裁切。改為 fixed 定位、掛在元件根層，脫離所有裁切與堆疊上下文。
+const tip = ref(null) // { text, x, y }
+
+function tipText(stock) {
+  return [
+    `收盤 ${stock.close}（${stock.chg_pct > 0 ? '+' : ''}${stock.chg_pct}%）`,
+    `量能 ${stock.vol_x}x｜觸發日 ${stock.fired_dates.join(' ')}`,
+    `進場參考 ${stock.entry_ref ?? '明日開盤'}`,
+    `出場線 ${stock.exit_line ?? '—'}${stock.exit_hit ? '（已跌破，出場）' : ''}`,
+  ].join('\n')
+}
+
+function showTip(e, stock) {
+  const r = e.currentTarget.getBoundingClientRect()
+  tip.value = { text: tipText(stock), x: r.left + r.width / 2, y: r.top - 8 }
+}
+
+function hideTip() {
+  tip.value = null
+}
 </script>
 
 <template>
@@ -61,9 +83,10 @@ const totalStocks = computed(() =>
           <div class="theme-stocks">
             <span
               v-for="stock in theme.stocks" :key="stock.stock_id"
-              class="stock-pill"
+              class="stock-pill has-tip"
               :class="{ 'pill-fired': stock.fired_today, 'pill-broken': stock.exit_hit }"
-              :title="`收盤 ${stock.close}｜當日 ${stock.chg_pct > 0 ? '+' : ''}${stock.chg_pct}%｜量 ${stock.vol_x}x｜觸發日 ${stock.fired_dates.join(' ')}｜進場參考 ${stock.entry_ref ?? '明日開盤'}｜出場線 ${stock.exit_line ?? '—'}${stock.exit_hit ? '（已跌破，出場）' : ''}`"
+              @mouseenter="showTip($event, stock)"
+              @mouseleave="hideTip"
             >
               {{ stock.stock_name }} ({{ stock.stock_id }}){{ stock.fired_today ? ' *' : '' }}
             </span>
@@ -73,6 +96,12 @@ const totalStocks = computed(() =>
       <div v-else class="glass-panel empty-state">
         近期無出量突破事件。
       </div>
+
+      <div
+        v-if="tip"
+        class="tip-float"
+        :style="{ left: tip.x + 'px', top: tip.y + 'px' }"
+      >{{ tip.text }}</div>
     </template>
   </section>
 </template>
@@ -115,5 +144,39 @@ const totalStocks = computed(() =>
 .broken-demo {
   text-decoration: line-through;
   opacity: 0.55;
+}
+
+.has-tip {
+  cursor: help;
+}
+
+/* 浮動 tooltip：fixed 定位掛在元件根層，不受 .theme-stocks 捲動容器裁切 */
+.tip-float {
+  position: fixed;
+  transform: translate(-50%, -100%);
+  z-index: 1000;
+  width: max-content;
+  max-width: 300px;
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+  color: #e2e8f0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre-line;
+  pointer-events: none;
+}
+
+.tip-float::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: rgba(15, 23, 42, 0.97);
 }
 </style>
