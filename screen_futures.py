@@ -49,17 +49,33 @@ def get_us_overnight_signal() -> dict:
         }
     """
     try:
-        # 下載最近 5 個交易日的美股數據
-        aapl = yf.download("AAPL", period="1w", progress=False)["Close"]
-        qqq = yf.download("QQQ", period="1w", progress=False)["Close"]
-        sp500 = yf.download("^GSPC", period="1w", progress=False)["Close"]
+        # 下載最近 5 個交易日的美股數據（各自下載以避免 MultiIndex）
+        aapl_data = yf.download("AAPL", period="5d", progress=False)
+        qqq_data = yf.download("QQQ", period="5d", progress=False)
+        sp500_data = yf.download("^GSPC", period="5d", progress=False)
 
-        if len(aapl) < 2:
+        # 處理 MultiIndex 列（yfinance 多股票下載時會產生）
+        if isinstance(aapl_data.columns, pd.MultiIndex):
+            aapl = aapl_data[("Close", "AAPL")]
+        else:
+            aapl = aapl_data["Close"]
+
+        if isinstance(qqq_data.columns, pd.MultiIndex):
+            qqq = qqq_data[("Close", "QQQ")]
+        else:
+            qqq = qqq_data["Close"]
+
+        if isinstance(sp500_data.columns, pd.MultiIndex):
+            sp500 = sp500_data[("Close", "^GSPC")]
+        else:
+            sp500 = sp500_data["Close"]
+
+        if len(aapl) < 2 or len(qqq) < 2 or len(sp500) < 2:
             return {"us_signal": "neutral", "note": "美股數據不足"}
 
-        aapl_chg = (aapl.iloc[-1] / aapl.iloc[0] - 1) * 100
-        qqq_chg = (qqq.iloc[-1] / qqq.iloc[0] - 1) * 100
-        sp500_chg = (sp500.iloc[-1] / sp500.iloc[0] - 1) * 100
+        aapl_chg = float((aapl.iloc[-1] / aapl.iloc[0] - 1) * 100)
+        qqq_chg = float((qqq.iloc[-1] / qqq.iloc[0] - 1) * 100)
+        sp500_chg = float((sp500.iloc[-1] / sp500.iloc[0] - 1) * 100)
 
         # 簡單投票制
         bullish_count = sum([
@@ -86,10 +102,12 @@ def get_taifex_signal(day: dt.date) -> dict:
 
     Returns:
         {
-            "taifex_signal": "bullish" | "bearish" | "unknown",
-            "trust_net": ...,  # 投信 (多 - 空)
+            "taifex_signal": "bullish" | "bearish" | "neutral" | "unknown",
+            "trust_net": ...,
             "dealer_net": ...,
             "foreign_net": ...,
+            "weighted_score": ...,
+            "source": "taifex_api" | "fallback_empty",
         }
     """
     try:
@@ -98,23 +116,10 @@ def get_taifex_signal(day: dt.date) -> dict:
         if data_txf is None:
             return {"taifex_signal": "unknown", "note": "期貨籌碼無法取得"}
 
-        # 簡化版：假設 data 中包含 trust_buy/sell 等字段
-        # 實際格式需根據期交所 API 調整
-        futures_data = data_txf.get("data", {})
-
-        # 計算淨多單 (假設 API 回傳格式)
-        trust_net = (
-            int(futures_data.get("trust_long", 0)) -
-            int(futures_data.get("trust_short", 0))
-        )
-        dealer_net = (
-            int(futures_data.get("dealer_long", 0)) -
-            int(futures_data.get("dealer_short", 0))
-        )
-        foreign_net = (
-            int(futures_data.get("foreign_long", 0)) -
-            int(futures_data.get("foreign_short", 0))
-        )
+        trust_net = int(data_txf.get("trust_net", 0))
+        dealer_net = int(data_txf.get("dealer_net", 0))
+        foreign_net = int(data_txf.get("foreign_net", 0))
+        source = data_txf.get("source", "unknown")
 
         # 加權信號
         net_score = (
@@ -127,10 +132,11 @@ def get_taifex_signal(day: dt.date) -> dict:
 
         return {
             "taifex_signal": signal,
-            "trust_net": int(trust_net),
-            "dealer_net": int(dealer_net),
-            "foreign_net": int(foreign_net),
+            "trust_net": trust_net,
+            "dealer_net": dealer_net,
+            "foreign_net": foreign_net,
             "weighted_score": round(net_score, 0),
+            "source": source,
         }
     except Exception as e:
         print(f"[-] 期交所籌碼抓取失敗: {e}")

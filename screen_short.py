@@ -22,6 +22,7 @@ import yfinance as yf
 from src.market_regime import get_regime, is_regime_allowed
 from src.advisor.margin_futures import fetch_margin_cached
 from src.advisor.indicators import sma
+from src.advisor.data import fetch_revenue
 
 REPO = Path(__file__).resolve().parent
 ASOF = sys.argv[1] if len(sys.argv) > 1 and not sys.argv[1].startswith("-") \
@@ -79,12 +80,34 @@ def main() -> None:
         if len(df) >= 60:
             prices[c] = df
 
-    # 取得融券資料
+    # 取得融券資料（回溯：無資料就往前推）
     print(f"抓取融券資料...", flush=True)
-    margin_df = fetch_margin_cached(asof, market="TW")
+    margin_df = None
     margin_by_code = {}
-    if margin_df is not None and not margin_df.empty:
-        margin_by_code = {row["code"]: row for _, row in margin_df.iterrows()}
+
+    # 最多回溯 5 個交易日
+    for backtrack_days in range(0, 5):
+        check_date = asof - dt.timedelta(days=backtrack_days + 1)
+        if check_date.weekday() >= 5:  # 略過週末
+            continue
+        margin_df = fetch_margin_cached(check_date, market="TW")
+        if margin_df is not None and not margin_df.empty:
+            print(f"融券資料來源：{check_date}")
+            margin_by_code = {row["code"]: row for _, row in margin_df.iterrows()}
+            break
+
+    if not margin_by_code:
+        print("警告：無融券資料可用，將以融券餘額為 0 處理", flush=True)
+
+    # 取得營收資料（基本面空頭判定）
+    print(f"抓取營收資料...", flush=True)
+    revenue_df = fetch_revenue()
+    revenue_by_code = {}
+    if revenue_df is not None and not revenue_df.empty:
+        for _, row in revenue_df.iterrows():
+            code = str(row.get("code", "")).strip()
+            mom = float(row.get("mom", 0)) if row.get("mom") else 0
+            revenue_by_code[code] = {"mom": mom}
 
     # 篩選做空候選
     stocks_out = []
@@ -106,15 +129,19 @@ def main() -> None:
             continue
 
         # ── 條件 2：籌碼面空頭 ──
-        # 融券餘額 > 0 且呈上升趨勢
+        # 融券餘額 > 0
         margin_info = margin_by_code.get(code, {})
         short_balance = float(margin_info.get("short_balance", 0))
         if short_balance <= 0:
             # 融券很少，不考慮
             continue
 
-        # ── 條件 3：基本面空頭（簡化版：暫不包含營收，後續加入）
-        # 將在 rollout 後加上營收檢查
+        # ── 條件 3：基本面空頭 ──
+        # 營收月減 > 30%
+        revenue_info = revenue_by_code.get(code, {})
+        mom = float(revenue_info.get("mom", 0))
+        if mom > -30:  # 月減未超過 30%，略過
+            continue
 
         # ── 條件 4：動能確認 ──
         # 近期有明顯下跌（例如最近 1 月內曾創近 60 日新低）
