@@ -18,8 +18,10 @@ HEADERS = {"User-Agent": "Mozilla/5.0 (stock-selector)"}
 CACHE_DIR = Path(__file__).parent / "cache"
 
 # ── 融資融券 ──────────────────────────────────────────────────
-# 台灣證交所「融資融券統計」API (上市)
-TWSE_MARGIN = "https://www.twse.com.tw/rwd/zh/fund/BFI82U"
+# 台灣證交所「信用交易統計」API (上市，個股融資融券餘額，供應歷史日期)
+# 注意：舊版誤用 BFI82U（三大法人買賣金額統計），該表無個股融券欄位，
+# 導致條件 2 永遠拿到空資料——見 docs/judgment-cases.md
+TWSE_MARGIN = "https://www.twse.com.tw/rwd/zh/marginTrading/MI_MARGN"
 
 # 櫃買中心融資融券 (上櫃)
 TPEX_MARGIN = "https://www.tpex.org.tw/web/stock/margin_trading/daily"
@@ -46,7 +48,8 @@ def fetch_margin_loan(day: dt.date = None, market: str = "TW") -> Optional[pd.Da
     url = TWSE_MARGIN if market == "TW" else TPEX_MARGIN
     params = {
         "response": "json",
-        "date": day.strftime("%Y%m%d")
+        "date": day.strftime("%Y%m%d"),
+        "selectType": "ALL",
     }
 
     try:
@@ -54,21 +57,32 @@ def fetch_margin_loan(day: dt.date = None, market: str = "TW") -> Optional[pd.Da
         resp.raise_for_status()
         data = resp.json()
 
-        # TWSE 格式
+        # TWSE MI_MARGN 格式：tables 內含市場合計表與個股表，取欄位以「代號」開頭者
+        # 個股列 16 欄：0代號 1名稱 | 2-7 融資(買/賣/現償/前餘/今餘/限額)
+        #              | 8-13 融券(買[回補]/賣[放空]/現償/前餘/今餘/限額) | 14資券互抵 15註記
         if market == "TW":
+            stock_table = None
+            for t in data.get("tables", []):
+                fields = t.get("fields", [])
+                if fields and fields[0] == "代號":
+                    stock_table = t
+                    break
+            if stock_table is None:
+                return None
+
             records = []
-            for row in data.get("data", []):
-                code = row[0].strip()
+            for row in stock_table.get("data", []):
+                code = str(row[0]).strip()
                 if len(code) < 4 or not code.isalnum():
                     continue
                 records.append({
                     "code": code,
-                    "margin_buy": _to_num(row[2]),      # 融資買進
-                    "margin_sell": _to_num(row[3]),     # 融資賣出
-                    "margin_balance": _to_num(row[4]),  # 融資餘額
-                    "short_sell": _to_num(row[6]),      # 融券賣出
-                    "short_cover": _to_num(row[7]),     # 融券買進
-                    "short_balance": _to_num(row[8]),   # 融券餘額
+                    "margin_buy": _to_num(row[2]),       # 融資買進
+                    "margin_sell": _to_num(row[3]),      # 融資賣出
+                    "margin_balance": _to_num(row[6]),   # 融資今日餘額
+                    "short_sell": _to_num(row[9]),       # 融券賣出（放空）
+                    "short_cover": _to_num(row[8]),      # 融券買進（回補）
+                    "short_balance": _to_num(row[12]),   # 融券今日餘額
                 })
             return pd.DataFrame(records)
 

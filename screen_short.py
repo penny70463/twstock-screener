@@ -67,7 +67,9 @@ def main() -> None:
 
     # 下載股價
     print(f"下載 {len(codes)} 檔 2 年日線 ...", flush=True)
-    tickers = {c: c + ".TW" for c in codes}
+    # 上櫃股 yfinance 後綴為 .TWO（同 screen_breakout.py 慣例）
+    suffix = {"上市": ".TW", "上櫃": ".TWO"}
+    tickers = {c: c + suffix.get(uni[c].get("市場", "上市"), ".TW") for c in codes}
     raw = yf.download(list(tickers.values()), period="2y", group_by="ticker",
                       auto_adjust=True, progress=False, threads=True)
 
