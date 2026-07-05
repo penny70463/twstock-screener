@@ -6,6 +6,7 @@ import PullbackScreen from './components/PullbackScreen.vue'
 import ClusterBreakout from './components/ClusterBreakout.vue'
 import GroupSeason from './components/GroupSeason.vue'
 import QuarterEnd from './components/QuarterEnd.vue'
+import EventDriven from './components/EventDriven.vue'
 
 const activeMarket = ref('TW')
 const activeTab = ref('screener')
@@ -62,9 +63,9 @@ watch(selectedDate, () => {
 
 watch(activeMarket, () => {
   selectedDate.value = 'latest'
-  // 回檔轉強、族群突破、集團作帳、季底法人僅台股提供，切到美股時退回強勢股掃描
+  // 回檔轉強、族群突破、集團作帳、季底法人、事件驅動僅台股提供，切到美股時退回強勢股掃描
   if (activeMarket.value !== 'TW'
-      && ['pullback', 'cluster', 'group', 'quarter'].includes(activeTab.value)) {
+      && ['pullback', 'cluster', 'group', 'quarter', 'event'].includes(activeTab.value)) {
     activeTab.value = 'screener'
   }
   fetchDates()
@@ -285,6 +286,14 @@ const isSparklineUp = (prices) => {
           📆 季底法人
         </button>
         <button
+          v-if="activeMarket === 'TW'"
+          class="tab-btn"
+          :class="{ active: activeTab === 'event' }"
+          @click="activeTab = 'event'"
+        >
+          🎪 展覽會供應鏈
+        </button>
+        <button
           class="tab-btn"
           :class="{ active: activeTab === 'portfolio' }"
           @click="activeTab = 'portfolio'"
@@ -384,6 +393,11 @@ const isSparklineUp = (prices) => {
       <!-- Quarter End Tab Content -->
       <template v-if="activeTab === 'quarter'">
         <QuarterEnd />
+      </template>
+
+      <!-- Event Driven Tab Content -->
+      <template v-if="activeTab === 'event'">
+        <EventDriven />
       </template>
 
       <!-- Portfolio Tab Content -->

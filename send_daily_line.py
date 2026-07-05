@@ -89,6 +89,20 @@ def _format_quarter(data: dict) -> str | None:
     return line
 
 
+def _format_event_driven(data: dict) -> str | None:
+    """事件驅動段落：展覽會 + 法說會前後供應鏈股"""
+    events = data.get("events", [])
+    if not events:
+        return None
+    lines = ["🎪 展覽會供應鏈"]
+    for evt in events[:2]:  # 最多顯示 2 個展覽會
+        count = evt.get("count", 0)
+        stocks = evt.get("stocks", [])
+        top_names = "、".join(f"{s['stock_id']}" for s in stocks[:3])
+        lines.append(f"・{evt['name']}：{count} 檔符合（{top_names}…）")
+    return "\n".join(lines)
+
+
 # 各選股腳本的訊息段落登記表：(結果檔名, 格式函式)
 # 新選股腳本 → 輸出 JSON → 在此加一筆；格式函式回 None 表示該段落本日不顯示
 SCREEN_SECTIONS = [
@@ -96,6 +110,7 @@ SCREEN_SECTIONS = [
     ("cluster_tw.json", _format_breakout),
     ("group_tw.json", _format_group),
     ("quarter_tw.json", _format_quarter),
+    ("event_driven_tw.json", _format_event_driven),
 ]
 
 

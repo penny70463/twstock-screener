@@ -50,6 +50,11 @@ if ! python -u screen_quarter.py; then
   echo "季底法人選股失敗，跳過（不影響其他結果）"
 fi
 
+echo "執行事件驅動選股 (screen_event_driven.py，展覽會前供應鏈)..."
+if ! python -u screen_event_driven.py; then
+  echo "事件驅動選股失敗，跳過（不影響其他結果）"
+fi
+
 echo "統一發送每日 Line 訊息..."
 if ! python -u send_daily_line.py; then
   echo "Line 發送失敗，跳過（不影響結果推送）"

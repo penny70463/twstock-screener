@@ -1,0 +1,119 @@
+{
+  "exhibitions": [
+    {
+      "name_zh": "台北國際電腦展",
+      "name_en": "COMPUTEX Taiwan",
+      "season": 5,
+      "typical_date_range": "2026-05-27:2026-05-30",
+      "lookback_days": 10,
+      "key_industries": ["IC設計", "AI芯片", "伺服器", "PC周邊"],
+      "key_stocks": ["2330", "2454", "2408", "3231"],
+      "supply_chain": {
+        "2330": ["5483", "4952", "2303", "3029"],
+        "2454": ["3547", "2308", "2324"],
+        "2408": ["3557", "8299"],
+        "3231": ["2464", "2379"]
+      }
+    },
+    {
+      "name_zh": "國際半導體展",
+      "name_en": "SEMICON Taiwan",
+      "season": 9,
+      "typical_date_range": "2026-09-09:2026-09-11",
+      "lookback_days": 10,
+      "key_industries": ["晶圓製造", "封測", "設備材料"],
+      "key_stocks": ["2330", "2454", "3711"],
+      "supply_chain": {
+        "2330": ["5483", "4952", "1605", "3029"],
+        "2454": ["3711", "2308", "4747"],
+        "3711": ["2395", "6471"]
+      }
+    },
+    {
+      "name_zh": "美國消費性電子展",
+      "name_en": "CES",
+      "season": 1,
+      "typical_date_range": "2026-01-07:2026-01-10",
+      "lookback_days": 7,
+      "key_industries": ["消費電子", "顯示技術", "智慧家居"],
+      "key_stocks": ["2303", "2454", "3481"],
+      "supply_chain": {
+        "2303": ["2347", "3034", "2449"],
+        "2454": ["3547", "2308"],
+        "3481": ["2344", "6451"]
+      }
+    },
+    {
+      "name_zh": "世界行動通訊大會",
+      "name_en": "MWC",
+      "season": 2,
+      "typical_date_range": "2026-02-24:2026-02-27",
+      "lookback_days": 7,
+      "key_industries": ["5G", "手機", "通訊模組"],
+      "key_stocks": ["2454", "3037", "3629"],
+      "supply_chain": {
+        "2454": ["3544", "2382", "5470"],
+        "3037": ["2409", "2433"],
+        "3629": ["2443", "2404"]
+      }
+    },
+    {
+      "name_zh": "台北國際自動化工業大展",
+      "name_en": "Taipei Automation Show",
+      "season": 7,
+      "typical_date_range": "2026-07-15:2026-07-18",
+      "lookback_days": 10,
+      "key_industries": ["工業電腦", "馬達", "變頻器", "機器人"],
+      "key_stocks": ["2498", "2516", "3062"],
+      "supply_chain": {
+        "2498": ["2451", "2412", "3086"],
+        "2516": ["2449", "2434"],
+        "3062": ["2416", "2428"]
+      }
+    },
+    {
+      "name_zh": "亞洲生技大展",
+      "name_en": "BIO Asia Taiwan",
+      "season": 7,
+      "typical_date_range": "2026-07-22:2026-07-24",
+      "lookback_days": 10,
+      "key_industries": ["生技製藥", "醫療器材", "診斷試劑"],
+      "key_stocks": ["1477", "1565", "4121"],
+      "supply_chain": {
+        "1477": ["6854", "4104"],
+        "1565": ["4126", "6271"],
+        "4121": ["2481", "4966"]
+      }
+    },
+    {
+      "name_zh": "台北國際汽車零配件展",
+      "name_en": "Taiwan AutoParts Show",
+      "season": [4, 10],
+      "typical_date_range_spring": "2026-04-15:2026-04-17",
+      "typical_date_range_autumn": "2026-10-14:2026-10-16",
+      "lookback_days": 10,
+      "key_industries": ["電動車", "車電", "連接器", "鋁合金"],
+      "key_stocks": ["2301", "3714", "2409"],
+      "supply_chain": {
+        "2301": ["3706", "2384", "3054"],
+        "3714": ["3545", "2426"],
+        "2409": ["3034", "2417"]
+      }
+    },
+    {
+      "name_zh": "台灣電子展",
+      "name_en": "Taiwan Electronics Show",
+      "season": 8,
+      "typical_date_range": "2026-08-12:2026-08-14",
+      "lookback_days": 10,
+      "key_industries": ["被動元件", "連接器", "電子零件"],
+      "key_stocks": ["3034", "3706", "2344"],
+      "supply_chain": {
+        "3034": ["2415", "3436"],
+        "3706": ["2379", "2388"],
+        "2344": ["3356", "2427"]
+      }
+    }
+  ],
+  "note": "供應鏈映射（key_stocks → supply_chain）需人工驗證並擴充。每展覽會 lookback_days 為建議進場提前天數。"
+}
