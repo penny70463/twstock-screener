@@ -177,9 +177,12 @@ def main() -> None:
     taifex_sig = get_taifex_signal(asof)
 
     # 下載加權指數（作為台指期基準）
+    # period=5d：假日/收盤後 1d 會拿到空資料，取近 5 天的最後一筆收盤
     try:
-        twii = yf.download("^TWII", period="1d", progress=False)
-        twii_close = float(twii["Close"].iloc[-1])
+        twii = yf.download("^TWII", period="5d", progress=False)
+        if isinstance(twii.columns, pd.MultiIndex):
+            twii.columns = twii.columns.get_level_values(0)
+        twii_close = float(twii["Close"].iloc[-1]) if not twii.empty else None
     except Exception:
         twii_close = None
 
