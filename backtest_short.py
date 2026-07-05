@@ -83,6 +83,10 @@ def backtest_short_strategy(
     print("[下載] 建立 TWII regime 序列...")
     regime_series = _build_regime_series(start_date, end_date)
     print(f"[OK] 建立 {len(regime_series)} 個交易日的 regime 映射\n")
+    if not regime_series:
+        # 沒有 regime 序列 = 閘門全擋，跑完只會得到 0 筆交易的假結果，直接失敗
+        print("[-] regime 序列為空，中止回測（不產生無效結果檔）")
+        return {"error": "regime series empty"}
 
     # ── 準備階段 2：取得台股代碼列表 ──
     try:
@@ -92,23 +96,32 @@ def backtest_short_strategy(
         print(f"[-] 無法取得台股代碼: {e}")
         return {"error": str(e)}
 
-    # ── 第二步：先下載所有股票的歷史數據 ──
-    print("[下載] 歷史數據...")
+    # ── 第二步：批次下載所有股票的歷史數據 ──
+    # group_by="ticker"：一次請求 + 每檔子表為攤平欄位（避免 MultiIndex 比較炸掉）
+    # 慣例同 screen_short.py:71
+    print(f"[下載] {len(all_codes)} 檔歷史數據（批次）...")
+    raw = yf.download(
+        all_codes,
+        start=start_date - dt.timedelta(days=200),
+        end=end_date + dt.timedelta(days=1),
+        group_by="ticker",
+        auto_adjust=True,
+        progress=False,
+        threads=True,
+    )
     history_data = {}
     for code in all_codes:
         try:
-            hist = yf.download(
-                code,
-                start=start_date - dt.timedelta(days=200),
-                end=end_date + dt.timedelta(days=1),
-                progress=False,
-            )
-            if not hist.empty:
-                history_data[code] = hist
-        except Exception:
+            hist = raw[code].dropna(subset=["Close"])
+        except (KeyError, TypeError):
             continue
+        if not hist.empty:
+            history_data[code] = hist
 
     print(f"[OK] 成功取得 {len(history_data)} 檔歷史數據\n")
+    if not history_data:
+        print("[-] 沒有任何股票取得歷史資料，中止回測（不產生無效結果檔）")
+        return {"error": "no price history"}
 
     # ── 第三步：迴圈每個交易日，篩選做空候選 ──
     annual_results = {}
@@ -275,8 +288,15 @@ def _get_taiwan_stock_codes() -> list[str]:
         with open(universe_file, "r", encoding="utf-8") as f:
             data = json.load(f)
 
-        # universe 格式：{ "code": {...}, "code": {...}, ... }
-        codes = list(data.keys())
+        # universe 格式：{"date":..., "stocks":[{"stock_id": "2330", "市場": "上市"|"上櫃", ...}]}
+        # 上櫃股 yfinance 後綴為 .TWO（同 screen_breakout.py 慣例）
+        suffix = {"上市": ".TW", "上櫃": ".TWO"}
+        codes = [
+            s["stock_id"] + suffix.get(s.get("市場", "上市"), ".TW")
+            for s in data["stocks"] if s.get("stock_id")
+        ]
+        if not codes:
+            raise ValueError("universe_tw.json 的 stocks 為空")
         return codes
 
     except Exception as e:
@@ -302,7 +322,8 @@ def _get_short_balance(code: str, date: dt.date) -> float:
     回溯邏輯：如果當日無資料，往前查 5 個交易日
     修正 R2：改用顯式查表而非依賴迴圈殘留
     """
-    code_normalized = code if code.endswith(".TW") else code + ".TW"
+    # 快取以「純代碼」為 key（去掉 .TW/.TWO 後綴），與 TWSE 回傳的 code 對齊
+    code_bare = code.split(".")[0]
 
     for backtrack_days in range(5):
         check_date = date - dt.timedelta(days=backtrack_days + 1)
@@ -312,17 +333,19 @@ def _get_short_balance(code: str, date: dt.date) -> float:
             continue
 
         # 修正 R2：先查快取（避免重複調用 API）
-        cache_key = (check_date, code_normalized)
+        cache_key = (check_date, code_bare)
         if cache_key in _margin_cache:
             return _margin_cache[cache_key]
 
         try:
+            # 禮貌性間隔：只在快取未命中（真的要打 API）時等待，避免 TWSE 限流封鎖
+            import time
+            time.sleep(1.2)
             df = fetch_margin_loan(check_date, market="TW")
             if df is not None and not df.empty:
-                # 填充快取：逐列處理，用正確的 code 作為 key
+                # 填充快取：以純代碼為 key（TWSE 回傳的 code 本來就無後綴）
                 for _, row in df.iterrows():
-                    normalized_code = row["code"] if row["code"].endswith(".TW") else row["code"] + ".TW"
-                    key = (check_date, normalized_code)
+                    key = (check_date, str(row["code"]))
                     _margin_cache[key] = row.get("short_balance", 0)
 
                 # 查詢當前股票（修正 R2：顯式查表）
@@ -354,9 +377,10 @@ def _build_regime_series(start_date: dt.date, end_date: dt.date) -> dict[dt.date
     """
     try:
         # 下載 TWII（加權指數）
+        # 緩衝 550 日曆日 ≈ 375 交易日 > 252，確保區間起點就能算年線
         twii = yf.download(
             "^TWII",
-            start=start_date - dt.timedelta(days=300),
+            start=start_date - dt.timedelta(days=550),
             end=end_date + dt.timedelta(days=1),
             progress=False,
         )
@@ -364,6 +388,10 @@ def _build_regime_series(start_date: dt.date, end_date: dt.date) -> dict[dt.date
         if twii.empty:
             print("[警告] TWII 下載失敗，回退到每日查詢")
             return {}
+
+        # 新版 yfinance 回傳 MultiIndex 欄位，需攤平（同 market.py 慣例）
+        if isinstance(twii.columns, pd.MultiIndex):
+            twii.columns = twii.columns.get_level_values(0)
 
         close = twii["Close"]
         ma63 = close.rolling(63).mean()    # 季線
@@ -629,7 +657,11 @@ if __name__ == "__main__":
     result = backtest_short_strategy(start, end, args.profit, args.loss)
 
     # 儲存結果
-    output_file = OUTPUT_DIR / "backtest_short_3y.json"
+    # 注意：不寫進 data/results/（該目錄由 run_daily.sh 以 *.json glob 自動 commit，
+    # 回測產物會污染每日結果歷史），回測證據放 data/backtests/
+    backtest_dir = Path(__file__).parent / "data" / "backtests"
+    backtest_dir.mkdir(parents=True, exist_ok=True)
+    output_file = backtest_dir / f"backtest_short_{args.start}_{args.end}.json"
     import json
     with open(output_file, "w", encoding="utf-8") as f:
         # 將結果轉換為可序列化的格式

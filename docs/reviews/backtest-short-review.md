@@ -165,6 +165,25 @@ dataset：`TaiwanStockMarginPurchaseShortSale`、`TaiwanStockMonthRevenue`），
 
 ---
 
+## 第三輪（A 機，2026-07-05）：R1–R3 驗證通過；冒煙測試揪出的新問題已由 A 機直接修復
+
+R1（regime 序列）、R2（融券查表）、R3（history_data 傳遞）的實裝**驗證通過**。
+但實跑冒煙測試（2022-09~12）發現以下新問題，均屬機械性 bug，A 機已直接修復（不再往返，改動都在 backtest_short.py / margin_futures.py，請 B 機 pull 後檢視）：
+
+1. **universe 解析錯誤**：誤把 JSON 頂層 key（date/generated_at/...）當股票代碼 → 載入 0 檔、
+   輸出「0 筆交易」且 exit 0。已改為解析 `stocks` 陣列並依「市場」欄位對應 .TW/.TWO 後綴
+2. **`_build_regime_series` 的 yfinance MultiIndex 未攤平**：整個序列建立失敗退回空字典 →
+   全部日期 unknown → 全被閘門擋掉。已攤平（market.py 慣例）；緩衝 300→550 日曆天（252 交易日年線所需）
+3. **逐股下載改批次**（group_by="ticker"），子表天然攤平，同時解決速度與 MultiIndex
+4. **零資料防呆**：regime 序列或股價載入為空時中止、不寫結果檔（禁止 exit 0 假成功）
+5. **輸出改到 `data/backtests/`**：原路徑 data/results/ 會被 run_daily.sh 的 *.json glob 自動 commit
+6. **（重大，生產層）`fetch_margin_loan` 端點用錯**：BFI82U 無個股融券欄位，生產與回測的條件 2
+   一直拿到空資料。已改 MI_MARGN 並實測 2021/2022/2026——見 docs/judgment-cases.md 案例 5
+7. 融券查詢加 1.2s 禮貌間隔（TWSE 限流）；快取 key 改純代碼
+
+**給 B 機**：後續若繼續迭代此腳本，請先 pull 並讀本節與 judgment-cases 案例 4、5。
+條件 3（營收）仍為 stub，補實裝時注意營收公佈時滯（防 lookahead）。
+
 ## 裁決紀錄（使用者：2026-07-05）
 
 **第一輪裁決**：
