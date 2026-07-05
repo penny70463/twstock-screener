@@ -65,6 +65,7 @@ const signalText = computed(() => {
       <div class="glass-panel signal-card">
         <h3>🇺🇸 美股隔夜信號</h3>
         <table class="compact-table">
+          <tbody>
           <tr>
             <td>信號</td>
             <td class="font-bold">{{ usSignal.us_signal }}</td>
@@ -87,6 +88,7 @@ const signalText = computed(() => {
               {{ usSignal.sp500_change_pct > 0 ? '+' : '' }}{{ usSignal.sp500_change_pct }}%
             </td>
           </tr>
+          </tbody>
         </table>
       </div>
 
@@ -94,6 +96,7 @@ const signalText = computed(() => {
       <div class="glass-panel signal-card">
         <h3>📊 期交所籌碼信號 (TXF)</h3>
         <table class="compact-table">
+          <tbody>
           <tr>
             <td>信號</td>
             <td class="font-bold">{{ taifexSignal.taifex_signal }}</td>
@@ -120,6 +123,7 @@ const signalText = computed(() => {
             <td>加權分數</td>
             <td class="font-bold">{{ taifexSignal.weighted_score }}</td>
           </tr>
+          </tbody>
         </table>
       </div>
 
@@ -132,6 +136,7 @@ const signalText = computed(() => {
         <div v-else class="entry-details">
           <div class="twii-ref">加權指數：{{ twiiClose }}</div>
           <table class="entry-table">
+            <tbody>
             <tr>
               <td>進場點位</td>
               <td class="entry-value">{{ entryExit.entry }}</td>
@@ -144,6 +149,7 @@ const signalText = computed(() => {
               <td>停損點位</td>
               <td class="entry-value">{{ entryExit.stop_loss }}</td>
             </tr>
+            </tbody>
           </table>
         </div>
       </div>
@@ -187,6 +193,7 @@ const signalText = computed(() => {
 
 .signal-card {
   margin-bottom: 1.5rem;
+  padding: 1rem;
 }
 
 .signal-card h3 {
@@ -225,6 +232,7 @@ const signalText = computed(() => {
 
 .entry-card {
   margin-bottom: 1.5rem;
+  padding: 1rem;
   border: 2px solid var(--accent-blue);
 }
 
