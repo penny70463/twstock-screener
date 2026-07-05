@@ -25,9 +25,8 @@ TWSE_MARGIN = "https://www.twse.com.tw/rwd/zh/fund/BFI82U"
 TPEX_MARGIN = "https://www.tpex.org.tw/web/stock/margin_trading/daily"
 
 # ── 期交所期貨籌碼 ──────────────────────────────────────────
-# 期交所官方報表（期貨及選擇權法人及特定人士部位資訊）
-TAIFEX_LARGE_TRADERS = "https://www.taifex.com.tw/rwd/zh/reports/largeTraders"
-TAIFEX_FUTURES_API = "https://www.taifex.com.tw/api/v1/fut/institution"
+# 期交所官方 OpenAPI（期貨大額交易人詳細數據）
+TAIFEX_FUTURES_API = "https://openapi.taifex.com.tw/v1/MarketDataOfMajorInstitutionalTradersDetailsOfFuturesContractsBytheDate"
 
 
 def fetch_margin_loan(day: dt.date = None, market: str = "TW") -> Optional[pd.DataFrame]:
@@ -82,9 +81,7 @@ def fetch_margin_loan(day: dt.date = None, market: str = "TW") -> Optional[pd.Da
 
 
 def fetch_taifex_institution(product: str = "TXF", day: dt.date = None) -> Optional[dict]:
-    """取得期交所台指期籌碼（法人多空）
-
-    優先嘗試官方 API，失敗時回傳簡化版本（供回測用）
+    """取得期交所台指期籌碼（法人多空）— 用官方 OpenAPI
 
     Args:
         product: "TXF" (台指期) or "MXF" (小台期)
@@ -92,45 +89,71 @@ def fetch_taifex_institution(product: str = "TXF", day: dt.date = None) -> Optio
 
     Returns:
         dict: {
-            "date": "...",
+            "date": "2026-07-03",
             "product": "TXF",
-            "trust_net": 12345,  # 投信淨多單
-            "dealer_net": -5678,
-            "foreign_net": 3456,
-            "source": "taifex_api" or "fallback"
+            "trust_net": 12345,      # 投信淨持倉
+            "dealer_net": -5678,     # 自營商淨持倉
+            "foreign_net": 3456,     # 外資淨持倉
+            "source": "taifex_api"
         }
-        or None if completely fail
+        or fallback_empty if fail
     """
     if day is None:
         day = dt.date.today()
 
-    # 嘗試官方 API
+    # 官方 OpenAPI 參數
     params = {
-        "queryDate": day.strftime("%Y/%m/%d"),
-        "product": product
+        "startDate": day.strftime("%Y%m%d"),
+        "endDate": day.strftime("%Y%m%d"),
     }
+
+    # 契約代碼對應
+    contract_map = {
+        "TXF": "台指期",
+        "MXF": "小台期",
+    }
+    contract_code = contract_map.get(product, product)
 
     try:
         resp = requests.get(TAIFEX_FUTURES_API, params=params, headers=HEADERS, timeout=30)
         resp.raise_for_status()
         data = resp.json()
 
-        if data.get("success"):
-            raw = data.get("data", {})
-            # 解析籌碼數據（具體格式需根據實際 API 回應調整）
-            return {
-                "date": day.isoformat(),
-                "product": product,
-                "trust_net": int(raw.get("trust_net", 0)),
-                "dealer_net": int(raw.get("dealer_net", 0)),
-                "foreign_net": int(raw.get("foreign_net", 0)),
-                "source": "taifex_api"
-            }
-    except Exception as e:
-        print(f"[!] 期交所 API 失敗，嘗試備選方案 ({product}, {day}): {e}")
+        if not isinstance(data, list):
+            data = [data]
 
-    # 備選方案：回傳空籌碼（以便測試前端，實際值由使用者補充或通過其他管道取得）
-    print(f"[-] 期交所籌碼無資料，回傳備選版本供測試")
+        # 解析籌碼數據：按 Item 類別（投信、自營商、外資）累加淨持倉
+        trust_net = 0
+        dealer_net = 0
+        foreign_net = 0
+
+        for record in data:
+            if record.get("ContractCode") != contract_code:
+                continue
+
+            item = record.get("Item", "")
+            net_open_interest = int(record.get("OpenInterest(Net)", 0))
+
+            if "投信" in item or "Investment" in item:
+                trust_net += net_open_interest
+            elif "自營" in item or "Dealer" in item:
+                dealer_net += net_open_interest
+            elif "外資" in item or "Foreign" in item:
+                foreign_net += net_open_interest
+
+        return {
+            "date": day.isoformat(),
+            "product": product,
+            "trust_net": trust_net,
+            "dealer_net": dealer_net,
+            "foreign_net": foreign_net,
+            "source": "taifex_api"
+        }
+
+    except Exception as e:
+        print(f"[-] 期交所籌碼 API 失敗 ({product}, {day}): {e}")
+
+    # 備選方案
     return {
         "date": day.isoformat(),
         "product": product,
@@ -138,7 +161,6 @@ def fetch_taifex_institution(product: str = "TXF", day: dt.date = None) -> Optio
         "dealer_net": 0,
         "foreign_net": 0,
         "source": "fallback_empty",
-        "note": "無 API 連線，值為 0（請手動補充或等待官方資料）"
     }
 
 

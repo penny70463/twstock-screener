@@ -98,49 +98,72 @@ def get_us_overnight_signal() -> dict:
 
 
 def get_taifex_signal(day: dt.date) -> dict:
-    """期交所法人籌碼信號
+    """期交所法人籌碼信號（優先期貨，備選現貨法人買賣超）
 
     Returns:
         {
-            "taifex_signal": "bullish" | "bearish" | "neutral" | "unknown",
+            "taifex_signal": "bullish" | "bearish" | "neutral",
             "trust_net": ...,
             "dealer_net": ...,
             "foreign_net": ...,
             "weighted_score": ...,
-            "source": "taifex_api" | "fallback_empty",
+            "source": "taifex_api" | "institutional_proxy" | "fallback",
         }
     """
     try:
-        # 台指期
+        # 優先嘗試期交所期貨籌碼
         data_txf = fetch_futures_cached(day, product="TXF")
-        if data_txf is None:
-            return {"taifex_signal": "unknown", "note": "期貨籌碼無法取得"}
+        if data_txf is not None and data_txf.get("source") == "taifex_api":
+            trust_net = int(data_txf.get("trust_net", 0))
+            dealer_net = int(data_txf.get("dealer_net", 0))
+            foreign_net = int(data_txf.get("foreign_net", 0))
 
-        trust_net = int(data_txf.get("trust_net", 0))
-        dealer_net = int(data_txf.get("dealer_net", 0))
-        foreign_net = int(data_txf.get("foreign_net", 0))
-        source = data_txf.get("source", "unknown")
+            net_score = (
+                trust_net * TRUST_WEIGHT +
+                dealer_net * DEALER_WEIGHT +
+                foreign_net * FOREIGN_WEIGHT
+            )
+            signal = "bullish" if net_score > 0 else "bearish" if net_score < 0 else "neutral"
+            return {
+                "taifex_signal": signal,
+                "trust_net": trust_net,
+                "dealer_net": dealer_net,
+                "foreign_net": foreign_net,
+                "weighted_score": round(net_score, 0),
+                "source": "taifex_api",
+            }
 
-        # 加權信號
-        net_score = (
-            trust_net * TRUST_WEIGHT +
-            dealer_net * DEALER_WEIGHT +
-            foreign_net * FOREIGN_WEIGHT
-        )
+        # 備選方案：用法人現貨買賣超推估期貨信號
+        from src.advisor.data import fetch_institutional
+        inst = fetch_institutional(days=1)
+        if inst is not None and not inst.empty:
+            # 取最新一日的法人買賣超淨額
+            trust_cols = [c for c in inst.columns if c.endswith("_trust")]
+            if trust_cols:
+                trust_net = int(inst[trust_cols[-1]].sum())
+                signal = "bullish" if trust_net > 0 else "bearish" if trust_net < 0 else "neutral"
+                return {
+                    "taifex_signal": signal,
+                    "trust_net": trust_net,
+                    "dealer_net": 0,
+                    "foreign_net": 0,
+                    "weighted_score": round(trust_net, 0),
+                    "source": "institutional_proxy",
+                }
 
-        signal = "bullish" if net_score > 0 else "bearish" if net_score < 0 else "neutral"
-
+        # 最後備選
         return {
-            "taifex_signal": signal,
-            "trust_net": trust_net,
-            "dealer_net": dealer_net,
-            "foreign_net": foreign_net,
-            "weighted_score": round(net_score, 0),
-            "source": source,
+            "taifex_signal": "neutral",
+            "trust_net": 0,
+            "dealer_net": 0,
+            "foreign_net": 0,
+            "weighted_score": 0.0,
+            "source": "fallback",
         }
+
     except Exception as e:
-        print(f"[-] 期交所籌碼抓取失敗: {e}")
-        return {"taifex_signal": "unknown", "note": str(e)}
+        print(f"[-] 籌碼信號失敗: {e}")
+        return {"taifex_signal": "neutral", "source": "error"}
 
 
 def main() -> None:
