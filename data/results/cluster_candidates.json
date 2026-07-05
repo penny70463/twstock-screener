@@ -1,0 +1,184 @@
+{
+  "date": "2026-07-05",
+  "generated_at": "2026-07-05T12:00:00",
+  "note": "候補族群監控表 - 即將轉強的族群及其觀察股票",
+  "monitoring_priorities": [
+    {
+      "priority": 1,
+      "name": "被動元件",
+      "reason": "2/6 股今日點火，低基期補漲",
+      "fired_today": 2,
+      "total_stocks": 6,
+      "status": "準備第二波",
+      "target_timeline": "1~2 週",
+      "entry_signal": "華容、凱美、立隆電中任一股漲回前日高點",
+      "expected_gain": "8~15%",
+      "watch_list": [
+        {
+          "code": "5328",
+          "name": "華容",
+          "current_price": 82.4,
+          "last_fire_date": "07-02",
+          "status": "離線中",
+          "signal": "漲回前日高點 83.4",
+          "priority": "high"
+        },
+        {
+          "code": "2375",
+          "name": "凱美",
+          "current_price": 216.0,
+          "last_fire_date": "07-01",
+          "chg_pct": -0.5,
+          "status": "洗盤中",
+          "signal": "漲回前日高點 217.6",
+          "priority": "high"
+        },
+        {
+          "code": "2472",
+          "name": "立隆電",
+          "current_price": 425.0,
+          "last_fire_date": "06-30",
+          "chg_pct": -0.7,
+          "status": "洗盤中",
+          "signal": "漲回前日高點 428.0",
+          "priority": "high"
+        },
+        {
+          "code": "3236",
+          "name": "千如",
+          "current_price": 68.7,
+          "last_fire_date": "07-01",
+          "chg_pct": -2.0,
+          "status": "最深洗盤",
+          "signal": "漲回前日高點 70.1",
+          "priority": "critical"
+        }
+      ]
+    },
+    {
+      "priority": 2,
+      "name": "功率元件",
+      "reason": "族群歷史觸發最多（7檔），今日集體衰退（洗盤）= 最佳進場",
+      "fired_today": 1,
+      "total_stocks": 7,
+      "status": "第三波啟動前夜",
+      "target_timeline": "2~3 天內",
+      "entry_signal": "茂達、杰力反彈站上 07-02 高點",
+      "expected_gain": "8~15%",
+      "watch_list": [
+        {
+          "code": "6525",
+          "name": "捷敏-KY",
+          "current_price": 183.0,
+          "last_fire_date": "07-03",
+          "chg_pct": 9.9,
+          "status": "已點火龍頭",
+          "signal": "持續強勢",
+          "priority": "high"
+        },
+        {
+          "code": "3707",
+          "name": "漢磊",
+          "current_price": 91.0,
+          "last_fire_date": "06-23",
+          "chg_pct": 3.8,
+          "status": "未達新高",
+          "signal": "突破 95 元",
+          "priority": "high"
+        },
+        {
+          "code": "8261",
+          "name": "富鼎",
+          "current_price": 320.0,
+          "last_fire_date": "07-02",
+          "chg_pct": -2.1,
+          "status": "洗盤中",
+          "signal": "漲回 327+ 元",
+          "priority": "high"
+        },
+        {
+          "code": "6435",
+          "name": "大中",
+          "current_price": 382.0,
+          "last_fire_date": "07-02",
+          "chg_pct": -2.7,
+          "status": "洗盤中",
+          "signal": "漲回 393+ 元",
+          "priority": "high"
+        },
+        {
+          "code": "6138",
+          "name": "茂達",
+          "current_price": 400.0,
+          "last_fire_date": "07-02",
+          "chg_pct": -4.4,
+          "status": "恐慌拋售",
+          "signal": "漲回 418+ 元（最強訊號）",
+          "priority": "critical"
+        },
+        {
+          "code": "5299",
+          "name": "杰力",
+          "current_price": 129.0,
+          "last_fire_date": "07-02",
+          "chg_pct": -5.1,
+          "status": "極度超跌",
+          "signal": "漲回 136+ 元（撿便宜位置）",
+          "priority": "critical"
+        }
+      ]
+    },
+    {
+      "priority": 3,
+      "name": "車用零組件",
+      "reason": "龍頭百達已連 4 日觸發，帶動信號明確",
+      "fired_today": 1,
+      "total_stocks": 3,
+      "status": "龍頭帶動中",
+      "target_timeline": "3~5 天",
+      "entry_signal": "聯嘉、麗清突破 30 元",
+      "expected_gain": "10~18%",
+      "watch_list": [
+        {
+          "code": "2236",
+          "name": "百達-KY",
+          "current_price": 184.0,
+          "last_fire_date": "07-03",
+          "chg_pct": 9.9,
+          "status": "龍頭強勢",
+          "signal": "持續領航",
+          "priority": "high"
+        },
+        {
+          "code": "3717",
+          "name": "聯嘉",
+          "current_price": 28.9,
+          "last_fire_date": "07-01",
+          "chg_pct": 1.2,
+          "status": "溫和上升",
+          "signal": "突破 30 元",
+          "priority": "high"
+        },
+        {
+          "code": "3346",
+          "name": "麗清",
+          "current_price": 29.15,
+          "last_fire_date": "07-02",
+          "chg_pct": -0.5,
+          "status": "洗盤中",
+          "signal": "漲破 30 元",
+          "priority": "high"
+        }
+      ]
+    }
+  ],
+  "monitoring_rules": {
+    "fire_signal": "當股票成交量 >= 20日均量×2倍 且 漲幅 >= 3.5% 且 收盤創60日新高",
+    "cluster_activation": "同族群3~5檔在數日內接連點火（雁行擴散）",
+    "entry_signal": "候補股漲回「前日高點」時，族群啟動轉強",
+    "stop_loss": "跌破波段起點下方 15%",
+    "take_profit": "達到「當日出場線」時出場"
+  },
+  "update_frequency": "每日收盤後自動更新",
+  "last_updated": "2026-07-05T12:00:00"
+}
