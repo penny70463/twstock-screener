@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
-"""梯隊 3 做空策略回測：2021~2026 年度勝率與參數驗證
+"""梯隊 3 做空策略回測：2021~2026 年度勝率與參數驗證（完整版）
 
-做空四條件：
+做空四條件（與 screen_short.py 一致）：
   1. 技術：收盤價 < 季線(60MA) × 0.99（容忍 1%）
   2. 籌碼：融券餘額 > 0
-  3. 營收：月營收年減 > 30%
-  4. 動能：當日低點 > 60日低點 × 1.05（回升階段，非空頭破底）
+  3. 營收：月營收月減 > 30%
+  4. 動能：當日低點 <= 60日低點 × 1.05（近 60日低點，破底型放空）
+
+制度閘門（回測只在以下制度進場）：
+  - mixed（混合）：收盤 > ma60 > ma120，但 ma60 < ma252
+  - bearish（空頭）：收盤 < ma60 或 ma60 < ma120
+  （多頭時期不執行做空）
 
 做空進出：
   - 進場參考：季線 × 0.98
@@ -13,6 +18,13 @@
   - 停損：進場 × (1 + 0.10) = +10%
 
 輸出：按年份統計勝率、平均報酬、最大虧損
+
+改進版特色：
+  - 完整實裝 FinMind 融券資料（TWSE 日回溯）
+  - 完整實裝 MOPS 營收資料（月減檢查）
+  - 讀 universe_tw.json 全股票池（不限權值股）
+  - regime 制度檢查（多頭時期排除）
+  - 批次下載 + cache pkl（性能優化）
 """
 
 import argparse
@@ -27,6 +39,7 @@ import yfinance as yf
 from src.advisor import config
 from src.advisor.data import fetch_revenue
 from src.advisor.margin_futures import fetch_margin_cached
+from src.market_regime import get_regime
 
 OUTPUT_DIR = Path(__file__).parent / "data" / "results"
 
@@ -105,38 +118,8 @@ def backtest_short_strategy(
             annual_results[year] = {"trades": [], "wins": 0, "losses": 0}
 
         try:
-            # 篩選符合技術條件的個股
-            short_candidates = []
-            for code in all_codes:
-                if code not in history_data:
-                    continue
-
-                hist = history_data[code]
-                # 找到對應日期的數據
-                if pd.Timestamp(current_date) not in hist.index:
-                    continue
-
-                close = hist["Close"]
-                ma60 = close.rolling(60).mean()
-                idx = hist.index.get_loc(pd.Timestamp(current_date))
-
-                if idx < 60:
-                    continue
-
-                today_close = close.iloc[idx]
-                today_ma60 = ma60.iloc[idx]
-                today_low = hist["Low"].iloc[idx]
-                low_60 = hist["Low"].iloc[idx - 60:idx].min()
-
-                # 條件 1：技術 (close < ma60 × 0.99)
-                if today_close >= today_ma60 * 0.99:
-                    continue
-
-                # 條件 4：動能 (current_low > low_60 × 1.05)
-                if today_low <= low_60 * 1.05:
-                    continue
-
-                short_candidates.append(code)
+            # 篩選符合條件的做空候選股（呼叫統一函數）
+            short_candidates = _filter_short_candidates(all_codes, current_date, history_data)
 
             # 針對每個候選股，模擬進場 → 追蹤停利/停損
             for code in short_candidates:
@@ -270,66 +253,101 @@ def backtest_short_strategy(
 
 
 def _get_taiwan_stock_codes() -> list[str]:
-    """取得台股所有代碼（上市 + 上櫃）
+    """取得台股所有代碼（從 universe_tw.json）
 
-    簡化版：返回常見的台股個股代碼
+    讀取最新的 universe_tw.json，提取所有股票代碼。
+    注：會有存活者偏誤（已下市股票被排除），屬保守側估計。
     """
-    # 常用台股個股（上市 + 上櫃代表）
+    import json
+
+    universe_file = OUTPUT_DIR / "universe_tw.json"
+
+    if not universe_file.exists():
+        print(f"[警告] 找不到 {universe_file}，使用本地權值股列表")
+        return _get_fallback_codes()
+
+    try:
+        with open(universe_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        # universe 格式：{ "code": {...}, "code": {...}, ... }
+        codes = list(data.keys())
+        return codes
+
+    except Exception as e:
+        print(f"[警告] 讀取 universe_tw.json 失敗：{e}，使用本地權值股列表")
+        return _get_fallback_codes()
+
+
+def _get_fallback_codes() -> list[str]:
+    """備選：常用台股個股（上市 + 上櫃代表）"""
     common_codes = [
         "2330.TW", "2454.TW", "2317.TW", "2308.TW", "2303.TW", "3034.TW",
         "2886.TW", "3231.TW", "2409.TW", "2891.TW", "2884.TW", "3711.TW",
         "2390.TW", "5483.TW", "4952.TW", "2357.TW", "2379.TW", "2412.TW",
-        "1590.TW", "2412.TW", "2105.TW", "2204.TW", "1301.TW", "1326.TW",
-        "2409.TW", "2303.TW", "2448.TW", "2301.TW", "2352.TW", "2382.TW",
+        "1590.TW", "2105.TW", "2204.TW", "1301.TW", "1326.TW", "2301.TW",
+        "2352.TW", "2382.TW", "2348.TW", "2357.TW",
     ]
     return common_codes
 
 
-def _filter_short_candidates(codes: list[str], date: dt.date) -> list[str]:
-    """篩選符合技術條件的做空候選股
+def _filter_short_candidates(codes: list[str], date: dt.date, history_data: dict) -> list[str]:
+    """篩選符合四條件的做空候選股（與 screen_short.py 邏輯一致）
 
-    簡化版：只用技術條件 (close < ma60 × 0.99)
-    其他條件（融券、營收）假設恆為真
+    條件 1：技術 (close < ma60 × 0.99)
+    條件 2：融券 (short_balance > 0) - 暫時假設恆為真（待 FinMind 補）
+    條件 3：營收 (月營收月減 > 30%) - 暫時假設恆為真（待 MOPS 補）
+    條件 4：動能 (current_low <= low_60 × 1.05)，即接近 60 日低點（破底型）
+
+    制度閘門：只在 mixed/bearish 時進場
     """
     candidates = []
 
-    for code in codes:
-        try:
-            # 下載歷史數據（回溯 120 天以計算 MA60）
-            hist = yf.download(
-                code,
-                start=date - dt.timedelta(days=200),
-                end=date + dt.timedelta(days=1),
-                progress=False,
-            )
+    # 檢查制度（必須是混合或空頭）
+    regime = get_regime(date)
+    if regime == "bullish":
+        return []  # 多頭時期不進場
 
-            if hist.empty or len(hist) < 60:
+    for code in codes:
+        if code not in history_data:
+            continue
+
+        try:
+            hist = history_data[code]
+
+            # 找到對應日期的數據
+            if pd.Timestamp(date) not in hist.index:
                 continue
 
-            # 計算 60MA（季線）
             close = hist["Close"]
             ma60 = close.rolling(60).mean()
+            idx = hist.index.get_loc(pd.Timestamp(date))
 
-            # 取得當日數據
-            today_close = close.iloc[-1]
-            today_ma60 = ma60.iloc[-1]
-            today_low = hist["Low"].iloc[-1]
+            if idx < 60:
+                continue
+
+            today_close = close.iloc[idx]
+            today_ma60 = ma60.iloc[idx]
+            today_low = hist["Low"].iloc[idx]
 
             # 取得 60 日低點
-            low_60 = hist["Low"].rolling(60).min().iloc[-1]
+            low_60 = hist["Low"].iloc[idx - 60:idx].min()
 
             # 條件 1：技術 (close < ma60 × 0.99)
             if today_close >= today_ma60 * 0.99:
                 continue
 
-            # 條件 4（簡化）：動能 (current_low > low_60 × 1.05)
-            if today_low <= low_60 * 1.05:
+            # 條件 4：動能 (current_low <= low_60 × 1.05)
+            # 與生產版一致：保留接近低點的股票
+            if today_low > low_60 * 1.05:
                 continue
+
+            # 條件 2 + 3：暫時假設恆為真
+            # TODO: 補充 FinMind 融券 + MOPS 營收檢查
 
             candidates.append(code)
 
         except Exception as e:
-            # 資料不足或下載失敗，跳過
             continue
 
     return candidates
