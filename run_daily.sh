@@ -55,6 +55,16 @@ if ! python -u screen_event_driven.py; then
   echo "事件驅動選股失敗，跳過（不影響其他結果）"
 fi
 
+echo "執行做空選股 (screen_short.py，空頭環境放空機會)..."
+if ! python -u screen_short.py; then
+  echo "做空選股失敗，跳過（不影響其他結果）"
+fi
+
+echo "執行台指期策略 (screen_futures.py，美股+籌碼信號)..."
+if ! python -u screen_futures.py; then
+  echo "台指期策略失敗，跳過（不影響其他結果）"
+fi
+
 echo "統一發送每日 Line 訊息..."
 if ! python -u send_daily_line.py; then
   echo "Line 發送失敗，跳過（不影響結果推送）"

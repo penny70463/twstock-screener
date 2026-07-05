@@ -7,6 +7,8 @@ import ClusterBreakout from './components/ClusterBreakout.vue'
 import GroupSeason from './components/GroupSeason.vue'
 import QuarterEnd from './components/QuarterEnd.vue'
 import EventDriven from './components/EventDriven.vue'
+import ShortSell from './components/ShortSell.vue'
+import Futures from './components/Futures.vue'
 
 const activeMarket = ref('TW')
 const activeTab = ref('screener')
@@ -63,9 +65,10 @@ watch(selectedDate, () => {
 
 watch(activeMarket, () => {
   selectedDate.value = 'latest'
-  // 回檔轉強、族群突破、集團作帳、季底法人、事件驅動僅台股提供，切到美股時退回強勢股掃描
+  // 台股專用頁籤：回檔轉強、族群突破、集團作帳、季底法人、事件驅動、做空
+  // 切到美股時退回強勢股掃描（台指期保留，可跨市場觀察）
   if (activeMarket.value !== 'TW'
-      && ['pullback', 'cluster', 'group', 'quarter', 'event'].includes(activeTab.value)) {
+      && ['pullback', 'cluster', 'group', 'quarter', 'event', 'short'].includes(activeTab.value)) {
     activeTab.value = 'screener'
   }
   fetchDates()
@@ -294,6 +297,21 @@ const isSparklineUp = (prices) => {
           🎪 展覽會供應鏈
         </button>
         <button
+          v-if="activeMarket === 'TW'"
+          class="tab-btn"
+          :class="{ active: activeTab === 'short' }"
+          @click="activeTab = 'short'"
+        >
+          🔴 做空機會
+        </button>
+        <button
+          class="tab-btn"
+          :class="{ active: activeTab === 'futures' }"
+          @click="activeTab = 'futures'"
+        >
+          📈 台指期策略
+        </button>
+        <button
           class="tab-btn"
           :class="{ active: activeTab === 'portfolio' }"
           @click="activeTab = 'portfolio'"
@@ -398,6 +416,16 @@ const isSparklineUp = (prices) => {
       <!-- Event Driven Tab Content -->
       <template v-if="activeTab === 'event'">
         <EventDriven />
+      </template>
+
+      <!-- Short Sell Tab Content -->
+      <template v-if="activeTab === 'short'">
+        <ShortSell />
+      </template>
+
+      <!-- Futures Tab Content -->
+      <template v-if="activeTab === 'futures'">
+        <Futures />
       </template>
 
       <!-- Portfolio Tab Content -->

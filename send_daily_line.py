@@ -103,6 +103,48 @@ def _format_event_driven(data: dict) -> str | None:
     return "\n".join(lines)
 
 
+def _format_short(data: dict) -> str | None:
+    """做空段落：僅 mixed / bearish Regime 時出現"""
+    regime = data.get("regime")
+    if regime not in ("mixed", "bearish"):
+        return None
+
+    stocks = data.get("stocks", [])
+    if not stocks:
+        return None
+
+    short_allowed = data.get("params", {}).get("short_allowed", False)
+    if not short_allowed:
+        return None
+
+    top = "、".join(f"{s['stock_id']}" for s in stocks[:3])
+    regime_label = "混合" if regime == "mixed" else "空頭"
+    return f"🔴 放空機會（{regime_label} {len(stocks)} 檔）\n⚠️ 高風險：{top}…"
+
+
+def _format_futures(data: dict) -> str | None:
+    """台指期段落：每日都有"""
+    signal = data.get("signals", {})
+    if not signal:
+        return None
+
+    entry_exit = data.get("entry_exit")
+    if not entry_exit or "note" in entry_exit:
+        return None
+
+    signal_text = (
+        "買進" if signal.get("buy_signal")
+        else "賣出" if signal.get("sell_signal")
+        else "觀望"
+    )
+
+    twii = data.get("twii_close", 0)
+    entry = entry_exit.get("entry")
+    target = entry_exit.get("target")
+
+    return f"📈 台指期（{signal_text}）\n加權 {twii} → 進場 {entry} 目標 {target}"
+
+
 # 各選股腳本的訊息段落登記表：(結果檔名, 格式函式)
 # 新選股腳本 → 輸出 JSON → 在此加一筆；格式函式回 None 表示該段落本日不顯示
 SCREEN_SECTIONS = [
@@ -111,6 +153,8 @@ SCREEN_SECTIONS = [
     ("group_tw.json", _format_group),
     ("quarter_tw.json", _format_quarter),
     ("event_driven_tw.json", _format_event_driven),
+    ("short_tw.json", _format_short),
+    ("futures_tw.json", _format_futures),
 ]
 
 
