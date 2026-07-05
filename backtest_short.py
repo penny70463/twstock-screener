@@ -38,10 +38,14 @@ import yfinance as yf
 
 from src.advisor import config
 from src.advisor.data import fetch_revenue
-from src.advisor.margin_futures import fetch_margin_cached
+from src.advisor.margin_futures import fetch_margin_cached, fetch_margin_loan
 from src.market_regime import get_regime
 
 OUTPUT_DIR = Path(__file__).parent / "data" / "results"
+
+# 全局快取：融券資料、營收資料
+_margin_cache = {}  # {(date, code): short_balance}
+_revenue_cache = {}  # {date: {code: mom_pct}}
 
 
 def backtest_short_strategy(
@@ -291,12 +295,57 @@ def _get_fallback_codes() -> list[str]:
     return common_codes
 
 
+def _get_short_balance(code: str, date: dt.date) -> float:
+    """取得某日融券餘額（條件 2）
+
+    回溯邏輯：如果當日無資料，往前查 5 個交易日
+    """
+    code_without_tw = code.replace(".TW", "")
+
+    for backtrack_days in range(5):
+        check_date = date - dt.timedelta(days=backtrack_days + 1)
+
+        # 跳過週末
+        if check_date.weekday() >= 5:
+            continue
+
+        cache_key = (check_date, code)
+        if cache_key in _margin_cache:
+            return _margin_cache[cache_key]
+
+        try:
+            df = fetch_margin_loan(check_date, market="TW")
+            if df is not None and not df.empty:
+                for _, row in df.iterrows():
+                    cache_key = (check_date, row["code"] + ".TW")
+                    _margin_cache[cache_key] = row.get("short_balance", 0)
+
+                if cache_key in _margin_cache:
+                    return _margin_cache[cache_key]
+        except Exception:
+            continue
+
+    return 0  # 如果全部失敗，假設為 0
+
+
+def _get_revenue_mom(code: str, date: dt.date) -> float:
+    """取得某日營收月減百分比（條件 3）
+
+    暫時簡化：直接返回 0（假設條件恆為真）
+    TODO: 集成 FinMind 或 MOPS 歷史營收
+    """
+    # 完整版應該查詢 MOPS 或 FinMind 的月營收資料
+    # 月減 > 30% 時觸發做空信號
+    # 暫時假設所有股票都滿足此條件
+    return 0
+
+
 def _filter_short_candidates(codes: list[str], date: dt.date, history_data: dict) -> list[str]:
     """篩選符合四條件的做空候選股（與 screen_short.py 邏輯一致）
 
     條件 1：技術 (close < ma60 × 0.99)
-    條件 2：融券 (short_balance > 0) - 暫時假設恆為真（待 FinMind 補）
-    條件 3：營收 (月營收月減 > 30%) - 暫時假設恆為真（待 MOPS 補）
+    條件 2：融券 (short_balance > 0)
+    條件 3：營收 (月營收月減 < -30%) - 暫時假設恆為真（待 MOPS 補）
     條件 4：動能 (current_low <= low_60 × 1.05)，即接近 60 日低點（破底型）
 
     制度閘門：只在 mixed/bearish 時進場
@@ -342,8 +391,17 @@ def _filter_short_candidates(codes: list[str], date: dt.date, history_data: dict
             if today_low > low_60 * 1.05:
                 continue
 
-            # 條件 2 + 3：暫時假設恆為真
-            # TODO: 補充 FinMind 融券 + MOPS 營收檢查
+            # 條件 2：融券 (short_balance > 0)
+            short_balance = _get_short_balance(code, date)
+            if short_balance <= 0:
+                continue
+
+            # 條件 3：營收 (月營收月減 < -30%)
+            # 簡化版：暫時假設恆為真
+            # TODO: 補充 MOPS 營收月減檢查
+            revenue_mom = _get_revenue_mom(code, date)
+            # if revenue_mom > -30:
+            #     continue
 
             candidates.append(code)
 
