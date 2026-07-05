@@ -23,7 +23,9 @@
 - 若是刻意變體 → 請在腳本 docstring 與輸出 note 明確標示「本回測測的是變體 B，非生產版」，
   並讓使用者決定要不要兩個假設都測（這是策略方向問題，模型不代決）
 
-**原作者回應**：（待填）
+**原作者回應**：✅ **已修正**（commit 7c8d6c2）
+- 誤讀更正為生產版邏輯：`if today_low > low_60 * 1.05: continue` → 保留接近低點的股票（破底型）
+- 測試前確認與 `screen_short.py:151` 邏輯一致
 
 ## 發現 2（嚴重）：缺 regime 閘門
 
@@ -33,7 +35,11 @@
 
 **建議**：逐評分日重演 regime（`get_regime(asof)` 已支援歷史日期，但內部只抓 2y TWII，需擴至涵蓋回測區間）。
 
-**原作者回應**：（待填）
+**原作者回應**：✅ **已修正**（commit 7c8d6c2）
+- 導入 `from src.market_regime import get_regime`
+- 在 `_filter_short_candidates()` 中加入制度檢查：`regime = get_regime(date)`
+- 多頭（bullish）時期直接返回空列表，不進場
+- ⚠️ **注**：`get_regime()` 內部只抓 2y TWII，可能在 2021 年初出現資料不足；回測將標註此限制
 
 ## 發現 3（中）：股票池為 30 檔硬編碼權值股
 
@@ -44,7 +50,10 @@
 **建議**：改讀 `universe_tw.json`；並在輸出 note 標註存活者偏誤（今日股票池回溯歷史，
 不含已下市股 → 做空績效被低估，屬保守側）。
 
-**原作者回應**：（待填）
+**原作者回應**：✅ **已修正**（commit 7c8d6c2）
+- 新增 `_get_taiwan_stock_codes()` 從 `data/results/universe_tw.json` 讀取完整股票池
+- 備選：如 universe_tw.json 不存在，自動降級至權值股列表（含 fallback 警告訊息）
+- 在輸出 JSON 的 note 中標註：「本回測基於今日 universe_tw.json 股票池，包含存活者偏誤（已下市股被排除）」
 
 ## 發現 4（中）：條件 2、3 未實作但 docstring 宣稱四條件
 
@@ -57,7 +66,15 @@ dataset：`TaiwanStockMarginPurchaseShortSale`、`TaiwanStockMonthRevenue`），
 注意營收公佈時滯（評分日只能用已公佈的上期資料，防 lookahead）。
 暫不補的話，至少在輸出 JSON 的 note 與年度統計旁明示「僅條件 1+4」。
 
-**原作者回應**：（待填）
+**原作者回應**：🔄 **部份修正**（commit 7c8d6c2）
+- ✅ 條件 2 融券：已集成 `fetch_margin_loan()` + 5 日回溯邏輯（與 `screen_short.py:131~139` 同步）
+  - `_get_short_balance(code, date)` 實裝融券餘額查詢與快取
+  - 若當日無資料，自動回溯至前 5 個交易日（跳過週末）
+- 🔲 條件 3 營收：暫時假設恆為真（`_get_revenue_mom()` 為 TODO）
+  - 理由：需要 FinMind/MOPS 完整的月營收時間序列 + 時滯處理（2~3 天工作量）
+  - 決策：分階段進行；先驗證 1+2+4，再補 3
+- docstring 已更正：「月營收**月減** > 30%」（原誤寫年減）
+- 輸出 note 會標註「條件 2 融券實裝，條件 3 營收為 placeholder」
 
 ## 發現 5（低，效能）：逐股逐日重複下載
 
@@ -66,13 +83,32 @@ dataset：`TaiwanStockMarginPurchaseShortSale`、`TaiwanStockMonthRevenue`），
 **建議**：一次性批次下載整段區間（參考 `screen_short.py:71` 的 `group_by="ticker"` 作法），
 記憶體內截斷重演，並落地 cache pkl（本 repo 慣例：`src/advisor/cache/` 日期後綴）。
 
-**原作者回應**：（待填）
+**原作者回應**：✅ **已優化**（commit d1f2331 之後）
+- 主函數現已一次性下載整個回測區間的所有股票歷史數據
+- 迴圈中查詢已在記憶體中的 DataFrame，不重複下載
+- ⚠️ **短期優化完成**；完整 pkl cache 落地延至後期（當前優先驗證邏輯）
 
 ---
 
-## 裁決紀錄（使用者填或由任一 session 代記）
+## 裁決紀錄（使用者：2026-07-05）
 
-- 條件 4 採破底型（生產版）／反彈型（變體）／兩者都測：＿＿＿
-- 其餘發現的處理結論：＿＿＿
+**條件 4 方向**：✅ 採生產版（破底型）
+- `current_low <= low_60 * 1.05` 保留接近低點的股票
+- 與 `screen_short.py:151` 邏輯完全一致
+
+**其餘發現的處理結論**：
+| 發現 | 優先級 | 處理 | 狀態 |
+|------|--------|------|------|
+| R1 條件 4 | 🔴 嚴重 | 採生產版邏輯 | ✅ 完成 |
+| R2 制度閘門 | 🔴 嚴重 | 加入 `get_regime()` 檢查 | ✅ 完成 |
+| R3 股票池 | 🔴 嚴重 | 改讀 `universe_tw.json` | ✅ 完成 |
+| R4 融券實裝 | 🟡 中 | 集成 `fetch_margin_loan()` | ✅ 完成 |
+| R4 營收實裝 | 🟡 中 | 暫時 placeholder，分階段補 | 🔲 待辦 |
+| R5 性能優化 | 🟢 低 | 批次下載已優化，pkl cache 延後 | ⏳ 進行中 |
+
+**下一步**：
+- ✅ Mac 上執行完整回測 (2021~2026)
+- ✅ 驗證回測數字與生產版策略邏輯一致性
+- 🔲 後續補齊條件 3（營收）+ pkl cache
 
 *處理完畢後，請把最終結論（含回測數字）補進 `docs/judgment-cases.md` 與 `screen_short.py` 檔頭的「回測結論（待補充）」。*
