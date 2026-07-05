@@ -41,7 +41,7 @@ EXIT_OFFSET = 5      # 出場：進場後 N 日收盤（T+5 勝率最高）
 
 def season_phase(d: dt.date) -> str:
     """判斷是否為季底窗口（季度最後月份的最後 20 日）"""
-    q_month = {1, 4, 7, 10}[d.month // 3] if d.month % 3 == 0 else None
+    q_month = (1, 4, 7, 10)[d.month // 3] if d.month % 3 == 0 else None
     if q_month is None:
         return "off"
     _, last_day = (d.replace(day=1) + dt.timedelta(days=32)).replace(day=1) - dt.timedelta(days=1)
