@@ -51,7 +51,7 @@ const regimeColor = computed(() => ({
 
       <p class="logic-desc ed-desc">
         💡 <strong>策略邏輯</strong>：監控即將到來的產業展覽會。
-        展覽會前 7～15 日，龍頭公司及相關供應鏈股往往因預期訂單增加而提前上漲。
+        展覽會前 15～30 日，龍頭公司及相關供應鏈股往往因預期訂單增加而提前上漲。
         <strong>僅在多頭或混合 Regime 下執行</strong>。
       </p>
 

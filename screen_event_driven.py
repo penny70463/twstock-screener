@@ -2,7 +2,7 @@
 """事件驅動選股（展覽會 + 法說會前後供應鏈股）
 
 回測結論（待補充）：
-- 展覽會前 10～15 日進場供應鏈股，出場規則待定
+- 展覽會前 15～30 日進場供應鏈股（2026-07-05 依使用者指示由 7~15 日改為 15~30 日），出場規則待定
 - 法說會前 5～10 日進場龍頭股及供應鏈股
 
 用法：
@@ -28,7 +28,10 @@ ASOF = sys.argv[1] if len(sys.argv) > 1 and not sys.argv[1].startswith("-") \
     else dt.date.today().isoformat()
 OUT_JSON = REPO / "data" / "results" / "event_driven_tw.json"
 
-LOOKBACK = 14  # 往後查看 14 天內的展覽會
+# 進場窗口：展覽會開始日前 LEAD_MIN ~ LEAD_MAX 天才納入
+# （展前 15~30 日提前佈局；太近的展覽視為行情已反應，不再進場）
+LEAD_MIN = 15
+LEAD_MAX = 30
 
 
 def main() -> None:
@@ -40,7 +43,8 @@ def main() -> None:
         "generated_at": dt.datetime.now().isoformat(timespec="seconds"),
         "regime": regime,
         "params": {
-            "lookback_days": LOOKBACK,
+            "lead_min_days": LEAD_MIN,
+            "lead_max_days": LEAD_MAX,
             "regime_filter": "多頭、混合 Regime 時執行",
         },
         "events": [],
@@ -58,24 +62,31 @@ def main() -> None:
     with open(REPO / "data" / "results" / "universe_tw.json", encoding="utf-8") as f:
         uni = {s["stock_id"]: s for s in json.load(f)["stocks"]}
 
-    # 篩選即將到來的展覽會（簡化版：以月份判定）
+    # 篩選進場窗口內的展覽會：展覽開始日在 asof 後 LEAD_MIN~LEAD_MAX 天
+    # typical_date_range 格式 "YYYY-MM-DD:YYYY-MM-DD"；無日期者回退月份判定（下一個月視為窗口內）
     upcoming_exhibitions = []
     for exh in cal.get("exhibitions", []):
-        season = exh.get("season")
-        if isinstance(season, list):
-            seasons = season
-        else:
-            seasons = [season]
+        date_range = exh.get("typical_date_range")
+        if date_range:
+            try:
+                start = dt.date.fromisoformat(date_range.split(":")[0])
+                days_until = (start - asof).days
+                if LEAD_MIN <= days_until <= LEAD_MAX:
+                    upcoming_exhibitions.append(exh)
+                continue
+            except ValueError:
+                pass  # 日期格式壞掉 → 落到月份回退
 
-        for s in seasons:
-            if asof.month == s or (asof.month < s <= asof.month + (LOOKBACK // 30)):
-                upcoming_exhibitions.append(exh)
-                break
+        season = exh.get("season")
+        seasons = season if isinstance(season, list) else [season]
+        next_month = asof.month % 12 + 1
+        if next_month in seasons:
+            upcoming_exhibitions.append(exh)
 
     if not upcoming_exhibitions:
-        payload["note"] = f"未來 {LOOKBACK} 天內無主要展覽會"
+        payload["note"] = f"未來 {LEAD_MIN}~{LEAD_MAX} 天內無主要展覽會"
         OUT_JSON.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
-        print(f"未來 {LOOKBACK} 天內無主要展覽會")
+        print(f"未來 {LEAD_MIN}~{LEAD_MAX} 天內無主要展覽會")
         return
 
     # 下載股價（所有相關股票）
@@ -89,7 +100,9 @@ def main() -> None:
     related_stocks = [s for s in related_stocks if s in uni]
     print(f"下載 {len(related_stocks)} 檔相關股票日線 ...", flush=True)
 
-    tickers = {c: c + ".TW" for c in related_stocks}
+    # 上櫃股 yfinance 後綴為 .TWO（同 screen_breakout.py 慣例）
+    suffix = {"上市": ".TW", "上櫃": ".TWO"}
+    tickers = {c: c + suffix.get(uni[c].get("市場", "上市"), ".TW") for c in related_stocks}
     raw = yf.download(list(tickers.values()), period="2y", group_by="ticker",
                       auto_adjust=True, progress=False, threads=True)
 

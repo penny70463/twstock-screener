@@ -1,1 +1,1 @@
-{"date": "2026-07-05", "generated_at": "2026-07-05T12:13:38", "regime": "bullish", "params": {"lookback_days": 14, "regime_filter": "多頭、混合 Regime 時執行"}, "events": [{"name": "台北國際自動化工業大展", "season": 7, "lookback_days": 10, "count": 1, "stocks": [{"stock_id": "2412", "stock_name": "中華電", "type": "供應鏈", "current_price": 141.0, "ma60": 139.09, "dist_ma60_pct": 1.4}]}]}
+{"date": "2026-07-05", "generated_at": "2026-07-05T17:08:23", "regime": "bullish", "params": {"lead_min_days": 15, "lead_max_days": 30, "regime_filter": "多頭、混合 Regime 時執行"}, "events": []}
