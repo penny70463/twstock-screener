@@ -83,9 +83,12 @@ def fetch_margin_loan(day: dt.date = None, market: str = "TW") -> Optional[pd.Da
 def fetch_taifex_institution(product: str = "TXF", day: dt.date = None) -> Optional[dict]:
     """取得期交所台指期籌碼（法人多空）— 用官方 OpenAPI
 
+    注意：官方 API 忽略日期參數，永遠回傳最近交易日資料；
+    回傳 dict 的 date 以 API 回應的 Date 欄位為準，不是請求的 day。
+
     Args:
         product: "TXF" (台指期) or "MXF" (小台期)
-        day: 交易日期 (default: 最近交易日)
+        day: 期望的交易日期（僅作快取 key 與 fallback 標記用）
 
     Returns:
         dict: {
@@ -101,16 +104,17 @@ def fetch_taifex_institution(product: str = "TXF", day: dt.date = None) -> Optio
     if day is None:
         day = dt.date.today()
 
-    # 官方 OpenAPI 參數
+    # 注意：此 API 忽略 startDate/endDate，永遠回傳最近交易日的資料。
+    # 保留參數僅為文件性用途；實際資料日期以回應中的 Date 欄位為準。
     params = {
         "startDate": day.strftime("%Y%m%d"),
         "endDate": day.strftime("%Y%m%d"),
     }
 
-    # 契約代碼對應
+    # 契約代碼對應（API 的 ContractCode 是中文全名，注意「臺」為繁體）
     contract_map = {
-        "TXF": "台指期",
-        "MXF": "小台期",
+        "TXF": "臺股期貨",
+        "MXF": "小型臺指期貨",
     }
     contract_code = contract_map.get(product, product)
 
@@ -126,10 +130,17 @@ def fetch_taifex_institution(product: str = "TXF", day: dt.date = None) -> Optio
         trust_net = 0
         dealer_net = 0
         foreign_net = 0
+        matched = 0
+        data_date = None
 
         for record in data:
             if record.get("ContractCode") != contract_code:
                 continue
+            matched += 1
+            if data_date is None:
+                raw = str(record.get("Date", ""))
+                if len(raw) == 8:
+                    data_date = f"{raw[:4]}-{raw[4:6]}-{raw[6:8]}"
 
             item = record.get("Item", "")
             net_open_interest = int(record.get("OpenInterest(Net)", 0))
@@ -141,14 +152,20 @@ def fetch_taifex_institution(product: str = "TXF", day: dt.date = None) -> Optio
             elif "外資" in item or "Foreign" in item:
                 foreign_net += net_open_interest
 
-        return {
-            "date": day.isoformat(),
-            "product": product,
-            "trust_net": trust_net,
-            "dealer_net": dealer_net,
-            "foreign_net": foreign_net,
-            "source": "taifex_api"
-        }
+        if matched == 0:
+            # 一筆都沒匹配到 = 契約名對不上或 API 格式變了，
+            # 必須走 fallback 讓 source 誠實標示，不能讓全 0 偽裝成成功
+            codes = sorted({r.get("ContractCode", "?") for r in data})[:10]
+            print(f"[-] 期交所籌碼 API 無匹配契約 {contract_code}，回應中的契約: {codes}")
+        else:
+            return {
+                "date": data_date or day.isoformat(),
+                "product": product,
+                "trust_net": trust_net,
+                "dealer_net": dealer_net,
+                "foreign_net": foreign_net,
+                "source": "taifex_api"
+            }
 
     except Exception as e:
         print(f"[-] 期交所籌碼 API 失敗 ({product}, {day}): {e}")
@@ -211,7 +228,8 @@ def fetch_futures_cached(day: dt.date, product: str = "TXF", force: bool = False
             pass
 
     data = fetch_taifex_institution(product, day)
-    if data is not None:
+    # fallback_empty 不寫入快取：避免暫時性失敗被固化成全 0 的假資料
+    if data is not None and data.get("source") == "taifex_api":
         with open(cache_path, "wb") as f:
             import pickle
             pickle.dump(data, f)
