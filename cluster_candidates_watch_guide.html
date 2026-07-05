@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>候補族群進場觀察指南 - 7/3 盤後</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "PingFang TC", sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 32px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .header-subtitle {
+            font-size: 15px;
+            color: #888;
+            margin-bottom: 20px;
+        }
+
+        .alert-box {
+            padding: 20px;
+            background: linear-gradient(135deg, #fff5e6 0%, #ffe8cc 100%);
+            border-left: 5px solid #ff9800;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .alert-title {
+            font-weight: bold;
+            color: #e65100;
+            margin-bottom: 10px;
+        }
+
+        .alert-content {
+            font-size: 14px;
+            color: #d84315;
+            line-height: 1.6;
+        }
+
+        .priority-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .priority-section {
+            background: white;
+            padding: 35px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .priority-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .priority-icon {
+            font-size: 36px;
+            margin-right: 15px;
+        }
+
+        .priority-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .priority-subtitle {
+            font-size: 13px;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .cluster-card {
+            padding: 20px;
+            margin-bottom: 20px;
+            background: #f8f9fa;
+            border-left: 5px solid #667eea;
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .cluster-card:hover {
+            transform: translateX(5px);
+        }
+
+        .cluster-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .cluster-score {
+            display: inline-block;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .cluster-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+
+        .stat-item {
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+        }
+
+        .stat-label {
+            color: #888;
+            font-size: 12px;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #333;
+            margin-top: 5px;
+        }
+
+        .watch-signals {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid #2196F3;
+            margin-top: 15px;
+        }
+
+        .watch-signals-title {
+            font-size: 12px;
+            font-weight: bold;
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+
+        .watch-signals-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .watch-signals-list li {
+            font-size: 12px;
+            color: #0056b3;
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .watch-signals-list li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #2196F3;
+        }
+
+        .stocks-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 12px;
+        }
+
+        .stocks-table th {
+            background: #e8eaf6;
+            color: #333;
+            padding: 10px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .stocks-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #e0e0e0;
+            color: #666;
+        }
+
+        .stocks-table tr:hover {
+            background: #f5f5f5;
+        }
+
+        .stock-code {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .framework {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .framework h2 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .action-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .action-card {
+            padding: 25px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            border-left: 5px solid #667eea;
+        }
+
+        .action-day {
+            font-size: 14px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .action-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .action-content {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .trading-checklist {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 30px;
+        }
+
+        .checklist-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1b5e20;
+            margin-bottom: 20px;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #2e7d32;
+        }
+
+        .checklist-checkbox {
+            width: 24px;
+            height: 24px;
+            margin-right: 12px;
+            border: 2px solid #43a047;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            background: white;
+        }
+
+        .checklist-checkbox:before {
+            content: "☐";
+            font-size: 18px;
+            color: #43a047;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            padding: 20px;
+            font-size: 13px;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 25px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .priority-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cluster-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .action-steps {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📊 候補族群進場觀察指南</h1>
+            <p class="header-subtitle">7/3 盤後分析 - 基於族群突破前置跡像框架</p>
+
+            <div class="alert-box">
+                <div class="alert-title">⚠️ 重要提醒</div>
+                <div class="alert-content">
+                    以下 6 個候補族群已進入「波浪啟動中期」，符合進場前的主要特徵。
+                    建議 7/4 盤中重點追蹤成交量與股價變化，以決定是否進場。
+                    所有進場決策應以當日即時數據為準，本分析僅供參考。
+                </div>
+            </div>
+        </div>
+
+        <!-- Priority 1 Clusters -->
+        <div class="priority-grid">
+            <div class="priority-section">
+                <div class="priority-header">
+                    <div class="priority-icon">🔥</div>
+                    <div>
+                        <div class="priority-title">優先級 1</div>
+                        <div class="priority-subtitle">極度熱門（4 族群）</div>
+                    </div>
+                </div>
+
+                <!-- 被動元件 -->
+                <div class="cluster-card">
+                    <div class="cluster-name">被動元件</div>
+                    <span class="cluster-score">準備度 95/100</span>
+                    <div class="cluster-stats">
+                        <div class="stat-item">
+                            <div class="stat-label">已觸發</div>
+                            <div class="stat-value">2/6 檔（33%）</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">補漲潛力</div>
+                            <div class="stat-value">67%（4 檔待火）</div>
+                        </div>
+                    </div>
+                    <table class="stocks-table">
+                        <thead>
+                            <tr>
+                                <th>代碼</th>
+                                <th>股名</th>
+                                <th>股價</th>
+                                <th>狀態</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="stock-code">3026</td>
+                                <td>禾伸堂</td>
+                                <td>NT$988</td>
+                                <td>✓ 已觸發</td>
+                            </tr>
+                            <tr>
+                                <td class="stock-code">6173</td>
+                                <td>信昌電</td>
+                                <td>NT$351</td>
+                                <td>✓ 已觸發</td>
+                            </tr>
+                            <tr style="background: #fff9e6;">
+                                <td class="stock-code">5328</td>
+                                <td>華容</td>
+                                <td>NT$82</td>
+                                <td>⭐ 待補</td>
+                            </tr>
+                            <tr style="background: #fff9e6;">
+                                <td class="stock-code">2375</td>
+                                <td>凱美</td>
+                                <td>NT$216</td>
+                                <td>⭐ 待補</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="watch-signals">
+                        <div class="watch-signals-title">🎯 進場訊號</div>
+                        <ul class="watch-signals-list">
+                            <li>華容或凱美漲回前日高點（83.4、217.6）</li>
+                            <li>同族群再有 1 檔點火（vol_x >= 2.0）</li>
+                            <li>7/4 上午 10~11 時成交量異常</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 塑化・化纖 -->
+                <div class="cluster-card">
+                    <div class="cluster-name">塑化・化纖</div>
+                    <span class="cluster-score">準備度 90/100</span>
+                    <div class="cluster-stats">
+                        <div class="stat-item">
+                            <div class="stat-label">已觸發</div>
+                            <div class="stat-value">11/14 檔（79%）</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">補漲潛力</div>
+                            <div class="stat-value">21%（3 檔待火）</div>
+                        </div>
+                    </div>
+                    <table class="stocks-table">
+                        <thead>
+                            <tr>
+                                <th>代碼</th>
+                                <th>股名</th>
+                                <th>狀態</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="background: #fff9e6;">
+                                <td class="stock-code">1710</td>
+                                <td>東聯</td>
+                                <td>⭐ 待補</td>
+                            </tr>
+                            <tr style="background: #fff9e6;">
+                                <td class="stock-code">6505</td>
+                                <td>台塑化</td>
+                                <td>⭐ 待補</td>
+                            </tr>
+                            <tr style="background: #fff9e6;">
+                                <td class="stock-code">1444</td>
+                                <td>力麗</td>
+                                <td>⭐ 待補</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="watch-signals">
+                        <div class="watch-signals-title">🎯 進場訊號</div>
+                        <ul class="watch-signals-list">
+                            <li>台塑化漲破 59 元（前日高）</li>
+                            <li>東聯站上 18.5 元</li>
+                            <li>族群成交量維持 3.5x+</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="priority-section">
+                <div class="priority-header">
+                    <div class="priority-icon">⭐</div>
+                    <div>
+                        <div class="priority-title">優先級 1</div>
+                        <div class="priority-subtitle">極度熱門（2 族群）</div>
+                    </div>
+                </div>
+
+                <!-- 矽晶圓 -->
+                <div class="cluster-card">
+                    <div class="cluster-name">矽晶圓／半導體材料</div>
+                    <span class="cluster-score">準備度 85/100</span>
+                    <div class="cluster-stats">
+                        <div class="stat-item">
+                            <div class="stat-label">已觸發</div>
+                            <div class="stat-value">1/3 檔（33%）</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">補漲潛力</div>
+                            <div class="stat-value">67%（2 檔待火）</div>
+                        </div>
+                    </div>
+                    <table class="stocks-table">
+                        <thead>
+                            <tr>
+                                <th>代碼</th>
+                                <th>股名</th>
+                                <th>進場點</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="stock-code">6182</td>
+                                <td>合晶</td>
+                                <td>✓ 已觸發</td>
+                            </tr>
+                            <tr style="background: #fff9e6;">
+                                <td class="stock-code">5483</td>
+                                <td>中美晶</td>
+                                <td>NT$213+</td>
+                            </tr>
+                            <tr style="background: #fff9e6;">
+                                <td class="stock-code">5434</td>
+                                <td>崇越</td>
+                                <td>NT$545+</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="watch-signals">
+                        <div class="watch-signals-title">🎯 進場訊號</div>
+                        <ul class="watch-signals-list">
+                            <li>中美晶漲破 213 元（前高）</li>
+                            <li>同族群成交量 >= 2.5x</li>
+                            <li>記憶體漲價題材持續</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 車用零組件 -->
+                <div class="cluster-card">
+                    <div class="cluster-name">車用零組件</div>
+                    <span class="cluster-score">準備度 85/100</span>
+                    <div class="cluster-stats">
+                        <div class="stat-item">
+                            <div class="stat-label">已觸發</div>
+                            <div class="stat-value">1/3 檔（33%）</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">補漲潛力</div>
+                            <div class="stat-value">67%（2 檔待火）</div>
+                        </div>
+                    </div>
+                    <table class="stocks-table">
+                        <thead>
+                            <tr>
+                                <th>代碼</th>
+                                <th>股名</th>
+                                <th>進場點</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="stock-code">2236</td>
+                                <td>百達-KY</td>
+                                <td>✓ 龍頭</td>
+                            </tr>
+                            <tr style="background: #fff9e6;">
+                                <td class="stock-code">3717</td>
+                                <td>聯嘉</td>
+                                <td>NT$30+</td>
+                            </tr>
+                            <tr style="background: #fff9e6;">
+                                <td class="stock-code">3346</td>
+                                <td>麗清</td>
+                                <td>NT$30+</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="watch-signals">
+                        <div class="watch-signals-title">🎯 進場訊號</div>
+                        <ul class="watch-signals-list">
+                            <li>聯嘉或麗清突破 30 元</li>
+                            <li>百達-KY 維持高價強勢</li>
+                            <li>軍工題材帶動車用零件</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 進場行動計畫 -->
+        <div class="framework">
+            <h2>📅 進場行動計畫（7/4 盤中執行）</h2>
+
+            <div class="action-steps">
+                <div class="action-card">
+                    <div class="action-day">⏰ 07:30~09:30</div>
+                    <div class="action-title">開盤前準備</div>
+                    <div class="action-content">
+                        • 列印觀察名單（6 族群）<br>
+                        • 設定目標股的進場價位<br>
+                        • 配置資金配置（防止追漲）<br>
+                        • 設定 5~10% 停損點
+                    </div>
+                </div>
+
+                <div class="action-card">
+                    <div class="action-day">⏰ 09:30~11:30</div>
+                    <div class="action-title">盤中觀察期</div>
+                    <div class="action-content">
+                        • 監控待補股的成交量<br>
+                        • 記錄開盤 30 分鐘後的價格<br>
+                        • 若有 2+ 檔點火，確認族群啟動<br>
+                        • 不搶頭波，等候確認點火
+                    </div>
+                </div>
+
+                <div class="action-card">
+                    <div class="action-day">⏰ 13:30~14:30</div>
+                    <div class="action-title">進場時機</div>
+                    <div class="action-content">
+                        • 族群再有 1 檔點火時進場<br>
+                        • 進場點：前日高點附近<br>
+                        • 成交量確認 >= 2.0x 才進場<br>
+                        • 單筆部位不超過淨值 3%
+                    </div>
+                </div>
+
+                <div class="action-card">
+                    <div class="action-day">⏰ 14:30~15:00</div>
+                    <div class="action-title">進場後確認</div>
+                    <div class="action-content">
+                        • 設定停損單（-5~10%）<br>
+                        • 設定目標價（+8~12%）<br>
+                        • 記錄進場時間與價格<br>
+                        • 盤後檢視操作日誌
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trading Checklist -->
+            <div class="trading-checklist">
+                <div class="checklist-title">✓ 進場確認清單（5/5 通過才進場）</div>
+
+                <div class="checklist-item">
+                    <div class="checklist-checkbox"></div>
+                    <div>
+                        <strong>成交量確認：</strong>該股成交量 >= 2.0x 20日均量（必須條件）
+                    </div>
+                </div>
+
+                <div class="checklist-item">
+                    <div class="checklist-checkbox"></div>
+                    <div>
+                        <strong>族群共振：</strong>同族群已有 2+ 檔在近 1~3 天內點火
+                    </div>
+                </div>
+
+                <div class="checklist-item">
+                    <div class="checklist-checkbox"></div>
+                    <div>
+                        <strong>波浪確認：</strong>龍頭股已觸發 3~7 天，形成波浪序列
+                    </div>
+                </div>
+
+                <div class="checklist-item">
+                    <div class="checklist-checkbox"></div>
+                    <div>
+                        <strong>技術面：</strong>股價站上前日高點或 60 日高點附近
+                    </div>
+                </div>
+
+                <div class="checklist-item">
+                    <div class="checklist-checkbox"></div>
+                    <div>
+                        <strong>資金控制：</strong>單筆部位 <= 淨值 3%，已設停損 5~10%
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Risk Warning -->
+        <div class="alert-box" style="background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%); border-left-color: #f44336;">
+            <div class="alert-title" style="color: #c62828;">⚠️ 風險提示</div>
+            <div class="alert-content" style="color: #d32f2f;">
+                • 本分析基於歷史事件統計，不保證未來成功<br>
+                • 候補族群可能因題材變化而失效<br>
+                • 建議僅用於中短期（3~5 天）波段交易<br>
+                • 嚴格執行停損，絕不心存僥倖<br>
+                • 此分析不構成投資建議，據此操作風險自負
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>候補族群進場觀察指南 v1.0 | 分析日期: 2026-07-03</p>
+            <p>© 2026 台股多策略篩選系統 | 6 個候補族群準備度 85~95 分</p>
+        </div>
+    </div>
+</body>
+</html>
