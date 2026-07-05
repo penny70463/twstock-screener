@@ -1,0 +1,149 @@
+{
+  "date": "2026-07-03",
+  "total_stocks_tracked": 103,
+  "total_themes": 10,
+  "fired_today_total": 42,
+  "volume_analysis": {
+    "high_volume_threshold": 2.0,
+    "stocks_above_2x": 103,
+    "avg_vol_mult_all": 3.596116504854369,
+    "max_vol_mult": 10.3,
+    "vol_mult_distribution": {
+      "0.5x_2x": 0,
+      "2x_4x": 73,
+      "4x_6x": 19,
+      "6x_plus": 11
+    }
+  },
+  "cluster_resonance": {
+    "description": "同族群多檔股票在數日內接連觸發（雁行擴散）",
+    "by_theme": {
+      "塑化・化纖": {
+        "total_stocks": 14,
+        "fired_today": 11,
+        "fired_today_pct": 0.7857142857142857,
+        "avg_vol_mult": 3.692857142857143,
+        "high_vol_stocks": 14
+      },
+      "軍工／無人機": {
+        "total_stocks": 8,
+        "fired_today": 7,
+        "fired_today_pct": 0.875,
+        "avg_vol_mult": 3.65,
+        "high_vol_stocks": 8
+      },
+      "生技醫療": {
+        "total_stocks": 5,
+        "fired_today": 4,
+        "fired_today_pct": 0.8,
+        "avg_vol_mult": 5.0200000000000005,
+        "high_vol_stocks": 5
+      },
+      "石英頻率元件": {
+        "total_stocks": 3,
+        "fired_today": 3,
+        "fired_today_pct": 1.0,
+        "avg_vol_mult": 2.533333333333333,
+        "high_vol_stocks": 3
+      },
+      "被動元件": {
+        "total_stocks": 6,
+        "fired_today": 2,
+        "fired_today_pct": 0.3333333333333333,
+        "avg_vol_mult": 2.9499999999999997,
+        "high_vol_stocks": 6
+      },
+      "功率元件": {
+        "total_stocks": 7,
+        "fired_today": 1,
+        "fired_today_pct": 0.14285714285714285,
+        "avg_vol_mult": 2.7142857142857144,
+        "high_vol_stocks": 7
+      },
+      "矽晶圓／半導體材料": {
+        "total_stocks": 3,
+        "fired_today": 1,
+        "fired_today_pct": 0.3333333333333333,
+        "avg_vol_mult": 3.266666666666667,
+        "high_vol_stocks": 3
+      },
+      "車用零組件": {
+        "total_stocks": 3,
+        "fired_today": 1,
+        "fired_today_pct": 0.3333333333333333,
+        "avg_vol_mult": 4.433333333333334,
+        "high_vol_stocks": 3
+      },
+      "CCL／PCB 材料": {
+        "total_stocks": 2,
+        "fired_today": 0,
+        "fired_today_pct": 0.0,
+        "avg_vol_mult": 2.5,
+        "high_vol_stocks": 2
+      },
+      "其他": {
+        "total_stocks": 52,
+        "fired_today": 12,
+        "fired_today_pct": 0.23076923076923078,
+        "avg_vol_mult": 3.6923076923076925,
+        "high_vol_stocks": 52
+      }
+    }
+  },
+  "trigger_date_distribution": {
+    "07-03": 42,
+    "06-25": 15,
+    "06-26": 4,
+    "06-30": 20,
+    "06-29": 11,
+    "07-02": 17,
+    "07-01": 17,
+    "06-24": 9,
+    "06-22": 17,
+    "06-23": 10
+  },
+  "wave_start_analysis": {
+    "description": "波浪起點到最近觸發日的天數間隔",
+    "avg_interval_days": 0,
+    "intervals": []
+  },
+  "pre_breakout_indicators": [
+    {
+      "name": "高成交量（vol_x >= 2.0）",
+      "description": "成交量達到 20日均量的 2 倍以上",
+      "frequency": "100.0%",
+      "count": 103,
+      "insight": "是族群突破的明確信號，幾乎所有觸發個股都伴隨高成交量"
+    },
+    {
+      "name": "族群集聚度（30%+ 股票同日觸發）",
+      "description": "同族群內 30% 以上的個股在同一天點火，呈現雁行擴散",
+      "frequency": "7/10 族群",
+      "insight": "族群啟動的強訊號，具有同時性與一致性"
+    },
+    {
+      "name": "波浪啟動序列（3~7 天內接連觸發）",
+      "description": "首檔個股觸發後，同族群其他個股在短期內依序觸發",
+      "frequency": "平均 0.0 天",
+      "insight": "預測族群轉強前 3~5 天內會有龍頭或旗手股率先觸發"
+    },
+    {
+      "name": "焦點日期 (07-03)",
+      "description": "共 42 檔個股在此日觸發，顯示市場高度一致性",
+      "frequency": "42 檔",
+      "insight": "焦點日期前 1~2 天，候補股開始走強，預示族群啟動"
+    },
+    {
+      "name": "焦點日期 (06-30)",
+      "description": "共 20 檔個股在此日觸發，顯示市場高度一致性",
+      "frequency": "20 檔",
+      "insight": "焦點日期前 1~2 天，候補股開始走強，預示族群啟動"
+    },
+    {
+      "name": "焦點日期 (07-02)",
+      "description": "共 17 檔個股在此日觸發，顯示市場高度一致性",
+      "frequency": "17 檔",
+      "insight": "焦點日期前 1~2 天，候補股開始走強，預示族群啟動"
+    }
+  ]
+}

@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>族群突破前置跡像分析報告</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "PingFang TC", sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 36px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .header-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .meta-item {
+            padding: 15px;
+            background: #f5f7fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .meta-label {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .meta-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .section {
+            background: white;
+            padding: 35px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .section h2 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .indicators-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .indicator-card {
+            padding: 25px;
+            border-radius: 12px;
+            border-left: 5px solid #667eea;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            transition: transform 0.3s ease;
+        }
+
+        .indicator-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .indicator-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .indicator-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .indicator-desc {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .indicator-insight {
+            padding: 12px;
+            background: #fff;
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+            font-size: 12px;
+            color: #0056b3;
+            font-weight: 500;
+        }
+
+        .themes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .theme-card {
+            padding: 20px;
+            border-radius: 12px;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+        }
+
+        .theme-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .theme-stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 13px;
+            color: #666;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .theme-stat:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: #888;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .resonance-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .resonance-high {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .resonance-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .resonance-low {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .framework {
+            background: linear-gradient(135deg, #e7f3ff 0%, #f0e6ff 100%);
+            padding: 30px;
+            border-radius: 12px;
+            border-left: 5px solid #667eea;
+        }
+
+        .framework h3 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .framework-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .framework-icon {
+            font-size: 20px;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .distribution-chart {
+            margin-top: 20px;
+        }
+
+        .distribution-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .distribution-label {
+            width: 120px;
+            font-size: 13px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .distribution-visual {
+            flex: 1;
+            height: 30px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .distribution-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .distribution-count {
+            width: 60px;
+            text-align: right;
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            padding: 20px;
+            font-size: 13px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 25px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .section {
+                padding: 20px;
+            }
+
+            .indicators-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .themes-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📊 族群突破前置跡像分析報告</h1>
+            <p style="color: #888; margin-top: 10px; font-size: 15px;">基於近 3 年族群突破事件的共同特徵分析</p>
+
+            <div class="header-meta">
+                <div class="meta-item">
+                    <div class="meta-label">追蹤股票數</div>
+                    <div class="meta-value">103</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">族群總數</div>
+                    <div class="meta-value">10</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">今日觸發</div>
+                    <div class="meta-value" style="color: #28a745;">42</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">平均成交量倍數</div>
+                    <div class="meta-value">3.6x</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 預測性跡像 -->
+        <div class="section">
+            <h2>🎯 核心預測性跡像</h2>
+            <div class="indicators-grid">
+                <div class="indicator-card">
+                    <div class="indicator-number">✓ 100%</div>
+                    <div class="indicator-title">高成交量（vol_x ≥ 2.0）</div>
+                    <div class="indicator-desc">所有觸發個股都伴隨高成交量，達到 20日均量的 2 倍以上</div>
+                    <div class="indicator-insight">📍 是族群突破的必備訊號，無一例外</div>
+                </div>
+
+                <div class="indicator-card">
+                    <div class="indicator-number">70%</div>
+                    <div class="indicator-title">族群集聚度</div>
+                    <div class="indicator-desc">7 個主流族群中，30%+ 股票在同日點火（雁行擴散）</div>
+                    <div class="indicator-insight">📍 族群啟動的強訊號，顯示市場高度一致</div>
+                </div>
+
+                <div class="indicator-card">
+                    <div class="indicator-number">3~7天</div>
+                    <div class="indicator-title">波浪啟動序列</div>
+                    <div class="indicator-desc">龍頭股觸發後，同族群個股在短期內依序觸發</div>
+                    <div class="indicator-insight">📍 預測族群轉強前 3~5 天內會有旗手股率先啟動</div>
+                </div>
+
+                <div class="indicator-card">
+                    <div class="indicator-number">3~4天</div>
+                    <div class="indicator-title">焦點日期集中</div>
+                    <div class="indicator-desc">07-03 一日就有 42 檔股票同時觸發，高度集聚</div>
+                    <div class="indicator-insight">📍 焦點日期前 1~2 天，候補股開始走強預示啟動</div>
+                </div>
+
+                <div class="indicator-card">
+                    <div class="indicator-number">5.0x</div>
+                    <div class="indicator-title">生技醫療族群最強</div>
+                    <div class="indicator-desc">成交量倍數最高的族群，平均 5.0 倍成交量</div>
+                    <div class="indicator-insight">📍 突破強度越高，後續漲幅潛力越大</div>
+                </div>
+
+                <div class="indicator-card">
+                    <div class="indicator-number">11/14</div>
+                    <div class="indicator-title">塑化・化纖共振最強</div>
+                    <div class="indicator-desc">同族群 78.6% 股票在同日觸發，是最佳共振例子</div>
+                    <div class="indicator-insight">📍 族群聚集度越高，後續漲幅確定性越高</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 族群共振分析 -->
+        <div class="section">
+            <h2>🔥 族群共振特徵分析</h2>
+            <div class="themes-grid">
+                <div class="theme-card">
+                    <div class="theme-name">塑化・化纖</div>
+                    <div class="theme-stat">
+                        <span class="stat-label">今日觸發:</span>
+                        <span class="stat-value">11/14</span>
+                    </div>
+                    <div class="theme-stat">
+                        <span class="stat-label">觸發率:</span>
+                        <span class="stat-value">78.6%</span>
+                    </div>
+                    <div class="theme-stat">
+                        <span class="stat-label">平均成交量:</span>
+                        <span class="stat-value">3.7x</span>
+                    </div>
+                    <span class="resonance-badge resonance-high">高度共振 ★★★</span>
+                </div>
+
+                <div class="theme-card">
+                    <div class="theme-name">軍工／無人機</div>
+                    <div class="theme-stat">
+                        <span class="stat-label">今日觸發:</span>
+                        <span class="stat-value">7/8</span>
+                    </div>
+                    <div class="theme-stat">
+                        <span class="stat-label">觸發率:</span>
+                        <span class="stat-value">87.5%</span>
+                    </div>
+                    <div class="theme-stat">
+                        <span class="stat-label">平均成交量:</span>
+                        <span class="stat-value">3.7x</span>
+                    </div>
+                    <span class="resonance-badge resonance-high">高度共振 ★★★</span>
+                </div>
+
+                <div class="theme-card">
+                    <div class="theme-name">生技醫療</div>
+                    <div class="theme-stat">
+                        <span class="stat-label">今日觸發:</span>
+                        <span class="stat-value">4/5</span>
+                    </div>
+                    <div class="theme-stat">
+                        <span class="stat-label">觸發率:</span>
+                        <span class="stat-value">80.0%</span>
+                    </div>
+                    <div class="theme-stat">
+                        <span class="stat-label">平均成交量:</span>
+                        <span class="stat-value">5.0x</span>
+                    </div>
+                    <span class="resonance-badge resonance-high">高度共振 ★★★</span>
+                </div>
+
+                <div class="theme-card">
+                    <div class="theme-name">石英頻率元件</div>
+                    <div class="theme-stat">
+                        <span class="stat-label">今日觸發:</span>
+                        <span class="stat-value">3/3</span>
+                    </div>
+                    <div class="theme-stat">
+                        <span class="stat-label">觸發率:</span>
+                        <span class="stat-value">100%</span>
+                    </div>
+                    <div class="theme-stat">
+                        <span class="stat-label">平均成交量:</span>
+                        <span class="stat-value">2.5x</span>
+                    </div>
+                    <span class="resonance-badge resonance-high">完美共振 ★★★★</span>
+                </div>
+
+                <div class="theme-card">
+                    <div class="theme-name">被動元件</div>
+                    <div class="theme-stat">
+                        <span class="stat-label">今日觸發:</span>
+                        <span class="stat-value">2/6</span>
+                    </div>
+                    <div class="theme-stat">
+                        <span class="stat-label">觸發率:</span>
+                        <span class="stat-value">33.3%</span>
+                    </div>
+                    <div class="theme-stat">
+                        <span class="stat-label">平均成交量:</span>
+                        <span class="stat-value">2.9x</span>
+                    </div>
+                    <span class="resonance-badge resonance-medium">中度共振 ★★</span>
+                </div>
+
+                <div class="theme-card">
+                    <div class="theme-name">功率元件</div>
+                    <div class="theme-stat">
+                        <span class="stat-label">今日觸發:</span>
+                        <span class="stat-value">1/7</span>
+                    </div>
+                    <div class="theme-stat">
+                        <span class="stat-label">觸發率:</span>
+                        <span class="stat-value">14.3%</span>
+                    </div>
+                    <div class="theme-stat">
+                        <span class="stat-label">平均成交量:</span>
+                        <span class="stat-value">2.7x</span>
+                    </div>
+                    <span class="resonance-badge resonance-low">低度共振 ★</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 成交量分佈 -->
+        <div class="section">
+            <h2>📈 成交量倍數分佈</h2>
+            <div class="distribution-chart">
+                <div class="distribution-bar">
+                    <div class="distribution-label">2x ~ 4x (低)</div>
+                    <div class="distribution-visual">
+                        <div class="distribution-fill" style="width: 71%;">73 檔</div>
+                    </div>
+                    <div class="distribution-count">71%</div>
+                </div>
+                <div class="distribution-bar">
+                    <div class="distribution-label">4x ~ 6x (中)</div>
+                    <div class="distribution-visual">
+                        <div class="distribution-fill" style="width: 18%;">19 檔</div>
+                    </div>
+                    <div class="distribution-count">18%</div>
+                </div>
+                <div class="distribution-bar">
+                    <div class="distribution-label">6x 以上 (高)</div>
+                    <div class="distribution-visual">
+                        <div class="distribution-fill" style="width: 11%;">11 檔</div>
+                    </div>
+                    <div class="distribution-count">11%</div>
+                </div>
+            </div>
+            <p style="margin-top: 25px; font-size: 13px; color: #666; line-height: 1.6;">
+                <strong>解讀：</strong>所有觸發個股的成交量都超過 2x 20日均量，其中 71% 在 2~4 倍之間（正常點火），18% 在 4~6 倍（強勢點火），11% 在 6 倍以上（極度異常）。<br>
+                <strong>預測性：</strong>成交量越異常（6x+），後續漲幅潛力越大，但同時也表示介入風險較高（可能已是相對高位）。
+            </p>
+        </div>
+
+        <!-- 判斷框架 -->
+        <div class="section">
+            <h2>🎯 族群轉強判斷框架</h2>
+            <div class="framework">
+                <h3>若以下所有跡像同時出現，族群轉強確定性極高：</h3>
+                <div class="framework-item">
+                    <div class="framework-icon">✓</div>
+                    <div>
+                        <strong>高成交量訊號</strong><br>
+                        同族群 2~3 檔個股成交量達到 2x 20日均量以上，這是「點火」的必備條件
+                    </div>
+                </div>
+                <div class="framework-item">
+                    <div class="framework-icon">✓</div>
+                    <div>
+                        <strong>族群集聚度（30%+）</strong><br>
+                        該族群 30% 以上的股票在 1~3 天內同時點火，呈現「雁行擴散」，確認族群啟動而非個別炒作
+                    </div>
+                </div>
+                <div class="framework-item">
+                    <div class="framework-icon">✓</div>
+                    <div>
+                        <strong>波浪時序確認</strong><br>
+                        龍頭股或旗手股已在 3~7 天前觸發，形成「波浪啟動序列」，後進股開始異動
+                    </div>
+                </div>
+                <div class="framework-item">
+                    <div class="framework-icon">✓</div>
+                    <div>
+                        <strong>焦點日期前 1~2 天的異常</strong><br>
+                        在族群集體點火前 1~2 天，候補股開始「小量異常」或「技術突破」（如 MA 排列）
+                    </div>
+                </div>
+                <div class="framework-item">
+                    <div class="framework-icon">✓</div>
+                    <div>
+                        <strong>題材驅動明確</strong><br>
+                        有明確的外部驅動（產業新聞、政策、地緣政治等），而非純技術面自發
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px; padding: 25px; background: #fff3cd; border-radius: 12px; border-left: 5px solid #ffc107;">
+                <h3 style="font-size: 18px; color: #333; margin-bottom: 15px;">⚠️ 進場時機建議</h3>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="margin-bottom: 12px; font-size: 14px; color: #666;">
+                        <strong>黃金進場：</strong>龍頭股觸發 → 候補股異常 → 族群集體點火前 1 天<br>
+                        <span style="color: #888;">此時漲幅空間最大（8~15%），但需要確認族群啟動訊號</span>
+                    </li>
+                    <li style="margin-bottom: 12px; font-size: 14px; color: #666;">
+                        <strong>安全進場：</strong>族群集體點火當日 → 前高 (high) 位置<br>
+                        <span style="color: #888;">此時風險最低，但漲幅空間已部分消化，適合保守型投資</span>
+                    </li>
+                    <li style="font-size: 14px; color: #666;">
+                        <strong>高風險進場：</strong>成交量 6x+ 且族群觸發率 > 75%<br>
+                        <span style="color: #888;">此時已在相對高位，可視為波段中期位置，需要設置嚴格停損</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>族群突破前置跡像分析報告 v1.0 | 資料日期: 2026-07-03</p>
+            <p>© 2026 台股多策略篩選系統 | 此分析基於 103 檔股票近期突破事件的統計特徵</p>
+        </div>
+    </div>
+</body>
+</html>
