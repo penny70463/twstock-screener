@@ -54,7 +54,12 @@ def backtest_short_strategy(
     stop_profit_pct: float = 0.03,
     stop_loss_pct: float = 0.10,
 ) -> dict:
-    """執行做空策略 2021~2026 回測
+    """執行做空策略 2021~2026 回測（修正版 - R1/R2/R3）
+
+    修正項：
+    - R1：自建 6 年 TWII regime 序列，避免 get_regime() 的 2y 限制
+    - R2：修正融券查詢快取邏輯
+    - R3：傳入 history_data 避免重複下載
 
     Args:
         start_date: 回測起始日
@@ -64,10 +69,7 @@ def backtest_short_strategy(
 
     Returns:
         dict: {
-            "annual_stats": {
-                "2021": {"win_rate": 0.55, "avg_return": 0.02, "max_loss": -0.08, "trades": 25},
-                ...
-            },
+            "annual_stats": {...},
             "overall_stats": {...},
             "params": {...},
             "note": "..."
@@ -77,10 +79,13 @@ def backtest_short_strategy(
     print(f"[回測] 梯隊 3 做空策略 ({start_date} ~ {end_date})")
     print(f"   停利: -{stop_profit_pct*100:.1f}%  |  停損: +{stop_loss_pct*100:.1f}%\n")
 
-    # ── 第一步：取得台股代碼列表 ──
+    # ── 準備階段 1：自建 regime 序列（修正 R1）──
+    print("[下載] 建立 TWII regime 序列...")
+    regime_series = _build_regime_series(start_date, end_date)
+    print(f"[OK] 建立 {len(regime_series)} 個交易日的 regime 映射\n")
+
+    # ── 準備階段 2：取得台股代碼列表 ──
     try:
-        # 使用 yfinance 取得所有上市櫃股票（簡化版，實際應從 TWSE/TPEX 取）
-        # 這裡使用已有的台股宇宙或手動列表
         all_codes = _get_taiwan_stock_codes()
         print(f"[OK] 取得 {len(all_codes)} 檔台股代碼\n")
     except Exception as e:
@@ -122,8 +127,10 @@ def backtest_short_strategy(
             annual_results[year] = {"trades": [], "wins": 0, "losses": 0}
 
         try:
-            # 篩選符合條件的做空候選股（呼叫統一函數）
-            short_candidates = _filter_short_candidates(all_codes, current_date, history_data)
+            # 篩選符合條件的做空候選股（修正 R1：傳入 regime_series）
+            short_candidates = _filter_short_candidates(
+                all_codes, current_date, history_data, regime_series
+            )
 
             # 針對每個候選股，模擬進場 → 追蹤停利/停損
             for code in short_candidates:
@@ -132,19 +139,13 @@ def backtest_short_strategy(
                     continue
                 processed_pairs.add(pair_key)
 
-                # 計算進場價
-                hist = history_data[code]
-                close = hist["Close"]
-                ma60 = close.rolling(60).mean()
-                idx = hist.index.get_loc(pd.Timestamp(current_date))
+                # 計算進場價（修正 R3：從共用的 history_data 查表）
+                entry_price, target_price, stop_loss_price = _calculate_entry_exit(
+                    code, current_date, history_data
+                )
 
-                today_ma60 = ma60.iloc[idx]
-                if pd.isna(today_ma60):
+                if entry_price is None:
                     continue
-
-                entry_price = today_ma60 * 0.98
-                target_price = entry_price * (1 - stop_profit_pct)
-                stop_loss_price = entry_price * (1 + stop_loss_pct)
 
                 # 向後尋找出場日
                 exit_price = None
@@ -299,8 +300,9 @@ def _get_short_balance(code: str, date: dt.date) -> float:
     """取得某日融券餘額（條件 2）
 
     回溯邏輯：如果當日無資料，往前查 5 個交易日
+    修正 R2：改用顯式查表而非依賴迴圈殘留
     """
-    code_without_tw = code.replace(".TW", "")
+    code_normalized = code if code.endswith(".TW") else code + ".TW"
 
     for backtrack_days in range(5):
         check_date = date - dt.timedelta(days=backtrack_days + 1)
@@ -309,17 +311,21 @@ def _get_short_balance(code: str, date: dt.date) -> float:
         if check_date.weekday() >= 5:
             continue
 
-        cache_key = (check_date, code)
+        # 修正 R2：先查快取（避免重複調用 API）
+        cache_key = (check_date, code_normalized)
         if cache_key in _margin_cache:
             return _margin_cache[cache_key]
 
         try:
             df = fetch_margin_loan(check_date, market="TW")
             if df is not None and not df.empty:
+                # 填充快取：逐列處理，用正確的 code 作為 key
                 for _, row in df.iterrows():
-                    cache_key = (check_date, row["code"] + ".TW")
-                    _margin_cache[cache_key] = row.get("short_balance", 0)
+                    normalized_code = row["code"] if row["code"].endswith(".TW") else row["code"] + ".TW"
+                    key = (check_date, normalized_code)
+                    _margin_cache[key] = row.get("short_balance", 0)
 
+                # 查詢當前股票（修正 R2：顯式查表）
                 if cache_key in _margin_cache:
                     return _margin_cache[cache_key]
         except Exception:
@@ -340,7 +346,74 @@ def _get_revenue_mom(code: str, date: dt.date) -> float:
     return 0
 
 
-def _filter_short_candidates(codes: list[str], date: dt.date, history_data: dict) -> list[str]:
+def _build_regime_series(start_date: dt.date, end_date: dt.date) -> dict[dt.date, str]:
+    """自建 6 年 TWII 的 regime 序列（修正 R1）
+
+    避免 get_regime() 的 2y 限制，直接下載完整區間 TWII 並計算
+    使用與生產版 get_regime() 相同的邏輯：63MA（季線）、252MA（年線）
+    """
+    try:
+        # 下載 TWII（加權指數）
+        twii = yf.download(
+            "^TWII",
+            start=start_date - dt.timedelta(days=300),
+            end=end_date + dt.timedelta(days=1),
+            progress=False,
+        )
+
+        if twii.empty:
+            print("[警告] TWII 下載失敗，回退到每日查詢")
+            return {}
+
+        close = twii["Close"]
+        ma63 = close.rolling(63).mean()    # 季線
+        ma252 = close.rolling(252).mean()  # 年線
+
+        regime_map = {}
+
+        for date in pd.date_range(start_date, end_date, freq='D'):
+            if pd.Timestamp(date) not in close.index:
+                continue
+
+            idx = close.index.get_loc(pd.Timestamp(date))
+
+            if idx < 252:  # 無足夠歷史資料
+                regime_map[date.date()] = "unknown"
+                continue
+
+            c = close.iloc[idx]
+            m63 = ma63.iloc[idx]
+            m252 = ma252.iloc[idx]
+
+            # 生產版邏輯（src/market_regime.py:51-60）
+            # bullish: c > ma63 > ma252
+            # mixed: ma63 > c > ma252 或 c > ma63 但 ma63 < ma252
+            # bearish: c < ma63 或 ma63 < ma252
+
+            if pd.isna(c) or pd.isna(m63) or pd.isna(m252):
+                regime_map[date.date()] = "unknown"
+                continue
+
+            if c > m63 and m63 > m252:
+                regime_map[date.date()] = "bullish"
+            elif m63 > c > m252:
+                regime_map[date.date()] = "mixed"
+            elif c > m63 > m252:
+                # 這個情況屬於 mixed（ma63 > ma252 但收盤在季線上方）
+                regime_map[date.date()] = "mixed"
+            else:
+                regime_map[date.date()] = "bearish"
+
+        return regime_map
+
+    except Exception as e:
+        print(f"[-] TWII regime 序列建立失敗: {e}，回退到每日查詢")
+        return {}
+
+
+def _filter_short_candidates(
+    codes: list[str], date: dt.date, history_data: dict, regime_series: dict
+) -> list[str]:
     """篩選符合四條件的做空候選股（與 screen_short.py 邏輯一致）
 
     條件 1：技術 (close < ma60 × 0.99)
@@ -348,14 +421,15 @@ def _filter_short_candidates(codes: list[str], date: dt.date, history_data: dict
     條件 3：營收 (月營收月減 < -30%) - 暫時假設恆為真（待 MOPS 補）
     條件 4：動能 (current_low <= low_60 × 1.05)，即接近 60 日低點（破底型）
 
-    制度閘門：只在 mixed/bearish 時進場
+    制度閘門（修正 R1）：只在 mixed/bearish 時進場
+    - 改用 regime_series 查表而非 get_regime()（避免 2y 限制）
     """
     candidates = []
 
-    # 檢查制度（必須是混合或空頭）
-    regime = get_regime(date)
-    if regime == "bullish":
-        return []  # 多頭時期不進場
+    # 檢查制度（修正 R1：從序列查表，改為 mixed/bearish 才進場）
+    regime = regime_series.get(date, "unknown")
+    if regime not in ("mixed", "bearish"):
+        return []  # 多頭或未知時期不進場
 
     for code in codes:
         if code not in history_data:
@@ -412,7 +486,7 @@ def _filter_short_candidates(codes: list[str], date: dt.date, history_data: dict
 
 
 def _calculate_entry_exit(
-    code: str, date: dt.date
+    code: str, date: dt.date, history_data: dict
 ) -> tuple[Optional[float], Optional[float], Optional[float]]:
     """計算做空進場價、停利目標、停損價
 
@@ -420,24 +494,25 @@ def _calculate_entry_exit(
     停利：進場 × (1 - 0.03)
     停損：進場 × (1 + 0.10)
 
-    Returns:
-        (entry_price, target_profit, stop_loss) or (None, None, None)
+    修正 R3：從 history_data 查表而非重複下載
     """
     try:
-        hist = yf.download(
-            code,
-            start=date - dt.timedelta(days=200),
-            end=date + dt.timedelta(days=1),
-            progress=False,
-        )
+        if code not in history_data:
+            return None, None, None
 
-        if hist.empty or len(hist) < 60:
+        hist = history_data[code]
+
+        if pd.Timestamp(date) not in hist.index:
             return None, None, None
 
         close = hist["Close"]
         ma60 = close.rolling(60).mean()
+        idx = hist.index.get_loc(pd.Timestamp(date))
 
-        today_ma60 = ma60.iloc[-1]
+        if idx < 60:
+            return None, None, None
+
+        today_ma60 = ma60.iloc[idx]
 
         if pd.isna(today_ma60):
             return None, None, None
