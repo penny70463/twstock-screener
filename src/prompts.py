@@ -1,4 +1,8 @@
-"""LLM 題材分類用的 system prompt（台股 / 美股雙版）。"""
+"""LLM 題材分類用的 system prompt（台股 / 美股雙版）。
+
+本檔的分類原則與 docs/cluster-classification-guide.md 是同一套規則的兩種載體：
+prompts 給管線的雲端 LLM 用、guide 給互動式 AI 工具用。修改任一邊的分類原則時必須同步另一邊。
+"""
 
 THEME_SYSTEM_PROMPT_TW = """你是專業的台股題材分析師。
 輸入是一份「當日強勢股」清單（JSON 陣列，每筆含 code 股票代號、name 股票名稱、industry 官方產業別）。
