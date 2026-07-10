@@ -107,6 +107,46 @@ watch(portfolio, (newVal) => {
   localStorage.setItem(getStorageKey(), JSON.stringify(newVal))
 }, { deep: true })
 
+// 現金部位：支援直接輸入數值，或輸入算式 (如 50000+3000-2000) 自動計算
+const cashExpr = ref('')
+const cashFocused = ref(false)
+
+// 未編輯時，讓輸入框顯示與 portfolio.cash 同步（切換市場、載入 localStorage 後刷新）
+watch(() => portfolio.value.cash, (v) => {
+  if (!cashFocused.value) cashExpr.value = v ? String(v) : ''
+}, { immediate: true })
+
+const resetCashExpr = () => {
+  cashExpr.value = portfolio.value.cash ? String(portfolio.value.cash) : ''
+}
+
+const evalCashExpr = () => {
+  const raw = cashExpr.value.trim()
+  if (raw === '') {
+    portfolio.value.cash = 0
+    return
+  }
+  // 只允許數字、四則運算子、括號、小數點與空白，避免任意程式碼執行
+  if (!/^[0-9+\-*/().\s]+$/.test(raw)) {
+    resetCashExpr()
+    return
+  }
+  try {
+    const result = Function(`"use strict"; return (${raw})`)()
+    if (typeof result === 'number' && isFinite(result)) {
+      portfolio.value.cash = Math.round(result * 100) / 100
+      resetCashExpr()
+    } else {
+      resetCashExpr()
+    }
+  } catch (e) {
+    resetCashExpr()
+  }
+}
+
+const onCashFocus = () => { cashFocused.value = true }
+const onCashBlur = () => { cashFocused.value = false; evalCashExpr() }
+
 const addPosition = () => {
   if (!newStock.value.id || !newStock.value.shares || !newStock.value.price) return
   
@@ -409,7 +449,17 @@ const isSparklineUp = (prices) => {
           <span class="summary-label">現金部位</span>
           <div class="cash-input-group">
             <span class="currency-symbol">{{ market === 'US' ? 'US$' : '$' }}</span>
-            <input type="number" v-model="portfolio.cash" class="cash-input" placeholder="輸入現金餘額" />
+            <input
+              type="text"
+              inputmode="text"
+              v-model="cashExpr"
+              class="cash-input"
+              placeholder="數值或算式"
+              title="支援 + - * / 與括號，離開欄位或按 Enter 自動計算"
+              @focus="onCashFocus"
+              @blur="onCashBlur"
+              @keyup.enter="$event.target.blur()"
+            />
           </div>
         </div>
         <div class="summary-item">
@@ -620,6 +670,12 @@ const isSparklineUp = (prices) => {
   font-weight: bold;
   width: 100%;
   outline: none;
+}
+
+.cash-input::placeholder {
+  font-size: 0.85rem;
+  font-weight: normal;
+  color: var(--text-muted);
 }
 
 .add-stock-panel {
