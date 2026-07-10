@@ -1,1 +1,1 @@
-{"date": "2026-07-09", "generated_at": "2026-07-09T16:20:21", "phase": "off", "params": {"stop_pct": 0.1, "min_buy_days": 7, "top_n": 10, "entry": "季底前 5 日隔日開盤", "exit": "進場後 5 日收盤"}, "stocks": [], "note": "非季底窗口（限 3/6/9/12 月最後 20 日）"}
+{"date": "2026-07-10", "generated_at": "2026-07-10T16:13:36", "phase": "off", "params": {"stop_pct": 0.1, "min_buy_days": 7, "top_n": 10, "entry": "季底前 5 日隔日開盤", "exit": "進場後 5 日收盤"}, "stocks": [], "note": "非季底窗口（限 3/6/9/12 月最後 20 日）"}

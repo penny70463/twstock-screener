@@ -1,6 +1,6 @@
 {
-  "date": "2026-07-09",
-  "generated_at": "2026-07-09T16:14:20",
+  "date": "2026-07-10",
+  "generated_at": "2026-07-10T16:11:50",
   "etfs": [
     {
       "code": "0050.TW",
@@ -27,46 +27,46 @@
     {
       "code": "VOO",
       "name": "S&P 500",
-      "price": 685.26,
-      "ma50": 678.47,
-      "ma200": 634.21,
+      "price": 690.69,
+      "ma50": 679.17,
+      "ma200": 634.64,
       "signal": "green",
       "desc": "多頭續航",
-      "entry_price": 678.47,
-      "exit_price": 634.21
+      "entry_price": 679.17,
+      "exit_price": 634.64
     },
     {
       "code": "QQQ",
       "name": "Nasdaq 100",
-      "price": 711.44,
-      "ma50": 712.02,
-      "ma200": 635.37,
-      "signal": "yellow",
-      "desc": "回檔買點",
-      "entry_price": 712.02,
-      "exit_price": 635.37
+      "price": 723.28,
+      "ma50": 713.22,
+      "ma200": 636.0,
+      "signal": "green",
+      "desc": "多頭續航",
+      "entry_price": 713.22,
+      "exit_price": 636.0
     },
     {
       "code": "SMH",
       "name": "半導體 (SMH)",
-      "price": 593.0,
-      "ma50": 585.78,
-      "ma200": 430.0,
+      "price": 607.73,
+      "ma50": 587.81,
+      "ma200": 431.47,
       "signal": "green",
       "desc": "多頭續航",
-      "entry_price": 585.78,
-      "exit_price": 430.0
+      "entry_price": 587.81,
+      "exit_price": 431.47
     },
     {
       "code": "SOXQ",
       "name": "半導體 (SOXQ)",
-      "price": 98.95,
-      "ma50": 98.09,
-      "ma200": 68.92,
+      "price": 101.97,
+      "ma50": 98.49,
+      "ma200": 69.19,
       "signal": "green",
       "desc": "多頭續航",
-      "entry_price": 98.09,
-      "exit_price": 68.92
+      "entry_price": 98.49,
+      "exit_price": 69.19
     },
     {
       "code": "2330.TW",
