@@ -28,12 +28,14 @@ CACHE_DIR = Path(__file__).parent / "cache"
 NAME_MAP_PATH = CACHE_DIR / "name_map.json"
 
 
-def _get(url: str, retries: int = 3, **kwargs) -> requests.Response:
+def _get(url: str, retries: int = 8, **kwargs) -> requests.Response:
     """GET with SSL fallback 與重試退避。
 
     - TPEX 憑證缺 Subject Key Identifier，Python 3.13 的嚴格驗證會間歇性
       失敗，失敗時退回不驗證（皆為公開行情資料）
-    - TWSE/TPEX 對連續請求會重置連線，指數退避重試"""
+    - TWSE/TPEX 對連續請求會重置連線，指數退避重試
+    - TPEX openapi 收盤後高峰常中途截斷回應（IncompleteRead），
+      實測截斷率約五成，重試預算需拉到分鐘級才扛得住連續截斷"""
     kwargs.setdefault("headers", HEADERS)
     kwargs.setdefault("timeout", 30)
     last_err: Exception = RuntimeError("unreachable")
@@ -48,7 +50,7 @@ def _get(url: str, retries: int = 3, **kwargs) -> requests.Response:
         except (requests.exceptions.ConnectionError,
                 requests.exceptions.ChunkedEncodingError) as e:
             last_err = e
-        time.sleep(2 ** attempt * 2)  # 2s, 4s, 8s
+        time.sleep(min(2 ** attempt * 2, 30))  # 2,4,8,16,30,30,30s
     raise last_err
 
 
