@@ -16,8 +16,10 @@ from src.prompts import get_prompts
 
 def _client() -> OpenAI:
     settings.require_nvidia()
-    # gemma free tier 延遲極不穩（10s~500s+）且連跑會被限流。分批呼叫，每批設較短 timeout
-    # 並不重試：被限流卡住的批次快速放棄、跳過，仍保住其他批的題材（部分結果勝過全 0）。
+    # gemma free tier 延遲極不穩（10s~500s+）且連跑會被限流。分批呼叫，每批設較短 timeout，
+    # SDK 層不重試（max_retries=0），重試由 _classify_batch 以批次為單位控制：
+    # 失敗批次重試一次即放棄，保住其他批的題材（部分結果勝過全 0；
+    # 但股票少時只有一批，不重試會一次失敗就整天 0 題材——2026-07-14 實際發生過）。
     # 串流讓正常批次的連線持續有資料，避免被當 idle 砍。
     return OpenAI(
         api_key=settings.nvidia_api_key,
@@ -72,16 +74,25 @@ def classify_themes(stocks: list[dict], market: str = "TW") -> dict:
     return {"themes": _attach_all(final, name_map)}
 
 
+_BATCH_ATTEMPTS = 2  # 每批最多嘗試次數（NVIDIA 排隊逾時多為暫時性，重試一次通常就過）
+
+
 def _classify_batch(client: OpenAI, batch: list[dict], bi: int, system_prompt: str) -> list[dict]:
     """單批分類，回傳原始 theme dict 清單（含 codes，尚未補名稱）。失敗回空清單。"""
     messages = [
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": json.dumps(batch, ensure_ascii=False)},
     ]
-    try:
-        content = _call(client, messages, json_mode=True)
-    except Exception as e:
-        print(f"  ! 批次 {bi} LLM 呼叫失敗: {e}", flush=True)
+    content = None
+    for attempt in range(1, _BATCH_ATTEMPTS + 1):
+        try:
+            content = _call(client, messages, json_mode=True)
+            break
+        except Exception as e:
+            print(f"  ! 批次 {bi} 第 {attempt} 次 LLM 呼叫失敗: {e}", flush=True)
+            if attempt < _BATCH_ATTEMPTS:
+                time.sleep(10)  # 排隊逾時後稍等再試，避開瞬間壅塞
+    if content is None:
         return []
 
     parsed = _safe_parse(content)
