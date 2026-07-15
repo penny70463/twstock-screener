@@ -1,28 +1,28 @@
 {
-  "date": "2026-07-14",
-  "generated_at": "2026-07-14T16:28:06",
+  "date": "2026-07-15",
+  "generated_at": "2026-07-15T16:09:49",
   "etfs": [
     {
       "code": "0050.TW",
       "name": "元大台灣50",
-      "price": 104.4,
-      "ma50": 102.57,
-      "ma200": 77.32,
+      "price": 106.3,
+      "ma50": 102.81,
+      "ma200": 77.58,
       "signal": "green",
       "desc": "多頭續航",
-      "entry_price": 102.57,
-      "exit_price": 77.32
+      "entry_price": 102.81,
+      "exit_price": 77.58
     },
     {
       "code": "0056.TW",
       "name": "元大高股息",
-      "price": 51.75,
-      "ma50": 49.78,
-      "ma200": 39.63,
+      "price": 53.0,
+      "ma50": 49.99,
+      "ma200": 39.73,
       "signal": "green",
       "desc": "多頭續航",
-      "entry_price": 49.78,
-      "exit_price": 39.63
+      "entry_price": 49.99,
+      "exit_price": 39.73
     },
     {
       "code": "VOO",
@@ -60,35 +60,35 @@
     {
       "code": "SOXQ",
       "name": "半導體 (SOXQ)",
-      "price": 97.1,
-      "ma50": 99.28,
-      "ma200": 69.69,
-      "signal": "yellow",
-      "desc": "回檔買點",
-      "entry_price": 99.28,
-      "exit_price": 69.69
+      "price": 99.65,
+      "ma50": 99.62,
+      "ma200": 69.94,
+      "signal": "green",
+      "desc": "多頭續航",
+      "entry_price": 99.62,
+      "exit_price": 69.94
     },
     {
       "code": "2330.TW",
       "name": "台積電",
-      "price": 2420.0,
-      "ma50": 2341.81,
-      "ma200": 1819.69,
+      "price": 2440.0,
+      "ma50": 2345.73,
+      "ma200": 1825.68,
       "signal": "green",
       "desc": "多頭續航",
-      "entry_price": 2341.81,
-      "exit_price": 1819.69
+      "entry_price": 2345.73,
+      "exit_price": 1825.68
     },
     {
       "code": "00981A.TW",
       "name": "統一增長",
-      "price": 28.4,
-      "ma50": 30.02,
-      "ma200": 20.41,
+      "price": 29.38,
+      "ma50": 30.03,
+      "ma200": 20.5,
       "signal": "yellow",
       "desc": "回檔買點",
-      "entry_price": 30.02,
-      "exit_price": 20.41
+      "entry_price": 30.03,
+      "exit_price": 20.5
     }
   ]
 }
