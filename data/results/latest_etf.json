@@ -1,94 +1,94 @@
 {
-  "date": "2026-07-16",
-  "generated_at": "2026-07-16T16:09:13",
+  "date": "2026-07-17",
+  "generated_at": "2026-07-17T16:14:43",
   "etfs": [
     {
       "code": "0050.TW",
       "name": "元大台灣50",
-      "price": 106.4,
-      "ma50": 103.02,
-      "ma200": 77.83,
-      "signal": "green",
-      "desc": "多頭續航",
-      "entry_price": 103.02,
-      "exit_price": 77.83
+      "price": 100.15,
+      "ma50": 103.07,
+      "ma200": 78.06,
+      "signal": "yellow",
+      "desc": "回檔買點",
+      "entry_price": 103.07,
+      "exit_price": 78.06
     },
     {
       "code": "0056.TW",
       "name": "元大高股息",
-      "price": 52.65,
-      "ma50": 50.16,
-      "ma200": 39.82,
+      "price": 50.75,
+      "ma50": 50.28,
+      "ma200": 39.9,
       "signal": "green",
       "desc": "多頭續航",
-      "entry_price": 50.16,
-      "exit_price": 39.82
+      "entry_price": 50.28,
+      "exit_price": 39.9
     },
     {
       "code": "VOO",
       "name": "S&P 500",
-      "price": 693.8,
-      "ma50": 682.04,
-      "ma200": 636.41,
+      "price": 690.14,
+      "ma50": 682.67,
+      "ma200": 636.84,
       "signal": "green",
       "desc": "多頭續航",
-      "entry_price": 682.04,
-      "exit_price": 636.41
+      "entry_price": 682.67,
+      "exit_price": 636.84
     },
     {
       "code": "QQQ",
       "name": "Nasdaq 100",
-      "price": 717.74,
-      "ma50": 717.55,
-      "ma200": 638.47,
-      "signal": "green",
-      "desc": "多頭續航",
-      "entry_price": 717.55,
-      "exit_price": 638.47
+      "price": 705.94,
+      "ma50": 718.23,
+      "ma200": 639.03,
+      "signal": "yellow",
+      "desc": "回檔買點",
+      "entry_price": 718.23,
+      "exit_price": 639.03
     },
     {
       "code": "SMH",
       "name": "半導體 (SMH)",
-      "price": 590.77,
-      "ma50": 595.41,
-      "ma200": 436.99,
+      "price": 568.92,
+      "ma50": 596.66,
+      "ma200": 438.23,
       "signal": "yellow",
       "desc": "回檔買點",
-      "entry_price": 595.41,
-      "exit_price": 436.99
+      "entry_price": 596.66,
+      "exit_price": 438.23
     },
     {
       "code": "SOXQ",
       "name": "半導體 (SOXQ)",
-      "price": 97.57,
-      "ma50": 99.9,
-      "ma200": 70.18,
+      "price": 93.4,
+      "ma50": 100.11,
+      "ma200": 70.4,
       "signal": "yellow",
       "desc": "回檔買點",
-      "entry_price": 99.9,
-      "exit_price": 70.18
+      "entry_price": 100.11,
+      "exit_price": 70.4
     },
     {
       "code": "2330.TW",
       "name": "台積電",
-      "price": 2470.0,
-      "ma50": 2350.25,
-      "ma200": 1831.83,
-      "signal": "green",
-      "desc": "多頭續航",
-      "entry_price": 2350.25,
-      "exit_price": 1831.83
+      "price": 2290.0,
+      "ma50": 2349.98,
+      "ma200": 1836.94,
+      "signal": "yellow",
+      "desc": "回檔買點",
+      "entry_price": 2349.98,
+      "exit_price": 1836.94
     },
     {
       "code": "00981A.TW",
       "name": "統一增長",
-      "price": 28.95,
-      "ma50": 30.03,
-      "ma200": 20.57,
+      "price": 26.43,
+      "ma50": 29.98,
+      "ma200": 20.64,
       "signal": "yellow",
       "desc": "回檔買點",
-      "entry_price": 30.03,
-      "exit_price": 20.57
+      "entry_price": 29.98,
+      "exit_price": 20.64
     }
   ]
 }
