@@ -34,6 +34,15 @@ def _load(name: str) -> dict | None:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _format_etf_alerts(data: dict) -> str | None:
+    """ETF/大盤警報段落：etf_alert.py 產出。原為獨立推播，併入統一訊息
+    以節省 LINE 月額度（200 則上限，2026-07 曾爆量斷訊）；無警報時整段隱藏"""
+    alerts = data.get("alerts") or []
+    if not alerts:
+        return None
+    return "\n\n".join(alerts)
+
+
 def _format_pullback(data: dict) -> str:
     """回檔轉強段落：檔數 + 回檔最深前 3 檔"""
     stocks = data.get("screened", [])
@@ -148,6 +157,7 @@ def _format_futures(data: dict) -> str | None:
 # 各選股腳本的訊息段落登記表：(結果檔名, 格式函式)
 # 新選股腳本 → 輸出 JSON → 在此加一筆；格式函式回 None 表示該段落本日不顯示
 SCREEN_SECTIONS = [
+    ("etf_alerts_today.json", _format_etf_alerts),
     ("pullback_tw.json", _format_pullback),
     ("cluster_tw.json", _format_breakout),
     ("group_tw.json", _format_group),

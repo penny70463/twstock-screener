@@ -1,19 +1,20 @@
-"""每日 ETF 與大盤進出場 LINE 自動警報系統
+"""每日 ETF 與大盤進出場警報系統
 
 邏輯：每天在 run_pipeline.py 跑完後執行，比對前一日的狀態（alert_state.json），
-只有在「大盤曝險水位」或「ETF 燈號」發生有意義的變化時，才會推播 LINE。
+只有在「大盤曝險水位」或「ETF 燈號」發生有意義的變化時，才產生警報。
+警報不再獨立推播 LINE（省月額度），改寫入 etf_alerts_today.json，
+由排程最後的 send_daily_line.py 併入統一每日訊息一次發送。
 
 用法：
-    python etf_alert.py              # 正常執行（含 LINE 推播）
-    python etf_alert.py --dry-run    # 只印出結果，不發送 LINE
+    python etf_alert.py              # 正常執行（寫入警報檔與狀態）
+    python etf_alert.py --dry-run    # 只印出結果，不寫入警報檔
 """
-import os
 import json
 import argparse
-import requests
 import numpy as np
 import pandas as pd
 import yfinance as yf
+from datetime import date
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -22,43 +23,11 @@ load_dotenv()
 
 RESULT_DIR = Path("data/results")
 STATE_FILE = RESULT_DIR / "alert_state.json"
+# 當日警報輸出檔：send_daily_line.py 讀取後併入統一訊息（見 SCREEN_SECTIONS）
+ALERTS_FILE = RESULT_DIR / "etf_alerts_today.json"
 
 # 曝險水位變化門檻：變化量（絕對值）超過此值才觸發警報，避免微幅波動每天通知
 EXPOSURE_CHANGE_THRESHOLD = 0.10  # 10%
-
-
-# ---------------------------------------------------------------------------
-# LINE 推播
-# ---------------------------------------------------------------------------
-def send_line_message(message: str) -> None:
-    token = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
-    if not token:
-        print("  [!] LINE_CHANNEL_ACCESS_TOKEN 未設定，無法推播。")
-        return
-
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {token}",
-    }
-
-    allowed_ids_str = os.getenv("LINE_ALLOWED_USER_IDS", "")
-    allowed_ids = [uid.strip() for uid in allowed_ids_str.split(",") if uid.strip()]
-
-    if allowed_ids:
-        data = {"to": allowed_ids, "messages": [{"type": "text", "text": message}]}
-        api_url = "https://api.line.me/v2/bot/message/multicast"
-    else:
-        data = {"messages": [{"type": "text", "text": message}]}
-        api_url = "https://api.line.me/v2/bot/message/broadcast"
-
-    try:
-        res = requests.post(api_url, headers=headers, json=data, timeout=10)
-        if res.status_code == 200:
-            print("  [+] LINE 進場警報推播發送成功！", flush=True)
-        else:
-            print(f"  [-] LINE 推播失敗: {res.text}", flush=True)
-    except Exception as e:
-        print(f"  [-] LINE 推播發生例外錯誤: {e}", flush=True)
 
 
 # ---------------------------------------------------------------------------
@@ -285,12 +254,14 @@ def check_and_alert(dry_run: bool = False):
     # 準備新狀態
     new_state = {"etfs": {}, "exposure": {}}
     alerts = []
+    on_date = None  # 主篩選日期：警報檔以此對齊統一訊息的日期檢查
 
     # 1. 檢查台股大盤曝險水位
     latest_tw_file = RESULT_DIR / "latest_tw.json"
     if latest_tw_file.exists():
         tw_data = json.loads(latest_tw_file.read_text(encoding="utf-8"))
         tw_market = tw_data.get("market_state", {})
+        on_date = tw_data.get("date")
         _check_exposure("🇹🇼 台股", "TW", tw_market, old_state, new_state, alerts)
 
     # 2. 檢查美股大盤曝險水位
@@ -298,6 +269,7 @@ def check_and_alert(dry_run: bool = False):
     if latest_us_file.exists():
         us_data = json.loads(latest_us_file.read_text(encoding="utf-8"))
         us_market = us_data.get("market_state", {})
+        on_date = on_date or us_data.get("date")
         _check_exposure("🇺🇸 美股", "US", us_market, old_state, new_state, alerts)
 
     # 3. 檢查 ETF 訊號
@@ -306,17 +278,18 @@ def check_and_alert(dry_run: bool = False):
     # 4. 檢查 KD 交叉
     _check_kd_cross(old_state, new_state, alerts)
 
-    # 推播
+    # 寫入當日警報檔（send_daily_line.py 併入統一訊息發送，不再獨立推播）
     if alerts:
-        msg = "\n\n".join(alerts)
         print("  [!] 觸發警報條件：")
-        print(msg)
-        if not dry_run:
-            send_line_message(msg)
-        else:
-            print("  [i] --dry-run 模式，跳過 LINE 推播。")
+        print("\n\n".join(alerts))
     else:
-        print("  [i] 狀態無變化，無須推播。")
+        print("  [i] 狀態無變化，無警報。")
+    if not dry_run:
+        payload = {"date": on_date or date.today().isoformat(), "alerts": alerts}
+        ALERTS_FILE.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+        print(f"  [+] 警報已寫入 {ALERTS_FILE}，將隨統一每日訊息發送")
+    else:
+        print("  [i] --dry-run 模式，跳過寫入警報檔。")
 
     # 寫入新的狀態（不論是否有警報，都要更新基準）
     STATE_FILE.write_text(json.dumps(new_state, indent=2, ensure_ascii=False), encoding="utf-8")
