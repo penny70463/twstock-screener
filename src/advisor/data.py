@@ -28,27 +28,36 @@ CACHE_DIR = Path(__file__).parent / "cache"
 NAME_MAP_PATH = CACHE_DIR / "name_map.json"
 
 
-def _get(url: str, retries: int = 8, **kwargs) -> requests.Response:
-    """GET with SSL fallback 與重試退避。
+def _get_json(url: str, retries: int = 8, **kwargs):
+    """GET 並回傳解析後的 JSON；取得與解析任一失敗都走 SSL fallback + 退避重試。
 
     - TPEX 憑證缺 Subject Key Identifier，Python 3.13 的嚴格驗證會間歇性
       失敗，失敗時退回不驗證（皆為公開行情資料）
     - TWSE/TPEX 對連續請求會重置連線，指數退避重試
-    - TPEX openapi 收盤後高峰常中途截斷回應（IncompleteRead），
-      實測截斷率約五成，重試預算需拉到分鐘級才扛得住連續截斷"""
+    - TPEX openapi 收盤後高峰常截斷回應，實測截斷率約五成，重試預算需拉到
+      分鐘級才扛得住連續截斷。截斷有兩種表現，都納入同一套重試：
+        1. 傳輸層截斷：requests 讀 body 時拋 ChunkedEncodingError
+        2. 內容截斷：HTTP 傳輸完整但 JSON 本身被切斷（Unterminated string），
+           由 resp.json() 拋 JSONDecodeError
+           （2026-07-23 排程即因此掛掉——舊版只重試傳輸層，漏了這種）
+
+    TWSE/TPEX 的 JSON 端點一律走這裡，避免內容截斷直接炸掉呼叫端。"""
     kwargs.setdefault("headers", HEADERS)
     kwargs.setdefault("timeout", 30)
     last_err: Exception = RuntimeError("unreachable")
     for attempt in range(retries):
         try:
-            return requests.get(url, **kwargs)
+            resp = requests.get(url, **kwargs)
+            resp.raise_for_status()
+            return resp.json()  # 內容截斷會在此拋 JSONDecodeError → 重試
         except requests.exceptions.SSLError:
             import urllib3
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
             kwargs["verify"] = False
             last_err = requests.exceptions.SSLError("ssl")
         except (requests.exceptions.ConnectionError,
-                requests.exceptions.ChunkedEncodingError) as e:
+                requests.exceptions.ChunkedEncodingError,
+                json.JSONDecodeError) as e:  # requests 的 JSONDecodeError 亦繼承自此
             last_err = e
         time.sleep(min(2 ** attempt * 2, 30))  # 2,4,8,16,30,30,30s
     raise last_err
@@ -89,9 +98,7 @@ def all_listings(include_otc: bool = True) -> pd.DataFrame:
     """
     records = []
 
-    resp = _get(TWSE_DAY_ALL)
-    resp.raise_for_status()
-    for r in resp.json():
+    for r in _get_json(TWSE_DAY_ALL):
         code = r["Code"].strip()
         records.append({
             "code": code, "name": r["Name"].strip(),
@@ -106,9 +113,7 @@ def all_listings(include_otc: bool = True) -> pd.DataFrame:
         })
 
     if include_otc:
-        resp = _get(TPEX_DAY_ALL)
-        resp.raise_for_status()
-        for r in resp.json():
+        for r in _get_json(TPEX_DAY_ALL):
             code = r["SecuritiesCompanyCode"].strip()
             records.append({
                 "code": code, "name": r["CompanyName"].strip(),
@@ -130,10 +135,9 @@ def all_listings(include_otc: bool = True) -> pd.DataFrame:
 def fetch_day_quotes(day: dt.date) -> pd.DataFrame | None:
     """指定日期的全市場官方 OHLCV（上市 MI_INDEX + 上櫃 dailyQuotes）。
     非交易日回傳 None。"""
-    resp = _get(TWSE_MI_INDEX,
-                params={"date": day.strftime("%Y%m%d"),
-                        "type": "ALLBUT0999", "response": "json"})
-    payload = resp.json()
+    payload = _get_json(TWSE_MI_INDEX,
+                        params={"date": day.strftime("%Y%m%d"),
+                                "type": "ALLBUT0999", "response": "json"})
     if payload.get("stat") != "OK":
         return None
     table = next((t for t in payload.get("tables", [])
@@ -157,10 +161,10 @@ def fetch_day_quotes(day: dt.date) -> pd.DataFrame | None:
         })
 
     try:
-        resp = _get(TPEX_QUOTES,
-                    params={"date": day.strftime("%Y/%m/%d"),
-                            "type": "EW", "response": "json"})
-        t = (resp.json().get("tables") or [{}])[0]
+        payload = _get_json(TPEX_QUOTES,
+                            params={"date": day.strftime("%Y/%m/%d"),
+                                    "type": "EW", "response": "json"})
+        t = (payload.get("tables") or [{}])[0]
         tf = t.get("fields") or []
         if "代號" in tf:
             i = {k: tf.index(k) for k in
@@ -418,10 +422,9 @@ def t86_one_day(datestr: str) -> dict[str, dict]:
 
     確認是假日（查無資料）回空 dict；限流或異常回應則拋例外，
     呼叫端絕不能把失敗存成假日標記。"""
-    resp = _get(
+    payload = _get_json(
         TWSE_T86,
         params={"date": datestr, "selectType": "ALLBUT0999", "response": "json"})
-    payload = resp.json()
     stat = payload.get("stat", "")
     if "沒有符合條件" in stat:   # TWSE 確認的非交易日
         return {}
@@ -443,11 +446,10 @@ def t86_one_day(datestr: str) -> dict[str, dict]:
 def tpex_inst_one_day(day: dt.date) -> dict[str, dict]:
     """單日上櫃法人買賣超。TPEX 表格為位置式欄位：
     外陸資(不含外資自營商)買賣超=idx4、投信買賣超=idx13"""
-    resp = _get(
+    payload = _get_json(
         TPEX_INST,
         params={"type": "Daily", "sect": "EW",
                 "date": day.strftime("%Y/%m/%d"), "response": "json"})
-    payload = resp.json()
     tables = payload.get("tables") or [{}]
     rows = tables[0].get("data") or []
     out = {}
@@ -518,8 +520,7 @@ def fetch_revenue() -> pd.DataFrame | None:
     records = {}
     for url in (TWSE_REVENUE, TPEX_REVENUE):
         try:
-            resp = _get(url)
-            rows = resp.json()
+            rows = _get_json(url)
         except Exception:
             continue
         for r in rows:
