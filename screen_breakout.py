@@ -210,7 +210,11 @@ def main() -> None:
                    "exit_stop": EXIT_STOP, "exit_trail": EXIT_TRAIL},
         "themes": out_themes,
     }
-    OUT_JSON.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+    json_text = json.dumps(payload, ensure_ascii=False)
+    OUT_JSON.write_text(json_text, encoding="utf-8")
+    # 歷史日期檔：前端選日期時抓對應的 cluster_tw_YYYYMMDD.json
+    dated_json = REPO / "data" / "results" / f"cluster_tw_{ASOF.replace('-', '')}.json"
+    dated_json.write_text(json_text, encoding="utf-8")
     print(f"前端資料已更新：{OUT_JSON}（{len(out_themes)} 個族群）")
 
     rows = []

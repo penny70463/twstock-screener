@@ -400,7 +400,7 @@ const isSparklineUp = (prices) => {
 
       <!-- Cluster Breakout Tab Content -->
       <template v-if="activeTab === 'cluster'">
-        <ClusterBreakout />
+        <ClusterBreakout :selectedDate="selectedDate" />
       </template>
 
       <!-- Group Season Tab Content -->

@@ -1,26 +1,36 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
+
+const props = defineProps({
+  selectedDate: { type: String, default: 'latest' },
+})
 
 const data = ref(null)
 const loading = ref(true)
 const error = ref(null)
 
-// 根據開發環境決定 API 網址
-const URL = import.meta.env.DEV
-  ? '/api/cluster_tw.json'
-  : 'https://raw.githubusercontent.com/penny70463/twstock-screener/master/data/results/cluster_tw.json'
+function getUrl(date) {
+  const base = import.meta.env.DEV ? '/api' : 'https://raw.githubusercontent.com/penny70463/twstock-screener/master/data/results'
+  if (date === 'latest') return `${base}/cluster_tw.json`
+  return `${base}/cluster_tw_${date.replace(/-/g, '')}.json`
+}
 
-onMounted(async () => {
+async function fetchCluster() {
+  loading.value = true
+  error.value = null
   try {
-    const res = await fetch(URL, { cache: 'no-store' })
-    if (!res.ok) throw new Error('尚無族群突破資料')
+    const res = await fetch(getUrl(props.selectedDate), { cache: 'no-store' })
+    if (!res.ok) throw new Error('尚無該日族群突破資料')
     data.value = await res.json()
   } catch (e) {
     error.value = e.message
   } finally {
     loading.value = false
   }
-})
+}
+
+onMounted(fetchCluster)
+watch(() => props.selectedDate, fetchCluster)
 
 const themes = computed(() => data.value?.themes || [])
 const totalStocks = computed(() =>
