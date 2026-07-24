@@ -9,6 +9,7 @@ import QuarterEnd from './components/QuarterEnd.vue'
 import EventDriven from './components/EventDriven.vue'
 import ShortSell from './components/ShortSell.vue'
 import Futures from './components/Futures.vue'
+import { getDataStaleness } from './utils/dataFreshness'
 
 const activeMarket = ref('TW')
 const activeTab = ref('screener')
@@ -73,6 +74,13 @@ watch(activeMarket, () => {
   }
   fetchDates()
   fetchData()
+})
+
+// 資料新鮮度偵測：排程失敗時結果 JSON 不會更新，頁面卻照樣顯示舊資料。
+// 只檢查「最新」；使用者主動查看歷史日期時不該跳警告。（邏輯見 utils/dataFreshness）
+const dataStaleness = computed(() => {
+  if (selectedDate.value !== 'latest') return null
+  return getDataStaleness(data.value?.date)
 })
 
 const marketLabel = computed(() => data.value?.market_state?.label || '未知')
@@ -189,6 +197,21 @@ const isSparklineUp = (prices) => {
     </div>
 
     <div v-else-if="data" class="dashboard-content">
+      <div v-if="dataStaleness" class="stale-banner"
+           :class="dataStaleness.lag >= 2 ? 'stale-severe' : 'stale-mild'">
+        <span class="stale-icon">⚠️</span>
+        <div class="stale-text">
+          <strong>{{ dataStaleness.lag >= 2
+            ? `資料已 ${dataStaleness.lag} 個交易日未更新`
+            : '資料可能未更新' }}</strong>
+          <p>
+            目前顯示 <b>{{ dataStaleness.dataDate }}</b> 的結果，預期應更新至
+            <b>{{ dataStaleness.expectedDate }}</b>。每日排程可能執行失敗；
+            若該日為國定假日休市則屬正常。
+          </p>
+        </div>
+      </div>
+
       <header class="glass-panel hero-banner">
         <div class="hero-left">
           <div class="market-toggle">
@@ -526,6 +549,24 @@ body {
   border-radius: 1rem;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
+
+/* 資料過期提醒橫幅 */
+.stale-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid;
+  border-radius: 1rem;
+}
+.stale-mild { background: rgba(234, 179, 8, 0.12); border-color: rgba(234, 179, 8, 0.45); }
+.stale-severe { background: rgba(239, 68, 68, 0.12); border-color: rgba(239, 68, 68, 0.5); }
+.stale-icon { font-size: 1.25rem; line-height: 1.4; }
+.stale-text strong { display: block; margin-bottom: 0.25rem; }
+.stale-mild .stale-text strong { color: var(--neutral); }
+.stale-severe .stale-text strong { color: var(--bullish); }
+.stale-text p { margin: 0; font-size: 0.875rem; color: var(--text-muted); line-height: 1.5; }
 
 /* Typography & Colors */
 .text-up { color: var(--up-color); font-weight: 600; }
