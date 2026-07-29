@@ -105,42 +105,46 @@ def run(market: str = "TW", classify: bool = True, verbose: bool = True) -> dict
     screened_df, universe_df = screener.run_screen(universe, history, inst, revenue, threshold, market=market)
     _step("評分與篩選完成", t0, verbose)
     
+    # 5. 算漲幅 → 排序 → 產業集中度上限；0 檔時整段跳過（這些操作依賴 screened_df
+    #    的欄位），直接以空結果往下走。仍會寫入當日檔（見文末 _save），讓前端顯示
+    #    「今日無標的通過篩選」並更新日期，而非停在前一日被誤判為排程失敗。
     if screened_df.empty:
-        if verbose: print("  ! 今日無股票通過 Advisor 篩選門檻", flush=True)
-        return _build_payload(datetime.now(TW_TZ).date(), pd.DataFrame(), {}, market_state)
-        
-    # 5. 計算當日漲幅，作為交集排序依據 (長線保護短線，短線找動能)
-    change_pcts = []
-    for code in screened_df["代號"]:
-        df = history.get(code)
-        if df is not None and len(df) >= 2:
-            pct = (df["Close"].iloc[-1] / df["Close"].iloc[-2] - 1) * 100
-            change_pcts.append(round(pct, 2))
-        else:
-            change_pcts.append(0.0)
-            
-    screened_df["change_pct"] = change_pcts
-
-    if market == "US":
-        # 動能策略：按動能總分排序（非當日漲幅；持倉型策略不追單日跳動）
-        result = screened_df.sort_values("總分", ascending=False).head(settings.top_n)
         if verbose:
-            print(f"  通過動能門檻共 {len(result)} 檔（按總分排序取前 {settings.top_n}）", flush=True)
+            print("  ! 今日無股票通過 Advisor 篩選門檻，仍寫入空結果供前端顯示", flush=True)
+        result = screened_df
     else:
-        # 台股：長線保護短線，過濾出今天上漲的，依漲幅排序取前 top_n 送給 LLM
-        # 回測驗證（2026-07，tests/backtest_tw_ranking.py）：漲幅排序在前瞻
-        # 5/10/20 日全面優於總分排序（如 20 日 12.8% vs 11.0%），維持現行邏輯
-        result = screened_df[screened_df["change_pct"] > 0].sort_values("change_pct", ascending=False).head(settings.top_n)
-        if verbose:
-            print(f"  通過 Advisor 門檻且今日上漲共 {len(result)} 檔（排序取前 {settings.top_n}）", flush=True)
+        # 計算當日漲幅，作為交集排序依據 (長線保護短線，短線找動能)
+        change_pcts = []
+        for code in screened_df["代號"]:
+            df = history.get(code)
+            if df is not None and len(df) >= 2:
+                pct = (df["Close"].iloc[-1] / df["Close"].iloc[-2] - 1) * 100
+                change_pcts.append(round(pct, 2))
+            else:
+                change_pcts.append(0.0)
 
-    # 5.5 產業集中度上限：排行榜任一前段內同產業佔比 ≤ 上限，超額者延後名次（不剔除）
-    result = _apply_industry_cap(result)
-    if verbose and "capped" in result.columns:
-        n_capped = int(result["capped"].sum())
-        if n_capped:
-            print(f"  產業集中度上限 {adv_config.SCREEN_MAX_INDUSTRY_RATIO:.0%}："
-                  f"{n_capped} 檔超額延後名次", flush=True)
+        screened_df["change_pct"] = change_pcts
+
+        if market == "US":
+            # 動能策略：按動能總分排序（非當日漲幅；持倉型策略不追單日跳動）
+            result = screened_df.sort_values("總分", ascending=False).head(settings.top_n)
+            if verbose:
+                print(f"  通過動能門檻共 {len(result)} 檔（按總分排序取前 {settings.top_n}）", flush=True)
+        else:
+            # 台股：長線保護短線，過濾出今天上漲的，依漲幅排序取前 top_n 送給 LLM
+            # 回測驗證（2026-07，tests/backtest_tw_ranking.py）：漲幅排序在前瞻
+            # 5/10/20 日全面優於總分排序（如 20 日 12.8% vs 11.0%），維持現行邏輯
+            result = screened_df[screened_df["change_pct"] > 0].sort_values("change_pct", ascending=False).head(settings.top_n)
+            if verbose:
+                print(f"  通過 Advisor 門檻且今日上漲共 {len(result)} 檔（排序取前 {settings.top_n}）", flush=True)
+
+        # 5.5 產業集中度上限：排行榜任一前段內同產業佔比 ≤ 上限，超額者延後名次（不剔除）
+        result = _apply_industry_cap(result)
+        if verbose and "capped" in result.columns:
+            n_capped = int(result["capped"].sum())
+            if n_capped:
+                print(f"  產業集中度上限 {adv_config.SCREEN_MAX_INDUSTRY_RATIO:.0%}："
+                      f"{n_capped} 檔超額延後名次", flush=True)
 
     # 為了相容前端顯示，將欄位名稱對齊
     result = result.rename(columns={
