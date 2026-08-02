@@ -86,6 +86,15 @@ def run(market: str = "TW", classify: bool = True, verbose: bool = True) -> dict
     adv_data.patch_latest_bar(history, universe)
     _step("歷史股價與快取完成", t0, verbose)
     
+    # 取歷史資料中最新的一天作為交易日基準 (避免週末執行時標記為週六/日)
+    latest_trade_date = None
+    for df in history.values():
+        if df is not None and not df.empty and hasattr(df, "index"):
+            max_date = df.index.max()
+            if latest_trade_date is None or max_date > latest_trade_date:
+                latest_trade_date = max_date
+    on_date = latest_trade_date.date() if latest_trade_date else datetime.now(TW_TZ).date()
+    
     # 2. 取得法人與營收資料 (僅台股支援)
     if market == "TW":
         inst = adv_data.fetch_institutional(days=3, lookback=10)
@@ -98,7 +107,7 @@ def run(market: str = "TW", classify: bool = True, verbose: bool = True) -> dict
     market_state = adv_market.get_regime(market=market)
     threshold = market_state["threshold"]
     if verbose:
-        print(f"[{datetime.now(TW_TZ).date()}] 大盤狀態: {market_state['label']}, 建議門檻: {threshold}", flush=True)
+        print(f"[{on_date}] 大盤狀態: {market_state['label']}, 建議門檻: {threshold}", flush=True)
     
     # 4. 執行選股：台股用五因子；美股用橫斷面動能策略（回測驗證的美股原生策略）
     screener = adv_us_screener if market == "US" else adv_screener
@@ -192,11 +201,11 @@ def run(market: str = "TW", classify: bool = True, verbose: bool = True) -> dict
         if verbose:
             print(f"  ! 連續水位模型計算失敗（不影響選股）: {e}", flush=True)
 
-    payload = _build_payload(datetime.now(TW_TZ).date(), result, themes, market_state, market=market)
-    _save(payload, datetime.now(TW_TZ).date(), market=market)
+    payload = _build_payload(on_date, result, themes, market_state, market=market)
+    _save(payload, on_date, market=market)
     
     # 儲存 Universe 給前端投資組合使用
-    universe_payload = _build_universe_payload(datetime.now(TW_TZ).date(), universe_df, market_state, market=market)
+    universe_payload = _build_universe_payload(on_date, universe_df, market_state, market=market)
     (RESULT_DIR / f"universe_{market.lower()}.json").write_text(
         json.dumps(universe_payload, ensure_ascii=False, indent=2), encoding="utf-8"
     )
