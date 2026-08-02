@@ -40,6 +40,11 @@ if ! python -u screen_breakout.py; then
   echo "族群突破偵測失敗，跳過（不影響其他結果）"
 fi
 
+echo "產出區間漲跌幅歷史資料 (build_price_history.py)..."
+if ! python -u build_price_history.py; then
+  echo "歷史收盤檔產出失敗，跳過（不影響其他結果）"
+fi
+
 echo "執行集團作帳選股 (screen_group.py，非季節時僅更新狀態)..."
 if ! python -u screen_group.py; then
   echo "集團作帳選股失敗，跳過（不影響其他結果）"

@@ -9,6 +9,8 @@ import QuarterEnd from './components/QuarterEnd.vue'
 import EventDriven from './components/EventDriven.vue'
 import ShortSell from './components/ShortSell.vue'
 import Futures from './components/Futures.vue'
+import RankingRange from './components/RankingRange.vue'
+import CalendarPicker from './components/CalendarPicker.vue'
 import { getDataStaleness } from './utils/dataFreshness'
 
 const activeMarket = ref('TW')
@@ -69,7 +71,7 @@ watch(activeMarket, () => {
   // 台股專用頁籤：回檔轉強、族群突破、集團作帳、季底法人、事件驅動、做空
   // 切到美股時退回強勢股掃描（台指期保留，可跨市場觀察）
   if (activeMarket.value !== 'TW'
-      && ['pullback', 'cluster', 'group', 'quarter', 'event', 'short'].includes(activeTab.value)) {
+      && ['pullback', 'cluster', 'group', 'quarter', 'event', 'short', 'ranking'].includes(activeTab.value)) {
     activeTab.value = 'screener'
   }
   fetchDates()
@@ -230,11 +232,13 @@ const isSparklineUp = (prices) => {
             大盤狀態：{{ marketLabel }} (門檻 {{ data.market_state?.threshold }} 分)
           </div>
           <div class="date-selector" v-if="availableDates.length > 0">
-            <label for="date-select" class="text-sm text-gray-400 mr-2">📅 歷史回顧：</label>
-            <select id="date-select" v-model="selectedDate" class="date-dropdown">
-              <option value="latest">最新 (Latest)</option>
-              <option v-for="d in availableDates" :key="d" :value="d">{{ d }}</option>
-            </select>
+            <label class="text-sm text-gray-400 mr-2">歷史回顧：</label>
+            <CalendarPicker
+              v-model="selectedDate"
+              :availableDates="availableDates"
+              :allowLatest="true"
+              placeholder="選擇日期"
+            />
           </div>
           <div class="update-time mt-2">
             更新時間：{{ new Date(data.generated_at).toLocaleString() }}
@@ -326,6 +330,14 @@ const isSparklineUp = (prices) => {
           @click="activeTab = 'short'"
         >
           🔴 做空機會
+        </button>
+        <button
+          v-if="activeMarket === 'TW'"
+          class="tab-btn"
+          :class="{ active: activeTab === 'ranking' }"
+          @click="activeTab = 'ranking'"
+        >
+          📊 區間漲跌幅
         </button>
         <button
           class="tab-btn"
@@ -444,6 +456,11 @@ const isSparklineUp = (prices) => {
       <!-- Short Sell Tab Content -->
       <template v-if="activeTab === 'short'">
         <ShortSell />
+      </template>
+
+      <!-- Ranking Range Tab Content -->
+      <template v-if="activeTab === 'ranking'">
+        <RankingRange />
       </template>
 
       <!-- Futures Tab Content -->
