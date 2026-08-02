@@ -28,6 +28,48 @@ const triggerRef = ref(null)
 const dropdownRef = ref(null)
 const dropdownStyle = ref({})
 
+// 讓使用者可以手動輸入
+const inputText = ref('')
+
+watch(() => props.modelValue, (val) => {
+  if (val === 'latest') {
+    inputText.value = '最新 (Latest)'
+  } else {
+    inputText.value = val || ''
+  }
+}, { immediate: true })
+
+function handleInputConfirm() {
+  const val = inputText.value.trim()
+  if (val === '最新 (Latest)' || val === 'latest') {
+    emit('update:modelValue', 'latest')
+    return
+  }
+  
+  if (val === '') {
+    emit('update:modelValue', '')
+    return
+  }
+
+  // 檢查格式 YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(val)) {
+    if (availableSet.value.has(val)) {
+      emit('update:modelValue', val)
+      viewYear.value = parseInt(val.substring(0, 4))
+      viewMonth.value = parseInt(val.substring(5, 7))
+      isOpen.value = false
+    } else {
+      // 找不到該日期的資料
+      alert(`日期 ${val} 沒有資料，請選擇有資料的日期。`)
+      // 還原
+      inputText.value = props.modelValue === 'latest' ? '最新 (Latest)' : props.modelValue
+    }
+  } else {
+    alert('請輸入正確的日期格式 (YYYY-MM-DD)')
+    inputText.value = props.modelValue === 'latest' ? '最新 (Latest)' : props.modelValue
+  }
+}
+
 // 目前顯示的年月
 const viewYear = ref(2026)
 const viewMonth = ref(1) // 1-12
@@ -109,11 +151,8 @@ async function toggleOpen() {
   }
 }
 
-// 顯示用的日期文字
-const displayText = computed(() => {
-  if (props.modelValue === 'latest') return '最新 (Latest)'
-  return props.modelValue || props.placeholder
-})
+// 顯示用的日期文字 (由 inputText 取代)
+// const displayText = computed(...) (已移除)
 
 // 月份導覽
 function prevMonth() {
@@ -200,11 +239,19 @@ const hasNextMonth = computed(() => {
 
 <template>
   <div class="cal-picker" ref="pickerRef">
-    <button class="cal-trigger" ref="triggerRef" @click="toggleOpen" type="button">
+    <div class="cal-trigger" ref="triggerRef" @click="toggleOpen">
       <span class="cal-icon">📅</span>
-      <span class="cal-text" :class="{ 'cal-placeholder': !modelValue }">{{ displayText }}</span>
+      <input 
+        type="text" 
+        class="cal-input"
+        v-model="inputText"
+        @keydown.enter="handleInputConfirm"
+        @blur="handleInputConfirm"
+        :placeholder="placeholder"
+        @click.stop="toggleOpen"
+      />
       <span class="cal-chevron" :class="{ open: isOpen }">▾</span>
-    </button>
+    </div>
 
     <Teleport to="body">
       <Transition name="cal-fade">
@@ -284,12 +331,18 @@ const hasNextMonth = computed(() => {
   font-size: 1rem;
 }
 
-.cal-text {
+.cal-input {
   flex: 1;
-  text-align: left;
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  font-size: 0.9rem;
+  outline: none;
+  width: 110px;
+  padding: 0;
 }
 
-.cal-placeholder {
+.cal-input::placeholder {
   color: var(--text-muted);
 }
 
