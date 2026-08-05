@@ -266,10 +266,31 @@ const isSparklineUp = (prices) => {
       </section>
 
       <!-- Dashboard Metrics -->
-      <DashboardMetrics 
-        v-if="data && data.market_state" 
-        :market-state="data.market_state" 
-      />
+      <section class="section" v-if="data && data.market_state && data.market_state.exposure !== undefined">
+        <div class="glass-panel exposure-panel" :class="{'high-exposure': data.market_state.exposure > 0.5, 'low-exposure': data.market_state.exposure <= 0.5}">
+          <div class="exposure-header">
+            <h3>🛡️ 連續水位模型 (建議曝險)</h3>
+            <span class="exposure-value">{{ Math.round(data.market_state.exposure * 100) }}%</span>
+          </div>
+          <div class="exposure-details">
+            <div class="stat-box">
+              <span class="stat-label">動能趨勢</span>
+              <span class="stat-val">{{ data.market_state.trend_score }}</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">市場寬度 (20MA之上)</span>
+              <span class="stat-val">{{ data.market_state.breadth }}%</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">實現波動率 (20日)</span>
+              <span class="stat-val">{{ data.market_state.realized_vol }}%</span>
+            </div>
+          </div>
+          <p class="exposure-desc" v-if="data.market_state.exposure >= 0.8">目前大盤趨勢穩健、寬度良好且波動率受控，適合維持高水位參與行情。</p>
+          <p class="exposure-desc" v-else-if="data.market_state.exposure > 0.3">目前大盤動能放緩或波動加劇，建議適度降低持股水位，保留部分現金。</p>
+          <p class="exposure-desc" v-else>目前大盤落入明顯空頭或極度波動，建議大幅降低曝險，以防禦為主。</p>
+        </div>
+      </section>
 
       <!-- ETF Traffic Light -->
       <EtfTrafficLight :market="activeMarket" />
@@ -340,6 +361,7 @@ const isSparklineUp = (prices) => {
           📊 區間漲跌幅
         </button>
         <button
+          v-if="activeMarket === 'TW'"
           class="tab-btn"
           :class="{ active: activeTab === 'futures' }"
           @click="activeTab = 'futures'"
@@ -1008,5 +1030,67 @@ body {
     height: 30px;
     display: block;
   }
+.exposure-panel {
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border-left: 4px solid var(--accent-blue);
+}
+
+.high-exposure {
+  border-left-color: var(--bullish);
+}
+
+.low-exposure {
+  border-left-color: var(--bearish);
+}
+
+.exposure-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.exposure-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--text-main);
+}
+
+.exposure-value {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: var(--accent-blue);
+}
+
+.high-exposure .exposure-value { color: var(--bullish); }
+.low-exposure .exposure-value { color: var(--bearish); }
+
+.exposure-details {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1rem;
+}
+
+.stat-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.stat-val {
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.exposure-desc {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
 </style>
 
