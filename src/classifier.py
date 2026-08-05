@@ -168,9 +168,10 @@ def _attach_all(themes: list[dict], name_map: dict) -> list[dict]:
         seen: set[str] = set()
         stocks = []
         for c in codes:
-            if c in name_map and c not in seen:
-                seen.add(c)
-                stocks.append({"code": c, "name": name_map[c]})
+            c_str = str(c).strip()
+            if c_str in name_map and c_str not in seen:
+                seen.add(c_str)
+                stocks.append({"code": c_str, "name": name_map[c_str]})
         if stocks:
             out.append({"name": name, "reason": t.get("reason", ""), "stocks": stocks})
     return out
