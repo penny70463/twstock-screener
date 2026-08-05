@@ -30,8 +30,15 @@ import pandas as pd
 import yfinance as yf
 
 REPO = Path(__file__).resolve().parent
-ASOF = sys.argv[1] if len(sys.argv) > 1 and not sys.argv[1].startswith("-") \
-    else dt.date.today().isoformat()
+def _get_default_asof():
+    try:
+        from src.advisor.data import _expected_last_session
+        return _expected_last_session().isoformat()
+    except Exception:
+        import datetime as dt
+        return dt.date.today().isoformat()
+
+ASOF = sys.argv[1] if len(sys.argv) > 1 and not sys.argv[1].startswith("-") else _get_default_asof()
 OUT_JSON = REPO / "data" / "results" / "group_tw.json"
 
 STOP_PCT = 0.08      # 停損：進場參考價 -8%（收盤確認）
@@ -102,7 +109,7 @@ def main() -> None:
     tickers = {c: c + (".TWO" if c in TWO_CODES else ".TW") for c in codes}
     print(f"下載 {len(codes)} 檔集團股 2 年日線 ...", flush=True)
     raw = yf.download(list(tickers.values()), period="2y", group_by="ticker",
-                      auto_adjust=True, progress=False, threads=True)
+                      auto_adjust=True, progress=False, threads=False)
 
     prices = {}
     for c, tk in tickers.items():

@@ -41,7 +41,11 @@ sys.path.insert(0, str(REPO))
 
 ARGS = [a for a in sys.argv[1:] if not a.startswith("-")]
 NO_LLM = "--no-llm" in sys.argv
-ASOF = ARGS[0] if ARGS else dt.date.today().isoformat()
+def _get_default_asof():
+    from src.advisor.data import _expected_last_session
+    return _expected_last_session().isoformat()
+
+ASOF = ARGS[0] if ARGS else _get_default_asof()
 OUT_CSV = (REPO / "data" / "results"
            / f"screen_breakout_result_{ASOF.replace('-', '')}.csv")
 OUT_JSON = REPO / "data" / "results" / "cluster_tw.json"
@@ -68,7 +72,7 @@ def main() -> None:
 
     print(f"基準日 {ASOF}，下載 {len(tickers)} 檔 6 個月日線 ...", flush=True)
     raw = yf.download(list(tickers.values()), period="6mo", group_by="ticker",
-                      auto_adjust=True, progress=False, threads=True)
+                      auto_adjust=True, progress=False, threads=False)
 
     # Yahoo 台股日線常缺最新一日 → 用官方行情補
     asof_date = dt.date.fromisoformat(ASOF)
@@ -152,6 +156,17 @@ def main() -> None:
     if has_asof == 0:
         print("無任何個股有基準日 K 線（非交易日？），不更新結果")
         return
+        
+    # 資料遺漏完整度檢查
+    missing_count = len(tickers) - has_asof
+    if missing_count > 10:
+        msg = f"今日 screen_breakout.py 下載資料異常，有 {missing_count} 檔個股遺漏，可能影響篩選結果。"
+        print(f"  ! {msg}")
+        try:
+            from notify_error import send_warning
+            send_warning(msg)
+        except Exception as e:
+            print(f"  ! 無法發送遺漏警告：{e}")
     print(f"近 {WINDOW} 日出量突破：{len(events_by_stock)} 檔"
           f"（今日點火 {sum(1 for i in today_info.values() if i['fired_today'])} 檔）",
           flush=True)

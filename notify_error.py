@@ -39,3 +39,26 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+def send_warning(msg_text: str):
+    load_dotenv()
+    token = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
+    if not token:
+        print("No LINE_CHANNEL_ACCESS_TOKEN found in .env, cannot send warning.")
+        return
+    
+    target_user_id = "U6a691e4a5f95264a3260f7ff5f0f2819"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {token}"
+    }
+    data = {
+        "to": target_user_id,
+        "messages": [{"type": "text", "text": f"⚠️ 警告：{msg_text}"}]
+    }
+    try:
+        res = requests.post("https://api.line.me/v2/bot/message/push", headers=headers, json=data, timeout=10)
+        res.raise_for_status()
+        print("Warning notification sent to LINE.")
+    except Exception as e:
+        print(f"Failed to send warning notification: {e}")

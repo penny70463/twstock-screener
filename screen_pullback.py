@@ -38,7 +38,15 @@ import requests
 import yfinance as yf
 
 REPO = Path(__file__).resolve().parent
-ASOF = sys.argv[1] if len(sys.argv) > 1 else date.today().isoformat()
+def _get_default_asof():
+    try:
+        from src.advisor.data import _expected_last_session
+        return _expected_last_session().isoformat()
+    except Exception:
+        from datetime import date
+        return date.today().isoformat()
+
+ASOF = sys.argv[1] if len(sys.argv) > 1 and not sys.argv[1].startswith("-") else _get_default_asof()
 OUT_CSV = (REPO / "data" / "results"
            / f"screen_pullback_result_{ASOF.replace('-', '')}.csv")
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
@@ -144,7 +152,7 @@ def main() -> None:
     suffix = {"上市": ".TW", "上櫃": ".TWO"}
     tickers = {c: c + suffix.get(uni[c].get("市場", "上市"), ".TW") for c in codes}
     raw = yf.download(list(tickers.values()), period="2y", group_by="ticker",
-                      auto_adjust=True, progress=False, threads=True)
+                      auto_adjust=True, progress=False, threads=False)
 
     print("步驟 3/3：套用價格條件 ...", flush=True)
     counts = {"資料足夠": 0, "c1_均線之上": 0, "c3_曾回檔7%": 0, "c4_轉強": 0}

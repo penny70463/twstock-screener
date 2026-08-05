@@ -12,10 +12,11 @@
   - bearish（空頭）：收盤 < ma60 或 ma60 < ma120
   （多頭時期不執行做空）
 
-做空進出：
-  - 進場參考：季線 × 0.98
-  - 停利：進場 × (1 - 0.03) = -3%
-  - 停損：進場 × (1 + 0.10) = +10%
+做空進出（2026-07-05 依使用者裁決改為出場線式移動停利，取代固定停利 3%/停損 10%）：
+  - 進場參考：季線 × 0.98（5 個交易日內最高價觸及才視為成交）
+  - 每日出場線 = min(進場價 × (1+初始停損), 波段最低收盤 × (1+回彈幅度))
+    線只會下移；收盤站上出場線即回補（收盤確認，同 screen_breakout 慣例）
+  - 預設：初始停損 10%、回彈幅度 10%（--loss / --trail 可調，待參數掃描驗證）
 
 輸出：按年份統計勝率、平均報酬、最大虧損
 
@@ -51,21 +52,22 @@ _revenue_cache = {}  # {date: {code: mom_pct}}
 def backtest_short_strategy(
     start_date: dt.date = dt.date(2021, 1, 1),
     end_date: dt.date = dt.date(2026, 12, 31),
-    stop_profit_pct: float = 0.03,
     stop_loss_pct: float = 0.10,
+    trail_pct: float = 0.10,
 ) -> dict:
-    """執行做空策略 2021~2026 回測（修正版 - R1/R2/R3）
+    """執行做空策略 2021~2026 回測（修正版 - R1/R2/R3；出場改移動停利）
 
     修正項：
     - R1：自建 6 年 TWII regime 序列，避免 get_regime() 的 2y 限制
     - R2：修正融券查詢快取邏輯
     - R3：傳入 history_data 避免重複下載
+    - 出場：出場線式移動停利（做空版），取代固定停利/停損
 
     Args:
         start_date: 回測起始日
         end_date: 回測結束日
-        stop_profit_pct: 停利百分比 (預設 3%)
-        stop_loss_pct: 停損百分比 (預設 10%)
+        stop_loss_pct: 初始停損（進場價往上的容忍幅度，預設 10%）
+        trail_pct: 移動停利回彈幅度（波段最低收盤往上，預設 10%）
 
     Returns:
         dict: {
@@ -77,7 +79,7 @@ def backtest_short_strategy(
     """
 
     print(f"[回測] 梯隊 3 做空策略 ({start_date} ~ {end_date})")
-    print(f"   停利: -{stop_profit_pct*100:.1f}%  |  停損: +{stop_loss_pct*100:.1f}%\n")
+    print(f"   出場線 = min(進場×(1+{stop_loss_pct:.0%}), 最低收盤×(1+{trail_pct:.0%}))，收盤站上即回補\n")
 
     # ── 準備階段 1：自建 regime 序列（修正 R1）──
     print("[下載] 建立 TWII regime 序列...")
@@ -107,7 +109,7 @@ def backtest_short_strategy(
         group_by="ticker",
         auto_adjust=True,
         progress=False,
-        threads=True,
+        threads=False,
     )
     history_data = {}
     for code in all_codes:
@@ -127,6 +129,8 @@ def backtest_short_strategy(
     annual_results = {}
     all_trades = []
     processed_pairs = set()  # 避免重複計算同一對 (code, entry_date)
+    open_until = {}  # code -> 平倉日；持倉期間同一檔不重複進場（避免天天加倉灌爆統計）
+    unresolved = 0   # 到資料尾端仍未觸及停利/停損的部位（未列入統計，回報時要標註）
 
     current_date = start_date
     while current_date <= end_date:
@@ -152,43 +156,58 @@ def backtest_short_strategy(
                     continue
                 processed_pairs.add(pair_key)
 
-                # 計算進場價（修正 R3：從共用的 history_data 查表）
-                entry_price, target_price, stop_loss_price = _calculate_entry_exit(
-                    code, current_date, history_data
-                )
-
-                if entry_price is None:
+                # 持倉中不重複進場
+                if code in open_until and current_date <= open_until[code]:
                     continue
 
-                # 向後尋找出場日
+                hist = history_data.get(code)
+                if hist is None or pd.Timestamp(current_date) not in hist.index:
+                    continue
+                idx = hist.index.get_loc(pd.Timestamp(current_date))
+
+                # 進場：訊號日隔日開盤市價（2026-07-05 使用者裁決選項 1）
+                # 原設計掛季線×0.98 等反彈——只有反彈中的股票才成交，
+                # 系統性錯過強勢下殺的標的（對做空是逆選擇）；改市價進場檢驗此假設
+                if idx + 1 >= len(hist):
+                    continue
+                fill_idx = idx + 1
+                entry_price = float(hist["Open"].iloc[fill_idx])
+                if not entry_price or entry_price <= 0:
+                    continue
+
+                # 出場線式移動停利（做空版，收盤確認）：
+                # 出場線 = min(進場價 × (1+初始停損), 波段最低收盤 × (1+回彈幅度))
+                # 線只會下移；收盤站上出場線即回補
+                # 自進場日當天收盤起評估（開盤進場，當日收盤即持倉狀態）
                 exit_price = None
                 exit_date = None
                 reason = None
+                trough = None
 
-                for j in range(idx + 1, len(hist)):
-                    high = hist["High"].iloc[j]
-                    low = hist["Low"].iloc[j]
-                    date = hist.index[j].date()
+                for j in range(fill_idx, len(hist)):
+                    close_j = float(hist["Close"].iloc[j])
+                    trough = close_j if trough is None else min(trough, close_j)
+                    exit_line = min(entry_price * (1 + stop_loss_pct),
+                                    trough * (1 + trail_pct))
 
-                    # 做空停利：股價跌至 target_price
-                    if low <= target_price:
-                        exit_price = target_price
-                        exit_date = date
-                        reason = "停利"
-                        break
-
-                    # 做空停損：股價漲至 stop_loss
-                    if high >= stop_loss_price:
-                        exit_price = stop_loss_price
-                        exit_date = date
-                        reason = "停損"
+                    if close_j > exit_line:
+                        exit_price = close_j
+                        exit_date = hist.index[j].date()
+                        reason = "移動停利" if close_j < entry_price else "停損"
                         break
 
                     # 最多持倉 1 年
-                    if j - idx > 252:
+                    if j - fill_idx > 252:
                         break
 
+                if exit_price is None:
+                    # 到資料尾端仍未平倉：鎖住持倉避免後續日期重複進場，並計數
+                    open_until[code] = end_date
+                    unresolved += 1
+                    continue
+
                 if exit_price is not None:
+                    open_until[code] = exit_date
                     pnl_pct = (entry_price - exit_price) / entry_price
                     trade = {
                         "code": code,
@@ -208,7 +227,11 @@ def backtest_short_strategy(
                         annual_results[year]["losses"] += 1
 
         except Exception as e:
-            pass
+            # 禁止靜默吞例外（判斷案例 4/5 的教訓）：至少報前 5 個
+            _loop_errors = globals().setdefault("_LOOP_ERROR_COUNT", 0)
+            if _loop_errors < 5:
+                print(f"[!] {current_date} 處理失敗: {type(e).__name__}: {e}")
+                globals()["_LOOP_ERROR_COUNT"] = _loop_errors + 1
 
         current_date += dt.timedelta(days=1)
 
@@ -250,6 +273,7 @@ def backtest_short_strategy(
         "avg_return": np.mean(all_returns) if all_returns else 0,
         "max_loss": np.min(all_returns) if all_returns else 0,
         "max_gain": np.max(all_returns) if all_returns else 0,
+        "unresolved_positions": unresolved,  # 資料尾端未平倉，未列入以上統計
     }
 
     # ── 輸出結果 ──
@@ -257,8 +281,10 @@ def backtest_short_strategy(
         "annual_stats": annual_stats,
         "overall_stats": overall_stats,
         "params": {
-            "stop_profit_pct": stop_profit_pct,
+            "entry_style": "next_open",  # 訊號日隔日開盤市價（原：季線×0.98 掛單）
+            "exit_style": "trailing",    # 出場線式移動停利（做空版）
             "stop_loss_pct": stop_loss_pct,
+            "trail_pct": trail_pct,
             "start_date": start_date.isoformat(),
             "end_date": end_date.isoformat(),
         },
@@ -337,11 +363,17 @@ def _get_short_balance(code: str, date: dt.date) -> float:
         if cache_key in _margin_cache:
             return _margin_cache[cache_key]
 
+        # 日期級標記：該日已抓過但這檔不在表中（不可信用交易）→ 不重抓整表，直接回溯下一天
+        # 沒有這個標記時，每一檔缺席股都會重新下載 5 份全市場融券表，回測時間失控
+        if (check_date, "__fetched__") in _margin_cache:
+            continue
+
         try:
             # 禮貌性間隔：只在快取未命中（真的要打 API）時等待，避免 TWSE 限流封鎖
             import time
             time.sleep(1.2)
             df = fetch_margin_loan(check_date, market="TW")
+            _margin_cache[(check_date, "__fetched__")] = True
             if df is not None and not df.empty:
                 # 填充快取：以純代碼為 key（TWSE 回傳的 code 本來就無後綴）
                 for _, row in df.iterrows():
@@ -631,6 +663,8 @@ def _print_results(result: dict) -> None:
     print(f"   平均報酬: {overall['avg_return']:.2%}")
     print(f"   最大虧損: {overall['max_loss']:.2%}")
     print(f"   最大獲利: {overall['max_gain']:.2%}")
+    if overall.get("unresolved_positions"):
+        print(f"   （另有 {overall['unresolved_positions']} 筆到資料尾端未平倉，未列入統計）")
 
     print(f"\n[年度] 分析:")
     for year, stats in sorted(result["annual_stats"].items()):
@@ -646,15 +680,15 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--start", default="2021-01-01", help="回測起始日 (YYYY-MM-DD)")
     parser.add_argument("--end", default="2026-12-31", help="回測結束日 (YYYY-MM-DD)")
-    parser.add_argument("--profit", type=float, default=0.03, help="停利百分比")
-    parser.add_argument("--loss", type=float, default=0.10, help="停損百分比")
+    parser.add_argument("--loss", type=float, default=0.10, help="初始停損（進場價往上容忍幅度）")
+    parser.add_argument("--trail", type=float, default=0.10, help="移動停利回彈幅度（最低收盤往上）")
 
     args = parser.parse_args()
 
     start = dt.datetime.strptime(args.start, "%Y-%m-%d").date()
     end = dt.datetime.strptime(args.end, "%Y-%m-%d").date()
 
-    result = backtest_short_strategy(start, end, args.profit, args.loss)
+    result = backtest_short_strategy(start, end, args.loss, args.trail)
 
     # 儲存結果
     # 注意：不寫進 data/results/（該目錄由 run_daily.sh 以 *.json glob 自動 commit，
