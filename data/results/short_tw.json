@@ -1,1 +1,1 @@
-{"date": "2026-08-06", "generated_at": "2026-08-06T06:39:29", "regime": "mixed", "params": {"stop_profit_pct": 0.03, "stop_loss_pct": 0.1, "min_pullback": 0.03, "short_allowed": true}, "stocks": []}
+{"date": "2026-08-05", "generated_at": "2026-08-06T06:50:19", "regime": "mixed", "params": {"stop_profit_pct": 0.03, "stop_loss_pct": 0.1, "min_pullback": 0.03, "short_allowed": true}, "stocks": []}
