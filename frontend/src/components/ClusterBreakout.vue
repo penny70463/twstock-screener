@@ -84,7 +84,12 @@ function hideTip() {
 
       <div class="theme-grid" v-if="themes.length > 0">
         <div v-for="(theme, idx) in themes" :key="idx" class="glass-panel theme-card">
-          <h3>{{ theme.name }}</h3>
+          <h3>
+            {{ theme.name }}
+            <span v-if="theme.suggested_etfs && theme.suggested_etfs.length > 0" class="suggested-etfs-badge">
+              🏷️ ETF: {{ theme.suggested_etfs.join(', ') }}
+            </span>
+          </h3>
           <div class="cluster-stats">
             <span class="stat-fired" v-if="theme.fired_today_count > 0">🔥 今日點火 {{ theme.fired_today_count }} 檔</span>
             <span class="stat-total">累計 {{ theme.count }} 檔</span>
@@ -158,6 +163,19 @@ function hideTip() {
 
 .has-tip {
   cursor: help;
+}
+
+.suggested-etfs-badge {
+  display: inline-block;
+  margin-left: 0.8rem;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent-blue);
+  background: rgba(14, 165, 233, 0.1);
+  border: 1px solid rgba(14, 165, 233, 0.3);
+  border-radius: 4px;
+  vertical-align: middle;
 }
 
 /* 浮動 tooltip：fixed 定位掛在元件根層，不受 .theme-stocks 捲動容器裁切 */

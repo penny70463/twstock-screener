@@ -8,14 +8,27 @@ from datetime import datetime
 from src.advisor import data, indicators
 
 ETF_LIST = {
+    # Core (大盤核心)
     "0050.TW": "0050.TW",
     "0056.TW": "0056.TW",
     "VOO": "VOO",
     "QQQ": "QQQ",
+    "2330.TW": "2330.TW",
+    # Satellite (衛星/產業波段)
     "SMH": "SMH",
     "SOXQ": "SOXQ",
-    "2330.TW": "2330.TW",
-    "00981A.TW": "00981A.TW"
+    "00981A.TW": "00981A.TW",
+    "XLK": "XLK",
+    "XLF": "XLF",
+    "XLC": "XLC",
+    "XLV": "XLV",
+    "XLE": "XLE",
+    "XLY": "XLY",
+    "XLP": "XLP",
+    "XLI": "XLI",
+    "XLU": "XLU",
+    "XLRE": "XLRE",
+    "XLB": "XLB"
 }
 
 ETF_NAMES = {
@@ -26,8 +39,21 @@ ETF_NAMES = {
     "SMH": "半導體 (SMH)",
     "SOXQ": "半導體 (SOXQ)",
     "2330.TW": "台積電",
-    "00981A.TW": "統一增長"
+    "00981A.TW": "統一增長",
+    "XLK": "科技 (XLK)",
+    "XLF": "金融 (XLF)",
+    "XLC": "通訊 (XLC)",
+    "XLV": "醫療 (XLV)",
+    "XLE": "能源 (XLE)",
+    "XLY": "非必須消費 (XLY)",
+    "XLP": "必需消費 (XLP)",
+    "XLI": "工業 (XLI)",
+    "XLU": "公用事業 (XLU)",
+    "XLRE": "房地產 (XLRE)",
+    "XLB": "原物料 (XLB)"
 }
+
+CORE_ETFS = {"0050.TW", "0056.TW", "VOO", "QQQ", "2330.TW"}
 
 def analyze_etfs() -> list[dict]:
     """分析核心 ETF 並回傳包含燈號狀態的資料列表"""
@@ -48,16 +74,18 @@ def analyze_etfs() -> list[dict]:
         current_ma50 = ma50.iloc[-1]
         current_ma200 = ma200.iloc[-1]
         
+        is_core = code in CORE_ETFS
+        
         # 判定紅綠燈狀態
         if current_price > current_ma50 and current_price > current_ma200:
-            signal = "green"   # 多頭續航
-            desc = "多頭續航"
+            signal = "green"
+            desc = "多頭續航" if is_core else "波段強勢"
         elif current_price > current_ma200 and current_price <= current_ma50:
-            signal = "yellow"  # 回檔買點
-            desc = "回檔買點"
+            signal = "yellow"
+            desc = "回檔買點" if is_core else "波段轉弱"
         else:
-            signal = "red"     # 空頭觀望
-            desc = "空頭觀望"
+            signal = "red"
+            desc = "空頭觀望" if is_core else "趨勢破壞"
             
         results.append({
             "code": code,
