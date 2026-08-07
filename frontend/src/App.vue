@@ -82,7 +82,7 @@ watch(activeMarket, () => {
 // 只檢查「最新」；使用者主動查看歷史日期時不該跳警告。（邏輯見 utils/dataFreshness）
 const dataStaleness = computed(() => {
   if (selectedDate.value !== 'latest') return null
-  return getDataStaleness(data.value?.date)
+  return getDataStaleness(data.value?.date, activeMarket.value)
 })
 
 const marketLabel = computed(() => data.value?.market_state?.label || '未知')
