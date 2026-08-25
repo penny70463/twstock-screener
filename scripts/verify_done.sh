@@ -79,6 +79,13 @@ else
     warn "pytest 未安裝（.venv/bin/pip install pytest），test_us_screener.py 未執行"
   fi
 fi
+if echo "$changed" | grep -q '^weekly_review\.py$'; then
+  if out=$("$PY" tests/test_weekly_review_health.py 2>&1); then
+    pass "tests/test_weekly_review_health.py 通過"
+  else
+    fail "tests/test_weekly_review_health.py 失敗（節錄）：$(echo "$out" | tail -3 | tr '\n' ' ')"
+  fi
+fi
 echo
 
 # ---- 4. 策略參數改動必須附回測證據 ----

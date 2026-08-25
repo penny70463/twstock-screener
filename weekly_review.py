@@ -1,5 +1,8 @@
 """週末自動覆盤：比對當週選股結果與最新收盤價，計算策略績效並推播 LINE。
 
+主 KPI 是 Top3 命中率對股票池同窗命中率的超額（P−U），不是絕對勝率 50%。
+合集（一週每日 Top30 去重）只當附註。選股邏輯不在此檔。
+
 用法:
     python weekly_review.py              # 完整流程（含 LINE 推播）
     python weekly_review.py --no-line    # 只計算不推播（本機測試用）
@@ -9,9 +12,10 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import pickle
 import re
 import sys
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -24,9 +28,12 @@ import yfinance as yf
 # ---------------------------------------------------------------------------
 TW_TZ = ZoneInfo("Asia/Taipei")
 RESULT_DIR = Path(__file__).parent / "data" / "results"
-TOP_N = 30  # 追蹤前 N 檔
+CACHE_DIR = Path(__file__).parent / "src" / "advisor" / "cache"
+TOP_N = 30  # 追蹤前 N 檔（合集附註）
 ALERT_WEEKS = 4  # 健康警報回望週數
 REVIEW_DIR = RESULT_DIR / "reviews"  # 歷史覆盤存放目錄
+INDEX_CODE = {"TW": "0050", "US": "SPY"}
+_YF_CHUNK = 80
 
 # 嘗試載入 .env（本機開發用）
 try:
@@ -34,6 +41,226 @@ try:
     load_dotenv()
 except ImportError:
     pass
+
+_SELECT_WINDOW_RE = re.compile(r"\((\d{2})-(\d{2}) ~ (\d{2})-(\d{2})\)")
+_HIST_CACHE: dict | None = None
+
+
+# ---------------------------------------------------------------------------
+# 尺：Top3 命中率 P vs 股票池同窗命中率 U
+# ---------------------------------------------------------------------------
+def primary_win_rate(ms: dict) -> float | None:
+    """行動對象的命中率：有 Top3 分段就用它，否則退回合集。"""
+    top3 = (ms.get("segments") or {}).get("top3")
+    if top3 and top3.get("total"):
+        return top3["win_rate"]
+    return ms.get("win_rate")
+
+
+def universe_hit_rate(ms: dict) -> float | None:
+    bench = ms.get("benchmark") or {}
+    return bench.get("universe_hit_rate")
+
+
+def lift_pp(ms: dict) -> float | None:
+    """P−U（百分點）。缺任一端則 None。"""
+    p, u = primary_win_rate(ms), universe_hit_rate(ms)
+    if p is None or u is None:
+        return None
+    return round(p - u, 1)
+
+
+def lost_to_universe(ms: dict) -> bool | None:
+    """True = 沒有選股能力（P≤U）。缺資料回 None。"""
+    v = lift_pp(ms)
+    if v is None:
+        return None
+    return v <= 0
+
+
+def parse_select_window(select_date: str, review_date: str) -> tuple[date, date] | None:
+    """'本週 (08-17 ~ 08-21)' + review_date → (start, end)。"""
+    m = _SELECT_WINDOW_RE.search(select_date or "")
+    if not m:
+        return None
+    year = int(str(review_date)[:4])
+    start = date(year, int(m.group(1)), int(m.group(2)))
+    end = date(year, int(m.group(3)), int(m.group(4)))
+    if start > end:  # 跨年：start 在前一年
+        start = date(year - 1, start.month, start.day)
+    return start, end
+
+
+def _value_on_or_before(series: pd.Series, d: date) -> float | None:
+    if series is None or series.empty:
+        return None
+    ts = pd.Timestamp(d)
+    try:
+        sub = series.loc[:ts].dropna()
+    except Exception:
+        return None
+    if sub.empty:
+        return None
+    v = float(sub.iloc[-1])
+    return v if v == v and v > 0 else None
+
+
+def _hit_rate_from_closes(
+    closes: dict[str, pd.Series], start: date, end: date
+) -> dict:
+    """closes: code → Close series。回傳股票池同窗命中統計。"""
+    up = n = 0
+    for s in closes.values():
+        c0 = _value_on_or_before(s, start)
+        c1 = _value_on_or_before(s, end)
+        if c0 is None or c1 is None:
+            continue
+        n += 1
+        if c1 > c0:
+            up += 1
+    return {
+        "universe_n": n,
+        "universe_up": up,
+        "universe_hit_rate": round(up / n * 100, 1) if n else None,
+        "window": [start.isoformat(), end.isoformat()],
+    }
+
+
+def _latest_hist_pkl() -> Path | None:
+    paths = sorted(CACHE_DIR.glob("hist_2y_*.pkl"))
+    return paths[-1] if paths else None
+
+
+def _load_hist_cache() -> dict:
+    global _HIST_CACHE
+    if _HIST_CACHE is not None:
+        return _HIST_CACHE
+    path = _latest_hist_pkl()
+    if path is None:
+        _HIST_CACHE = {}
+        return _HIST_CACHE
+    try:
+        with open(path, "rb") as f:
+            _HIST_CACHE = pickle.load(f)
+        print(f"  [>] 股票池價格用快取 {path.name}", flush=True)
+    except Exception as e:
+        print(f"  [!] 讀快取失敗（改抓 yfinance）: {e}", flush=True)
+        _HIST_CACHE = {}
+    return _HIST_CACHE
+
+
+def _load_universe_meta(market: str) -> list[dict]:
+    path = RESULT_DIR / f"universe_{market.lower()}.json"
+    if not path.exists():
+        return []
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return []
+    return data.get("stocks") or []
+
+
+def _tw_ticker(stock_id: str, listing: str) -> str:
+    return f"{stock_id}.TWO" if listing == "上櫃" else f"{stock_id}.TW"
+
+
+def _closes_from_cache(codes: list[str]) -> dict[str, pd.Series]:
+    hist = _load_hist_cache()
+    out: dict[str, pd.Series] = {}
+    for code in codes:
+        df = hist.get(code)
+        if isinstance(df, pd.DataFrame) and "Close" in df.columns and not df.empty:
+            out[code] = df["Close"]
+    return out
+
+
+def _closes_from_yf(tickers: list[str], start: date, end: date) -> dict[str, pd.Series]:
+    """yfinance 分批抓收盤。ticker 含後綴（2330.TW）。回傳 ticker→Close。"""
+    if not tickers:
+        return {}
+    span_start = start - timedelta(days=10)
+    span_end = end + timedelta(days=3)
+    out: dict[str, pd.Series] = {}
+    print(f"  [>] yfinance 抓股票池 {len(tickers)} 檔（{span_start} ~ {span_end}）...", flush=True)
+    for i in range(0, len(tickers), _YF_CHUNK):
+        chunk = tickers[i : i + _YF_CHUNK]
+        try:
+            df = yf.download(
+                chunk,
+                start=span_start.isoformat(),
+                end=(span_end + timedelta(days=1)).isoformat(),
+                auto_adjust=True,
+                group_by="ticker",
+                progress=False,
+                threads=True,
+            )
+        except Exception as e:
+            print(f"  [!] yfinance 批次失敗 ({i}): {e}", flush=True)
+            continue
+        if df is None or df.empty:
+            continue
+        for t in chunk:
+            try:
+                if len(chunk) == 1:
+                    s = df["Close"]
+                else:
+                    s = df[t]["Close"]
+                s = s.dropna()
+                if not s.empty:
+                    out[t] = s
+            except (KeyError, TypeError):
+                pass
+    return out
+
+
+def build_benchmark(market: str, start: date, end: date, allow_yf: bool = True) -> dict | None:
+    """股票池同窗命中率 + 指數報酬。優先本地 hist pkl，否則 yfinance。"""
+    meta = _load_universe_meta(market)
+    if not meta:
+        print(f"  [!] 找不到 universe_{market.lower()}.json，跳過股票池對照", flush=True)
+        return None
+
+    codes = [s["stock_id"] for s in meta if s.get("stock_id")]
+    closes = _closes_from_cache(codes)
+    source = "cache"
+    cache_ok = len(closes) >= max(50, int(len(codes) * 0.5))
+    if not cache_ok:
+        if not allow_yf:
+            if not closes:
+                return None
+        else:
+            if market == "TW":
+                tickers = [
+                    _tw_ticker(s["stock_id"], s.get("市場", "上市"))
+                    for s in meta if s.get("stock_id")
+                ]
+                yf_map = {
+                    _tw_ticker(s["stock_id"], s.get("市場", "上市")): s["stock_id"]
+                    for s in meta if s.get("stock_id")
+                }
+            else:
+                tickers = list(codes)
+                yf_map = {c: c for c in codes}
+            yf_closes = _closes_from_yf(tickers, start, end)
+            closes = {yf_map.get(t, t): s for t, s in yf_closes.items()}
+            source = "yfinance"
+
+    stats = _hit_rate_from_closes(closes, start, end)
+    stats["source"] = source
+
+    idx_code = INDEX_CODE[market]
+    idx_series = closes.get(idx_code)
+    if idx_series is None and allow_yf:
+        yf_idx = "0050.TW" if market == "TW" else "SPY"
+        extra = _closes_from_yf([yf_idx], start, end)
+        idx_series = extra.get(yf_idx)
+    c0 = _value_on_or_before(idx_series, start) if idx_series is not None else None
+    c1 = _value_on_or_before(idx_series, end) if idx_series is not None else None
+    stats["index"] = idx_code
+    stats["index_return"] = round((c1 / c0 - 1) * 100, 2) if c0 and c1 else None
+    if stats.get("universe_hit_rate") is None:
+        return None
+    return stats
 
 
 # ---------------------------------------------------------------------------
@@ -234,26 +461,46 @@ def review_market(market: str) -> dict | None:
     # 只保留虧損的
     bottom3 = [x for x in bottom3 if x[1] < 0]
 
+    review_day = datetime.now(TW_TZ).date()
+    window = parse_select_window(select_date, review_day.isoformat())
+    benchmark = None
+    if window:
+        benchmark = build_benchmark(market, window[0], window[1])
+
     summary = {
         "market": market,
         "select_date": select_date,
-        "review_date": datetime.now(TW_TZ).date().isoformat(),
+        "review_date": review_day.isoformat(),
         "total": total,
         "win_count": win_count,
         "win_rate": win_rate,
         "avg_return": avg_ret,
         "segments": segments,
         "capped_stats": capped_stats,
+        "benchmark": benchmark,
+        "lift_top3": None,
         "top3": [{"name": n, "ret": r} for n, r in top3],
         "bottom3": [{"name": n, "ret": r} for n, r in bottom3],
         "details": results,
     }
+    summary["lift_top3"] = lift_pp(summary)
 
-    # 終端機輸出
+    # 終端機輸出：主 KPI 是 Top3 vs 股票池，合集當附註
     market_label = "🇹🇼 台股" if market == "TW" else "🇺🇸 美股"
     print(f"\n  {market_label} 覆盤結果 (選股日: {select_date})")
-    print(f"  ✅ 勝率: {win_rate}% ({win_count}/{total})")
-    print(f"  📈 平均報酬: {'+' if avg_ret >= 0 else ''}{avg_ret}%")
+    t3 = segments.get("top3")
+    if t3:
+        print(f"  🎯 Top3 命中: {t3['win_rate']}% ({t3['win_count']}/{t3['total']})  "
+              f"平均 {t3['avg_return']:+.1f}%")
+    if benchmark and benchmark.get("universe_hit_rate") is not None:
+        idx_s = ""
+        if benchmark.get("index_return") is not None:
+            idx_s = f"  {benchmark['index']} {benchmark['index_return']:+.1f}%"
+        lift_s = f"{summary['lift_top3']:+.1f}pp" if summary["lift_top3"] is not None else "n/a"
+        print(f"  📊 股票池同窗: {benchmark['universe_hit_rate']}% "
+              f"({benchmark['universe_up']}/{benchmark['universe_n']} 上漲)  "
+              f"超額 {lift_s}{idx_s}")
+    print(f"  📎 合集（附註）: {win_rate}% ({win_count}/{total})  平均 {avg_ret:+.1f}%")
     print(f"  🎯 分段: {_format_segments(segments)}")
     if capped_stats:
         print(f"  🏭 產業上限: {_format_capped(capped_stats)}")
@@ -289,30 +536,37 @@ def _load_past_reviews(weeks: int = ALERT_WEEKS) -> list[dict]:
     return reviews
 
 
+def _attach_benchmark_if_missing(ms: dict) -> None:
+    """歷史覆盤沒有 benchmark 時，用同一檔價格快取補算（不回寫舊檔）。"""
+    if universe_hit_rate(ms) is not None:
+        return
+    window = parse_select_window(ms.get("select_date", ""), ms.get("review_date", ""))
+    market = ms.get("market")
+    if not window or market not in INDEX_CODE:
+        return
+    bench = build_benchmark(market, window[0], window[1], allow_yf=False)
+    if bench:
+        ms["benchmark"] = bench
+
+
 def _check_health(current_summaries: list[dict]) -> list[str]:
-    """根據近幾週的覆盤結果，產生策略健康警報訊息。"""
+    """近幾週 Top3 是否連續輸給股票池（P≤U）。不再用絕對勝率 50%。"""
     past_reviews = _load_past_reviews()
     if not past_reviews:
-        return []  # 歷史資料不足，不產生警報
+        return []
 
     alerts = []
     for market in ["TW", "US"]:
         market_label = "🇹🇼 台股" if market == "TW" else "🇺🇸 美股"
+        weeks: list[dict] = []
+        seen_weeks: set[str] = set()
 
-        # 收集本週 + 歷史的勝率與報酬
-        win_rates = []
-        avg_returns = []
-        seen_weeks = set()
-
-        # 本週
         current = next((s for s in current_summaries if s["market"] == market), None)
         if current:
-            win_rates.append(current["win_rate"])
-            avg_returns.append(current["avg_return"])
+            weeks.append(current)
             today_iso = datetime.now(TW_TZ).date().isocalendar()
             seen_weeks.add(f"{today_iso[0]}-W{today_iso[1]}")
 
-        # 歷史
         for review in past_reviews:
             rev_date_str = review.get("review_date")
             if not rev_date_str:
@@ -322,41 +576,41 @@ def _check_health(current_summaries: list[dict]) -> list[str]:
                 iso_week = f"{dt.isocalendar()[0]}-W{dt.isocalendar()[1]}"
             except ValueError:
                 continue
-                
             if iso_week in seen_weeks:
                 continue
-                
             for ms in review.get("markets", []):
                 if ms["market"] == market:
-                    win_rates.append(ms["win_rate"])
-                    avg_returns.append(ms["avg_return"])
+                    weeks.append(ms)
                     seen_weeks.add(iso_week)
 
-        if len(win_rates) < 2:
-            continue  # 至少要有 2 週才能判斷趨勢
+        outcomes = []  # (lost, p, u, lift)
+        for ms in weeks:
+            _attach_benchmark_if_missing(ms)
+            lost = lost_to_universe(ms)
+            if lost is None:
+                continue
+            p = primary_win_rate(ms)
+            u = universe_hit_rate(ms)
+            outcomes.append((lost, p, u, lift_pp(ms)))
 
-        # 取最近 N 週（含本週）
-        recent_wr = win_rates[:ALERT_WEEKS]
-        recent_ret = avg_returns[:ALERT_WEEKS]
+        if len(outcomes) < 2:
+            continue
 
-        # 🔴 嚴重警告：連續 4 週勝率 < 50% 或平均報酬為負
-        if len(recent_wr) >= 4 and all(wr < 50 for wr in recent_wr[:4]):
+        recent = outcomes[:ALERT_WEEKS]
+        lift_txt = ", ".join(
+            f"P {p}% / U {u}% ({lift:+.1f}pp)" for _, p, u, lift in recent
+        )
+
+        if len(recent) >= 4 and all(lost for lost, *_ in recent[:4]):
             alerts.append(
-                f"🔴 {market_label} 連續 4 週勝率低於 50%！"
-                f"近 4 週勝率: {', '.join(f'{wr}%' for wr in recent_wr[:4])}。"
-                f"建議檢視因子權重與篩選邏輯。"
+                f"🔴 {market_label} 連續 4 週 Top3 命中率輸給股票池（P≤U）！"
+                f"近 4 週: {lift_txt}。"
+                f"選股沒抓到相對強勢，不是「勝率低於 50%」本身。"
             )
-        elif len(recent_ret) >= 4 and all(r < 0 for r in recent_ret[:4]):
+        elif len(recent) >= 2 and all(lost for lost, *_ in recent[:2]):
             alerts.append(
-                f"🔴 {market_label} 連續 4 週平均報酬為負！"
-                f"近 4 週報酬: {', '.join(f'{r:+.1f}%' for r in recent_ret[:4])}。"
-                f"建議檢視因子權重與篩選邏輯。"
-            )
-        # 🟡 留意：連續 2 週勝率 < 50%
-        elif len(recent_wr) >= 2 and all(wr < 50 for wr in recent_wr[:2]):
-            alerts.append(
-                f"🟡 {market_label} 連續 2 週勝率低於 50%，"
-                f"近 2 週勝率: {', '.join(f'{wr}%' for wr in recent_wr[:2])}。"
+                f"🟡 {market_label} 連續 2 週 Top3 命中率輸給股票池（P≤U），"
+                f"近 2 週: {', '.join(f'{lift:+.1f}pp' for *_, lift in recent[:2])}。"
                 f"請持續觀察。"
             )
 
@@ -378,19 +632,38 @@ def send_line_review(summaries: list[dict], alerts: list[str] | None = None) -> 
 
     for s in summaries:
         market_label = "🇹🇼 台股" if s["market"] == "TW" else "🇺🇸 美股"
+        t3 = (s.get("segments") or {}).get("top3")
+        bench = s.get("benchmark") or {}
         top_str = "、".join(f"{t['name']} {t['ret']:+.1f}%" for t in s["top3"])
-        
-        block = (
-            f"\n📍 {market_label} (選股日: {s['select_date']})\n"
-            f"✅ 勝率: {s['win_rate']}% ({s['win_count']}/{s['total']})\n"
-            f"📈 平均報酬: {'+' if s['avg_return'] >= 0 else ''}{s['avg_return']}%"
-        )
 
-        if s.get("segments"):
-            block += f"\n🎯 分段: {_format_segments(s['segments'])}"
-        if s.get("capped_stats"):
-            block += f"\n🏭 產業上限: {_format_capped(s['capped_stats'])}"
+        if t3:
+            head = (
+                f"🎯 Top3 命中: {t3['win_rate']}% ({t3['win_count']}/{t3['total']})  "
+                f"平均 {t3['avg_return']:+.1f}%"
+            )
+        else:
+            head = (
+                f"✅ 合集勝率: {s['win_rate']}% ({s['win_count']}/{s['total']})\n"
+                f"📈 平均報酬: {s['avg_return']:+.1f}%"
+            )
 
+        block = f"\n📍 {market_label} (選股日: {s['select_date']})\n{head}"
+
+        if bench.get("universe_hit_rate") is not None:
+            lift = s.get("lift_top3")
+            if lift is None:
+                lift = lift_pp(s)
+            lift_s = f"{lift:+.1f}pp" if lift is not None else "n/a"
+            idx_s = ""
+            if bench.get("index_return") is not None:
+                idx_s = f"  {bench['index']} {bench['index_return']:+.1f}%"
+            block += (
+                f"\n📊 股票池同窗: {bench['universe_hit_rate']}% "
+                f"({bench.get('universe_up', '?')}/{bench.get('universe_n', '?')} 上漲)  "
+                f"超額 {lift_s}{idx_s}"
+            )
+
+        block += f"\n📎 合集（附註）: {s['win_rate']}% ({s['win_count']}/{s['total']})  平均 {s['avg_return']:+.1f}%"
         block += f"\n🏆 最強: {top_str}"
 
         if s["bottom3"]:
