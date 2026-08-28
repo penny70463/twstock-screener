@@ -57,6 +57,7 @@ def _get_json(url: str, retries: int = 8, **kwargs):
             last_err = requests.exceptions.SSLError("ssl")
         except (requests.exceptions.ConnectionError,
                 requests.exceptions.ChunkedEncodingError,
+                requests.exceptions.HTTPError,
                 json.JSONDecodeError) as e:  # requests 的 JSONDecodeError 亦繼承自此
             last_err = e
         time.sleep(min(2 ** attempt * 2, 30))  # 2,4,8,16,30,30,30s
@@ -389,7 +390,7 @@ def fetch_history(tickers: dict[str, str],
     for i in range(0, len(items), chunk):
         batch = items[i:i + chunk]
         raw = yf.download([y for _, y in batch], period=period, auto_adjust=True,
-                          progress=False, group_by="ticker", threads=True)
+                          progress=False, group_by="ticker", threads=False)
         if raw.empty:
             continue
         for code, yahoo in batch:
