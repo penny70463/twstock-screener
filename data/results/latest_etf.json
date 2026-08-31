@@ -1,28 +1,28 @@
 {
-  "date": "2026-08-28",
-  "generated_at": "2026-08-28T16:16:28",
+  "date": "2026-08-31",
+  "generated_at": "2026-08-31T16:16:18",
   "etfs": [
     {
       "code": "0050.TW",
       "name": "元大台灣50",
-      "price": 106.95,
-      "ma50": 104.19,
-      "ma200": 83.87,
+      "price": 106.25,
+      "ma50": 104.09,
+      "ma200": 84.31,
       "signal": "green",
       "desc": "多頭續航",
-      "entry_price": 104.19,
-      "exit_price": 83.87
+      "entry_price": 104.09,
+      "exit_price": 84.31
     },
     {
       "code": "0056.TW",
       "name": "元大高股息",
-      "price": 53.85,
-      "ma50": 51.16,
-      "ma200": 41.34,
+      "price": 54.6,
+      "ma50": 51.25,
+      "ma200": 41.54,
       "signal": "green",
       "desc": "多頭續航",
-      "entry_price": 51.16,
-      "exit_price": 41.34
+      "entry_price": 51.25,
+      "exit_price": 41.54
     },
     {
       "code": "VOO",
@@ -49,13 +49,13 @@
     {
       "code": "2330.TW",
       "name": "台積電",
-      "price": 2420.0,
-      "ma50": 2394.0,
-      "ma200": 1983.63,
+      "price": 2405.0,
+      "ma50": 2391.9,
+      "ma200": 1988.2,
       "signal": "green",
       "desc": "多頭續航",
-      "entry_price": 2394.0,
-      "exit_price": 1983.63
+      "entry_price": 2391.9,
+      "exit_price": 1988.2
     },
     {
       "code": "SMH",
@@ -82,13 +82,13 @@
     {
       "code": "00981A.TW",
       "name": "統一增長",
-      "price": 30.09,
-      "ma50": 29.09,
-      "ma200": 22.75,
+      "price": 29.4,
+      "ma50": 29.0,
+      "ma200": 22.89,
       "signal": "green",
       "desc": "波段強勢",
-      "entry_price": 29.09,
-      "exit_price": 22.75
+      "entry_price": 29.0,
+      "exit_price": 22.89
     },
     {
       "code": "XLK",
