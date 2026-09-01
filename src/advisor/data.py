@@ -413,7 +413,114 @@ def fetch_history(tickers: dict[str, str],
                 old.unlink()
         path.write_bytes(pickle.dumps(cached))
 
-    return {c: df for c, df in out.items() if len(df)}
+    out = {c: df for c, df in out.items() if len(df)}
+    n_filled = backfill_recent_session_holes(out, tickers)
+    if n_filled:
+        cached.update(out)
+        path.write_bytes(pickle.dumps(cached))
+        print(f"  已用 10 日行情回補缺 K {n_filled} 檔")
+
+    return out
+
+
+# 近 N 個交易日缺 K 超過此比例 → 回補並視為資料品質事件（2026-09-01：8/28 缺 89%）
+SESSION_GAP_LOOKBACK = 10
+SESSION_GAP_WARN_PCT = 0.20
+
+
+def _close_panel(history: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    cols = {}
+    for code, df in history.items():
+        if df is None or len(df) == 0 or "Close" not in getattr(df, "columns", []):
+            continue
+        cols[code] = df["Close"]
+    return pd.DataFrame(cols) if cols else pd.DataFrame()
+
+
+def session_gaps(history: dict[str, pd.DataFrame],
+                 lookback: int = SESSION_GAP_LOOKBACK,
+                 warn_pct: float = SESSION_GAP_WARN_PCT) -> list[dict]:
+    """近 lookback 個交易日中，缺收盤超過 warn_pct 的日期。
+
+    缺列（index 沒有那天）與 NaN 都算缺。完整資料回空 list。
+    """
+    panel = _close_panel(history)
+    if panel.empty:
+        return []
+    dates = panel.dropna(how="all").index[-lookback:]
+    n = panel.shape[1]
+    gaps = []
+    for d in dates:
+        miss = int(panel.loc[d].isna().sum())
+        pct = miss / n if n else 0.0
+        if pct >= warn_pct:
+            gaps.append({
+                "date": d.date().isoformat() if hasattr(d, "date") else str(d),
+                "missing": miss,
+                "n": n,
+                "pct": round(pct * 100, 1),
+            })
+    return gaps
+
+
+def backfill_recent_session_holes(
+    history: dict[str, pd.DataFrame],
+    tickers: dict[str, str],
+    lookback: int = SESSION_GAP_LOOKBACK,
+    warn_pct: float = SESSION_GAP_WARN_PCT,
+) -> int:
+    """對「多數股票都有、少數沒有」的近日，用 Yahoo 10 日線回補。
+
+    回傳有成功寫入至少一根新 K 的檔數。Yahoo 2y 週末常把非權值近端收盤變 NaN，
+    10 日線有時還在；補不到就留給 session_gaps 告警。
+    """
+    gaps = session_gaps(history, lookback=lookback, warn_pct=warn_pct)
+    if not gaps:
+        return 0
+    panel = _close_panel(history)
+    need: list[str] = []
+    seen: set[str] = set()
+    for g in gaps:
+        d = pd.Timestamp(g["date"])
+        if d not in panel.index:
+            continue
+        for code in panel.columns:
+            if code in seen:
+                continue
+            if pd.isna(panel.loc[d, code]):
+                seen.add(code)
+                need.append(code)
+    if not need:
+        return 0
+
+    filled = 0
+    chunk = config.DOWNLOAD_CHUNK
+    for i in range(0, len(need), chunk):
+        batch = need[i:i + chunk]
+        ymap = [(c, tickers[c]) for c in batch if c in tickers]
+        if not ymap:
+            continue
+        raw = yf.download([y for _, y in ymap], period="10d", auto_adjust=True,
+                          progress=False, group_by="ticker", threads=False)
+        if raw.empty:
+            continue
+        for code, yahoo in ymap:
+            try:
+                extra = raw[yahoo].dropna(subset=["Close"])
+            except KeyError:
+                continue
+            if extra.empty:
+                continue
+            old = history.get(code)
+            if old is None or old.empty:
+                history[code] = extra.sort_index()
+                filled += 1
+                continue
+            merged = extra.combine_first(old).sort_index()
+            if len(merged) > len(old) or merged["Close"].notna().sum() > old["Close"].notna().sum():
+                history[code] = merged
+                filled += 1
+    return filled
 
 
 # ── 三大法人買賣超（上市 T86 + 上櫃 TPEX）────────────────────

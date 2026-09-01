@@ -50,7 +50,8 @@ echo
 
 # ---- 2. data/results/ 手改防護 ----
 echo "[2] data/results/ 手改防護"
-results_dirty=$(git diff --name-only HEAD -- 'data/results/' || true)
+results_dirty=$(git diff --name-only HEAD -- 'data/results/' \
+  | grep -vE '(^|/)alert_state\.json$' || true)
 if [ -n "$results_dirty" ] && [ "${PIPELINE_COMMIT:-0}" != "1" ]; then
   fail "偵測到 data/results/ 有未 commit 的改動——結果檔只能由管線產生並自動 commit，不得手改：$(echo "$results_dirty" | tr '\n' ' ')"
 else
@@ -68,6 +69,11 @@ else
     pass "tests/test_exposure_alerts.py 通過"
   else
     fail "tests/test_exposure_alerts.py 失敗（節錄）：$(echo "$out" | tail -3 | tr '\n' ' ')"
+  fi
+  if out=$("$PY" tests/test_breadth_coverage.py 2>&1); then
+    pass "tests/test_breadth_coverage.py 通過"
+  else
+    fail "tests/test_breadth_coverage.py 失敗（節錄）：$(echo "$out" | tail -3 | tr '\n' ' ')"
   fi
   if "$PY" -c "import pytest" 2>/dev/null; then
     if out=$("$PY" -m pytest tests/test_us_screener.py -q 2>&1); then

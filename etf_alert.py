@@ -49,12 +49,24 @@ def _check_exposure(market_label: str, market_key: str, market_state: dict,
 
     change = round(curr_exp - old_exp, 4)
     vol = market_state.get("realized_vol", "N/A")
+    breadth = market_state.get("breadth")
+    vol_scale = market_state.get("vol_scale")
+    parts = []
+    if breadth is not None:
+        parts.append(f"寬度 {breadth}%")
+    if vol != "N/A":
+        vol_note = f"波動 {vol}%"
+        if vol_scale is not None and vol_scale >= 1.0:
+            vol_note += "（未超標）"
+        parts.append(vol_note)
+    why = "、".join(parts) if parts else f"波動率 {vol}%"
 
     # 水位下降超過門檻 → 風險警報
     if change <= -EXPOSURE_CHANGE_THRESHOLD:
         alerts.append(
             f"⚠️【{market_label}風險警報】"
-            f"波動率升至 {vol}%，三因子建議持股水位從 {int(old_exp*100)}% 降至 {int(curr_exp*100)}%！"
+            f"三因子建議持股水位從 {int(old_exp*100)}% 降至 {int(curr_exp*100)}%"
+            f"（{why}）。"
             f"請優先停利波動大的部位換取現金。"
         )
     # 水位重新回到滿水位（不論變化量大小）→ 警報解除
@@ -68,8 +80,8 @@ def _check_exposure(market_label: str, market_key: str, market_state: dict,
     elif curr_exp < 1.0 and change >= EXPOSURE_CHANGE_THRESHOLD:
         alerts.append(
             f"📈【{market_label}風險緩解】"
-            f"建議水位從 {int(old_exp*100)}% 回升至 {int(curr_exp*100)}%，"
-            f"波動率降至 {vol}%，可考慮適度分批買回。"
+            f"建議水位從 {int(old_exp*100)}% 回升至 {int(curr_exp*100)}%"
+            f"（{why}），可考慮適度分批買回。"
         )
 
 
@@ -288,12 +300,10 @@ def check_and_alert(dry_run: bool = False):
         payload = {"date": on_date or date.today().isoformat(), "alerts": alerts}
         ALERTS_FILE.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
         print(f"  [+] 警報已寫入 {ALERTS_FILE}，將隨統一每日訊息發送")
+        STATE_FILE.write_text(json.dumps(new_state, indent=2, ensure_ascii=False), encoding="utf-8")
+        print(f"  [+] 狀態已寫入 {STATE_FILE}")
     else:
-        print("  [i] --dry-run 模式，跳過寫入警報檔。")
-
-    # 寫入新的狀態（不論是否有警報，都要更新基準）
-    STATE_FILE.write_text(json.dumps(new_state, indent=2, ensure_ascii=False), encoding="utf-8")
-    print(f"  [+] 狀態已寫入 {STATE_FILE}")
+        print("  [i] --dry-run 模式，跳過寫入警報檔與狀態。")
 
 
 if __name__ == "__main__":

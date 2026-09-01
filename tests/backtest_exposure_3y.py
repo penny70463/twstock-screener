@@ -37,11 +37,8 @@ def calc_trend(close: pd.Series) -> pd.Series:
 
 
 def calc_breadth(close_panel: pd.DataFrame) -> pd.Series:
-    """市場寬度：每日「收盤站上季線」的個股比例（0–1）"""
-    ma60 = close_panel.rolling(60).mean()
-    above = (close_panel > ma60).sum(axis=1)
-    valid = close_panel.notna().sum(axis=1).clip(lower=1)
-    return above / valid
+    """市場寬度：與生產程式 src.advisor.market.breadth_series 同一條。"""
+    return adv_market.breadth_series(close_panel)
 
 
 def calc_exposure(index_close: pd.Series, breadth: pd.Series,

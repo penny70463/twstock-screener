@@ -53,12 +53,43 @@ def get_regime(market: str = "TW") -> dict:
 
 # ── 連續水位模型 ─────────────────────────────────────────────
 
+# 單日缺 K（Yahoo 週末/時區洞）會讓 rolling(60) 的 MA 整列變 NaN，
+# (close > NaN) 全算 False，寬度從 ~55% 假摔成個位數（2026-09-01 美股 5.2%）。
+BREADTH_MA_WINDOW = 60
+BREADTH_MA_MIN_PERIODS = 50
+BREADTH_FFILL_LIMIT = 2
+BREADTH_COVERAGE_WARN = 0.80
+
+
+def _breadth_inputs(close_panel: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """前向填最多 2 日缺口，MA 允許 50/60 有效列，避免單日缺 K 打穿寬度。"""
+    filled = close_panel.ffill(limit=BREADTH_FFILL_LIMIT)
+    ma60 = filled.rolling(BREADTH_MA_WINDOW, min_periods=BREADTH_MA_MIN_PERIODS).mean()
+    return filled, ma60
+
+
 def breadth_series(close_panel: pd.DataFrame) -> pd.Series:
-    """市場寬度：每日「收盤站上季線」的個股比例（0–1）"""
-    ma60 = close_panel.rolling(60).mean()
-    above = (close_panel > ma60).sum(axis=1)
-    valid = close_panel.notna().sum(axis=1).clip(lower=1)
+    """市場寬度：每日「收盤站上季線」的個股比例（0–1）。
+
+    分母只計「收盤與 MA60 都有效」的股票，避免 MA 為 NaN 時被算成沒站上。
+    """
+    filled, ma60 = _breadth_inputs(close_panel)
+    comparable = filled.notna() & ma60.notna()
+    above = ((filled > ma60) & comparable).sum(axis=1)
+    valid = comparable.sum(axis=1).clip(lower=1)
     return above / valid
+
+
+def breadth_coverage(close_panel: pd.DataFrame) -> float:
+    """最後一日有有效 MA60 的股票佔比（0–1），供日誌與失真示警。"""
+    if close_panel is None or close_panel.empty:
+        return 0.0
+    filled, ma60 = _breadth_inputs(close_panel)
+    comparable = filled.notna() & ma60.notna()
+    n = comparable.shape[1]
+    if n == 0:
+        return 0.0
+    return float(comparable.iloc[-1].sum() / n)
 
 
 def _vol_target(market: str = "TW") -> float:
@@ -122,6 +153,11 @@ def get_exposure_live(close_panel: pd.DataFrame, market: str = "TW") -> dict:
         idx.columns = idx.columns.get_level_values(0)
     c = idx["Close"].dropna()
 
+    coverage = breadth_coverage(close_panel)
+    if coverage < BREADTH_COVERAGE_WARN:
+        print(f"  ! 寬度樣本不足：最後一日僅 {coverage:.0%} 檔 MA60 有效，"
+              f"請檢查歷史缺 K（水位可能仍失真）", flush=True)
+
     breadth = breadth_series(close_panel)
     expo = exposure_series(c, breadth, market=market)
 
@@ -140,4 +176,5 @@ def get_exposure_live(close_panel: pd.DataFrame, market: str = "TW") -> dict:
         "realized_vol": round(realized * 100, 1),
         "vol_target": round(vol_target * 100, 1),
         "vol_scale": round(min(1.0, vol_target / realized), 2),
+        "breadth_coverage": round(coverage * 100, 1),
     }

@@ -27,6 +27,24 @@ def _step(label: str, t0: float, verbose: bool) -> float:
         print(f"  [+{now - t0:6.1f}s] {label}", flush=True)
     return now
 
+
+def _warn_session_gaps(market: str, history: dict, verbose: bool) -> None:
+    """近 10 日大量缺 K → 印出並立刻 LINE（不走 --no-line 合併訊，避免再誤報曝險）。"""
+    gaps = adv_data.session_gaps(history)
+    if not gaps:
+        return
+    bits = [f"{g['date']} 缺 {g['missing']}/{g['n']}（{g['pct']}%）" for g in gaps]
+    summary = f"{market} 歷史缺 K：" + "、".join(bits)
+    print(f"  ! {summary}", flush=True)
+    print("  ! 寬度已用填補計算；缺 K 日的曝險暴跌不可當真。", flush=True)
+    try:
+        from notify_error import send_warning
+        send_warning(
+            summary + "。寬度已用填補計算，請勿把曝險暴跌當成市場崩盤。"
+        )
+    except Exception as e:
+        print(f"  ! 缺 K 警告推播失敗: {e}", flush=True)
+
 def _apply_industry_cap(
     df: pd.DataFrame,
     ratio: float = adv_config.SCREEN_MAX_INDUSTRY_RATIO,
@@ -85,6 +103,7 @@ def run(market: str = "TW", classify: bool = True, verbose: bool = True) -> dict
     history = adv_data.fetch_history(tickers)
     adv_data.patch_latest_bar(history, universe)
     _step("歷史股價與快取完成", t0, verbose)
+    _warn_session_gaps(market, history, verbose)
     
     # 取歷史資料中最新的一天作為交易日基準 (避免週末執行時標記為週六/日)
     latest_trade_date = None
