@@ -87,12 +87,33 @@ def test_session_gaps_silent_when_complete():
     assert session_gaps(history, lookback=5, warn_pct=0.20) == []
 
 
+def test_fill_gaps_from_prior_close_writes_flat_bar():
+    from src.advisor.data import fill_gaps_from_prior_close
+    idx = pd.bdate_range("2024-01-02", periods=8)
+    hole = idx[-2]
+    hist = {}
+    for name, start in (("A", 10.0), ("B", 20.0)):
+        close = pd.Series(start + np.arange(8, dtype=float), index=idx)
+        close.loc[hole] = float("nan")
+        hist[name] = pd.DataFrame({
+            "Open": close, "High": close, "Low": close, "Close": close, "Volume": 1.0,
+        })
+    n = fill_gaps_from_prior_close(hist, [hole.date().isoformat()])
+    assert n == 2
+    prev = hole - pd.tseries.offsets.BDay(1)
+    for name in ("A", "B"):
+        assert hist[name].loc[hole, "Close"] == hist[name].loc[prev, "Close"]
+        assert hist[name].loc[hole, "Volume"] == 0
+    assert session_gaps(hist, lookback=5, warn_pct=0.20) == []
+
+
 def main() -> int:
     tests = [
         test_complete_panel_matches_legacy,
         test_one_day_hole_does_not_collapse_next_session,
         test_session_gaps_flags_majority_hole,
         test_session_gaps_silent_when_complete,
+        test_fill_gaps_from_prior_close_writes_flat_bar,
     ]
     failed = 0
     for fn in tests:

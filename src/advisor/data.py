@@ -520,7 +520,35 @@ def backfill_recent_session_holes(
             if len(merged) > len(old) or merged["Close"].notna().sum() > old["Close"].notna().sum():
                 history[code] = merged
                 filled += 1
+    # Yahoo 10 日線仍沒有的洞（如 8/28 非權值）：用前一交易日收盤寫入假 K，
+    # 讓 MA／寬度／告警對齊；Volume=0 標記非官方成交。
+    filled += fill_gaps_from_prior_close(history, [g["date"] for g in gaps])
     return filled
+
+
+def fill_gaps_from_prior_close(history: dict[str, pd.DataFrame],
+                               gap_dates: list[str]) -> int:
+    """把指定日期缺收盤的列，用該檔「更早最近一根」的收盤價填成平盤 K。回傳檔數。"""
+    n = 0
+    for gap in gap_dates:
+        d = pd.Timestamp(gap)
+        for code, df in list(history.items()):
+            if df is None or df.empty or "Close" not in df.columns:
+                continue
+            if d in df.index and pd.notna(df.loc[d, "Close"]):
+                continue
+            prev = df.loc[df.index < d, "Close"].dropna()
+            if prev.empty:
+                continue
+            px = float(prev.iloc[-1])
+            row = {col: px for col in ("Open", "High", "Low", "Close") if col in df.columns}
+            if "Volume" in df.columns:
+                row["Volume"] = 0
+            df = df.copy()
+            df.loc[d] = pd.Series(row)
+            history[code] = df.sort_index()
+            n += 1
+    return n
 
 
 # ── 三大法人買賣超（上市 T86 + 上櫃 TPEX）────────────────────
