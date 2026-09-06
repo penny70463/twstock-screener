@@ -1,7 +1,7 @@
 """每日 ETF 與大盤進出場警報系統
 
 邏輯：每天在 run_pipeline.py 跑完後執行，比對前一日的狀態（alert_state.json），
-只有在「大盤曝險水位」或「ETF 燈號」發生有意義的變化時，才產生警報。
+只有在「大盤曝險水位」、「ETF 燈號」或「0050／VOO 總經動作」發生有意義的變化時，才產生警報。
 警報不再獨立推播 LINE（省月額度），改寫入 etf_alerts_today.json，
 由排程最後的 send_daily_line.py 併入統一每日訊息一次發送。
 
@@ -25,6 +25,7 @@ RESULT_DIR = Path("data/results")
 STATE_FILE = RESULT_DIR / "alert_state.json"
 # 當日警報輸出檔：send_daily_line.py 讀取後併入統一訊息（見 SCREEN_SECTIONS）
 ALERTS_FILE = RESULT_DIR / "etf_alerts_today.json"
+MACRO_FILE = RESULT_DIR / "latest_macro.json"
 
 # 曝險水位變化門檻：變化量（絕對值）超過此值才觸發警報，避免微幅波動每天通知
 EXPOSURE_CHANGE_THRESHOLD = 0.10  # 10%
@@ -251,6 +252,119 @@ def _check_kd_cross(old_state: dict, new_state: dict, alerts: list) -> None:
 
 
 # ---------------------------------------------------------------------------
+# 0050／VOO 總經 × 燈號（只服務核心 ETF 操作，不進曝險）
+# ---------------------------------------------------------------------------
+def _macro_signals(new_state: dict) -> dict[str, str]:
+    """從 new_state 或 latest_etf.json 取核心 ETF 燈號。"""
+    from src.advisor.macro import MACRO_CORE_ETFS
+
+    signals: dict[str, str] = {}
+    for code in MACRO_CORE_ETFS:
+        sig = new_state.get("etfs", {}).get(code)
+        if sig:
+            signals[code] = sig
+    missing = [c for c in MACRO_CORE_ETFS if c not in signals]
+    if missing:
+        latest_etf_file = RESULT_DIR / "latest_etf.json"
+        if latest_etf_file.exists():
+            etf_data = json.loads(latest_etf_file.read_text(encoding="utf-8"))
+            for etf in etf_data.get("etfs", []):
+                code = etf.get("code")
+                if code in missing and etf.get("signal"):
+                    signals[code] = etf["signal"]
+    return signals
+
+
+def _old_macro_action(old_macro: dict, code: str) -> str | None:
+    """讀舊狀態的該檔 action。舊版 {regime, action} 只代表 0050。"""
+    etfs = old_macro.get("etfs") or {}
+    if code in etfs:
+        return etfs[code].get("action")
+    if code == "0050.TW":
+        return old_macro.get("action")
+    return None
+
+
+def _check_macro_action(old_state: dict, new_state: dict, alerts: list,
+                        dry_run: bool = False) -> dict | None:
+    """FRED 三態抓一次，0050／VOO 各看自己燈號。僅該檔 action 或總經態改變才推。"""
+    from src.advisor.macro import (
+        MACRO_CORE_ETFS, MACRO_LABELS, classify_action, format_alert, load_regime,
+    )
+
+    signals = _macro_signals(new_state)
+    if not signals:
+        print("  [!] 無 0050／VOO 燈號，跳過總經檢查。")
+        if old_state.get("macro"):
+            new_state["macro"] = old_state["macro"]
+        return None
+
+    try:
+        regime_result = load_regime()
+    except Exception as e:
+        print(f"  [!] 總經計算失敗: {e}")
+        if old_state.get("macro"):
+            new_state["macro"] = old_state["macro"]
+        return None
+
+    if regime_result is None:
+        print("  [!] 未設定 FRED_API_KEY，跳過總經檢查。")
+        if old_state.get("macro"):
+            new_state["macro"] = old_state["macro"]
+        return None
+
+    etf_state = {}
+    per_etf = {}
+    for code in MACRO_CORE_ETFS:
+        sig = signals.get(code)
+        if not sig:
+            continue
+        action = classify_action(regime_result["regime"], sig)
+        etf_state[code] = {"action": action, "signal": sig}
+        per_etf[code] = {**regime_result, "action": action, "signal": sig}
+        label = MACRO_LABELS.get(code, code)
+        print(f"  [i] 總經 {regime_result['regime_zh']}／{action}（{label} {sig}）")
+
+    new_state["macro"] = {
+        "regime": regime_result["regime"],
+        "etfs": etf_state,
+    }
+    # 舊欄位相容：0050 action 仍寫在頂層
+    if "0050.TW" in etf_state:
+        new_state["macro"]["action"] = etf_state["0050.TW"]["action"]
+
+    payload = {
+        **regime_result,
+        "etfs": etf_state,
+    }
+    if not dry_run:
+        RESULT_DIR.mkdir(parents=True, exist_ok=True)
+        MACRO_FILE.write_text(
+            json.dumps(payload, indent=2, ensure_ascii=False, default=str),
+            encoding="utf-8",
+        )
+        print(f"  [+] 總經狀態已寫入 {MACRO_FILE}")
+
+    old_macro = old_state.get("macro") or {}
+    first_regime = not old_macro.get("regime")
+    new_alerts: list[str] = []
+    for code, result in per_etf.items():
+        old_action = _old_macro_action(old_macro, code)
+        if first_regime or old_action is None:
+            label = MACRO_LABELS.get(code, code)
+            print(f"  [i] 總經：{label} 首次記錄 "
+                  f"[{result['regime']}/{result['action']}]，建立基準。")
+            continue
+        if (old_macro.get("regime") == result["regime"]
+                and old_action == result["action"]):
+            continue
+        new_alerts.append(format_alert(result, old_macro, code=code))
+    if new_alerts:
+        alerts[:0] = new_alerts
+    return payload
+
+
+# ---------------------------------------------------------------------------
 # 主邏輯
 # ---------------------------------------------------------------------------
 def check_and_alert(dry_run: bool = False):
@@ -289,6 +403,9 @@ def check_and_alert(dry_run: bool = False):
 
     # 4. 檢查 KD 交叉
     _check_kd_cross(old_state, new_state, alerts)
+
+    # 5. 0050／VOO 總經 × 燈號（須在 ETF 燈號寫入 new_state 之後）
+    _check_macro_action(old_state, new_state, alerts, dry_run=dry_run)
 
     # 寫入當日警報檔（send_daily_line.py 併入統一訊息發送，不再獨立推播）
     if alerts:

@@ -75,6 +75,11 @@ else
   else
     fail "tests/test_breadth_coverage.py 失敗（節錄）：$(echo "$out" | tail -3 | tr '\n' ' ')"
   fi
+  if out=$("$PY" tests/test_macro.py 2>&1); then
+    pass "tests/test_macro.py 通過"
+  else
+    fail "tests/test_macro.py 失敗（節錄）：$(echo "$out" | tail -3 | tr '\n' ' ')"
+  fi
   if "$PY" -c "import pytest" 2>/dev/null; then
     if out=$("$PY" -m pytest tests/test_us_screener.py -q 2>&1); then
       pass "tests/test_us_screener.py 通過"

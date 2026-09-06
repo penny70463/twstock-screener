@@ -1,0 +1,47 @@
+{
+  "regime": "favorable",
+  "regime_zh": "好",
+  "legs": {
+    "sahm": {
+      "value": -0.07,
+      "date": "2026-08-01",
+      "triggered": false,
+      "status": "ok"
+    },
+    "curve": {
+      "value": 0.41,
+      "date": "2026-09-04",
+      "inverted": false,
+      "status": "ok"
+    },
+    "hy": {
+      "value": 265.0,
+      "date": "2026-09-03",
+      "widen_3m": -11.0,
+      "status": "ok"
+    },
+    "fedfunds": {
+      "value": 3.63,
+      "date": "2026-08-01",
+      "hiking_6m": false,
+      "status": "ok"
+    }
+  },
+  "reasons": [
+    "Sahm -0.07",
+    "2s10s 0.41%",
+    "HY OAS 265bp",
+    "Fed 3.63%"
+  ],
+  "date": "2026-09-06",
+  "etfs": {
+    "0050.TW": {
+      "action": "dca",
+      "signal": "green"
+    },
+    "VOO": {
+      "action": "dca",
+      "signal": "green"
+    }
+  }
+}

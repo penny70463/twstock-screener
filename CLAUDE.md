@@ -69,8 +69,9 @@ run_daily.sh (cron 16:00)
 | `src/advisor/screener.py` | 台股五因子篩選與評分邏輯 |
 | `src/advisor/us_screener.py` | 美股動能策略實作 |
 | `src/advisor/market.py` | 市場狀態判斷與曝險水位計算 |
+| `src/advisor/macro.py` | FRED 總經三態，服務 0050／VOO 操作提醒，不進曝險 |
 | `src/classifier.py` | NVIDIA LLM 題材分類 (批次 30 股/請求) |
-| `etf_alert.py` | ETF 紅綠燈與 KD 警報 (LINE 推播) |
+| `etf_alert.py` | ETF 紅綠燈、KD、0050 總經動作警報 (LINE 推播) |
 
 ## 環境變數 (.env)
 
@@ -82,6 +83,7 @@ LINE_ALLOWED_USER_IDS=    # 接收警報的用戶 ID (逗號分隔)
 
 # 選用
 FINMIND_TOKEN=            # 台股法人籌碼增強資料
+FRED_API_KEY=             # 0050／VOO 總經提醒（未設定則跳過）
 ```
 
 ## 開發注意事項

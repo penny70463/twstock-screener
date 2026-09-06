@@ -2,22 +2,48 @@
 import { ref, onMounted, computed } from 'vue'
 
 const etfData = ref(null)
+const macroData = ref(null)
 const error = ref(null)
 
-// 根據開發環境決定 API 網址
-const URL = import.meta.env.DEV
-  ? '/api/latest_etf.json'
-  : 'https://raw.githubusercontent.com/penny70463/twstock-screener/master/data/results/latest_etf.json'
+const ACTION_ZH = {
+  dca: '定期定額',
+  buy_dip: '越跌越買',
+  hold_dca: '維持定期定額',
+  wait: '暫停加碼',
+  trim: '高點適度停利',
+  cash: '現金待命',
+}
+
+const resultsBase = import.meta.env.DEV
+  ? '/api'
+  : 'https://raw.githubusercontent.com/penny70463/twstock-screener/master/data/results'
 
 onMounted(async () => {
   try {
-    const res = await fetch(URL, { cache: 'no-store' })
+    const res = await fetch(`${resultsBase}/latest_etf.json`, { cache: 'no-store' })
     if (!res.ok) throw new Error('no data')
     etfData.value = await res.json()
   } catch (e) {
     error.value = e.message
   }
+  try {
+    const res = await fetch(`${resultsBase}/latest_macro.json`, { cache: 'no-store' })
+    if (res.ok) macroData.value = await res.json()
+  } catch {
+    // 總經檔未上線或 404：價燈照常，不擋整區
+  }
 })
+
+const macroLine = (code) => {
+  const row = macroData.value?.etfs?.[code]
+  if (!row || !macroData.value?.regime_zh) return ''
+  const action = ACTION_ZH[row.action] || row.action
+  return `總經${macroData.value.regime_zh} × ${action}`
+}
+
+const macroReasons = computed(() =>
+  (macroData.value?.reasons || []).join('、')
+)
 
 const props = defineProps({
   market: {
@@ -72,6 +98,10 @@ const getSignalClass = (signal) => {
           <div class="detail-row">
             <span class="label">🛡️ 出場底線 (200MA)</span>
             <span class="value">${{ etf.exit_price }}</span>
+          </div>
+          <div class="detail-row macro-row" v-if="macroLine(etf.code)" :title="macroReasons">
+            <span class="label">總經動作</span>
+            <span class="value">{{ macroLine(etf.code) }}</span>
           </div>
         </div>
       </div>
@@ -190,5 +220,9 @@ const getSignalClass = (signal) => {
 .detail-row .value {
   color: var(--text-main);
   font-weight: 500;
+}
+
+.macro-row .value {
+  font-weight: 600;
 }
 </style>
