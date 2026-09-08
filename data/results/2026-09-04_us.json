@@ -1,6 +1,6 @@
 {
   "date": "2026-09-04",
-  "generated_at": "2026-09-07T17:26:20+08:00",
+  "generated_at": "2026-09-08T16:22:56+08:00",
   "params": {
     "top_n": 200,
     "advisor_threshold": 70
@@ -6159,12 +6159,12 @@
           "name": "Seagate Technology"
         },
         {
-          "code": "DELL",
-          "name": "Dell Technologies"
-        },
-        {
           "code": "SNDK",
           "name": "Sandisk"
+        },
+        {
+          "code": "DELL",
+          "name": "Dell Technologies"
         },
         {
           "code": "AMAT",
@@ -6195,10 +6195,6 @@
           "name": "KLA Corporation"
         },
         {
-          "code": "KEYS",
-          "name": "Keysight Technologies"
-        },
-        {
           "code": "HPE",
           "name": "Hewlett Packard Enterprise"
         },
@@ -6209,10 +6205,6 @@
         {
           "code": "GLW",
           "name": "Corning Inc."
-        },
-        {
-          "code": "FLEX",
-          "name": "Flex Ltd."
         },
         {
           "code": "EQIX",
@@ -6245,42 +6237,8 @@
       ]
     },
     {
-      "name": "雲端平台與網路資安",
-      "reason": "包含大型雲端服務商、SaaS 軟體及網路安全防護，聚焦於企業數位轉型與數據安全。",
-      "stocks": [
-        {
-          "code": "GOOG",
-          "name": "Alphabet Inc. (Class C)"
-        },
-        {
-          "code": "GOOGL",
-          "name": "Alphabet Inc. (Class A)"
-        },
-        {
-          "code": "FTNT",
-          "name": "Fortinet"
-        },
-        {
-          "code": "PANW",
-          "name": "Palo Alto Networks"
-        },
-        {
-          "code": "CRWD",
-          "name": "CrowdStrike"
-        },
-        {
-          "code": "CSCO",
-          "name": "Cisco"
-        },
-        {
-          "code": "DDOG",
-          "name": "Datadog"
-        }
-      ]
-    },
-    {
-      "name": "金融服務與保險",
-      "reason": "整合大型銀行、資產管理、保險及風險管理公司，反映整體金融體系與資本市場動向。",
+      "name": "金融與保險",
+      "reason": "整合大型銀行、資產管理、保險及風險管理公司，反映整體金融體系與資本市場走勢。",
       "stocks": [
         {
           "code": "STT",
@@ -6359,26 +6317,26 @@
           "name": "Aflac"
         },
         {
-          "code": "AIZ",
-          "name": "Assurant"
-        },
-        {
-          "code": "GL",
-          "name": "Globe Life"
-        },
-        {
           "code": "CB",
           "name": "Chubb Limited"
         },
         {
           "code": "ALL",
           "name": "Allstate"
+        },
+        {
+          "code": "GL",
+          "name": "Globe Life"
+        },
+        {
+          "code": "AIZ",
+          "name": "Assurant"
         }
       ]
     },
     {
       "name": "醫療保健與生技製藥",
-      "reason": "包含傳統製藥、生物技術、醫療服務及 GLP-1 減重藥物開發，聚焦於生命科學與健康管理。",
+      "reason": "包含傳統製藥、生物技術、醫療服務及 GLP-1 減重藥物開發，聚焦於醫療創新與健康管理。",
       "stocks": [
         {
           "code": "CNC",
@@ -6448,47 +6406,39 @@
     },
     {
       "name": "工業自動化與國防軍工",
-      "reason": "涵蓋工業設備、自動化系統及國防軍事工業，與基礎建設更新及地緣政治需求相關。",
+      "reason": "涵蓋工業設備、自動化系統、航空航太及國防承包商，與基礎建設投資及地緣政治需求相關。",
       "stocks": [
         {
           "code": "CAT",
           "name": "Caterpillar Inc."
         },
         {
+          "code": "NUE",
+          "name": "Nucor"
+        },
+        {
+          "code": "STLD",
+          "name": "Steel Dynamics"
+        },
+        {
           "code": "FIX",
           "name": "Comfort Systems USA"
         },
         {
-          "code": "GWW",
-          "name": "W. W. Grainger"
-        },
-        {
-          "code": "SWK",
-          "name": "Stanley Black & Decker"
-        },
-        {
-          "code": "ROK",
-          "name": "Rockwell Automation"
-        },
-        {
-          "code": "DE",
-          "name": "Deere & Company"
+          "code": "PWR",
+          "name": "Quanta Services"
         },
         {
           "code": "WAB",
           "name": "Wabtec"
         },
         {
-          "code": "IEX",
-          "name": "IDEX Corporation"
-        },
-        {
           "code": "HWM",
           "name": "Howmet Aerospace"
         },
         {
-          "code": "PWR",
-          "name": "Quanta Services"
+          "code": "IEX",
+          "name": "IDEX Corporation"
         },
         {
           "code": "NDSN",
@@ -6521,54 +6471,28 @@
         {
           "code": "GD",
           "name": "General Dynamics"
+        },
+        {
+          "code": "GWW",
+          "name": "W. W. Grainger"
+        },
+        {
+          "code": "SWK",
+          "name": "Stanley Black & Decker"
+        },
+        {
+          "code": "ROK",
+          "name": "Rockwell Automation"
+        },
+        {
+          "code": "DE",
+          "name": "Deere & Company"
         }
       ]
     },
     {
-      "name": "物流、交通與運輸",
-      "reason": "包含貨運物流、鐵路運輸及航空業，反映全球貿易流動與供應鏈效率。",
-      "stocks": [
-        {
-          "code": "FDX",
-          "name": "FedEx"
-        },
-        {
-          "code": "CSX",
-          "name": "CSX Corporation"
-        },
-        {
-          "code": "JBHT",
-          "name": "J.B. Hunt"
-        },
-        {
-          "code": "UPS",
-          "name": "United Parcel Service"
-        },
-        {
-          "code": "EXPD",
-          "name": "Expeditors International"
-        },
-        {
-          "code": "UNP",
-          "name": "Union Pacific Corporation"
-        },
-        {
-          "code": "DAL",
-          "name": "Delta Air Lines"
-        },
-        {
-          "code": "PCAR",
-          "name": "Paccar"
-        },
-        {
-          "code": "NSC",
-          "name": "Norfolk Southern"
-        }
-      ]
-    },
-    {
-      "name": "能源、油氣與電力",
-      "reason": "整合傳統油氣開採、精煉、油田服務及電力公用事業，涵蓋能源生產與轉型。",
+      "name": "能源與油氣服務",
+      "reason": "包含上游油氣開採、中下游精煉、管線運輸及油田服務公司，受原油價格與能源轉型影響。",
       "stocks": [
         {
           "code": "VLO",
@@ -6621,28 +6545,58 @@
         {
           "code": "CVX",
           "name": "Chevron Corporation"
+        }
+      ]
+    },
+    {
+      "name": "物流與交通運輸",
+      "reason": "整合快遞、貨運鐵路、航空及供應鏈管理，反映全球貿易流量與消費需求。",
+      "stocks": [
+        {
+          "code": "FDX",
+          "name": "FedEx"
         },
         {
-          "code": "GEV",
-          "name": "GE Vernova"
+          "code": "CSX",
+          "name": "CSX Corporation"
         },
         {
-          "code": "EVRG",
-          "name": "Evergy"
+          "code": "JBHT",
+          "name": "J.B. Hunt"
         },
         {
-          "code": "ETR",
-          "name": "Entergy"
+          "code": "EXPD",
+          "name": "Expeditors International"
         },
         {
-          "code": "PNW",
-          "name": "Pinnacle West Capital"
+          "code": "UNP",
+          "name": "Union Pacific Corporation"
+        },
+        {
+          "code": "DAL",
+          "name": "Delta Air Lines"
+        },
+        {
+          "code": "PCAR",
+          "name": "Paccar"
+        },
+        {
+          "code": "NSC",
+          "name": "Norfolk Southern"
+        },
+        {
+          "code": "PLD",
+          "name": "Prologis"
+        },
+        {
+          "code": "UPS",
+          "name": "United Parcel Service"
         }
       ]
     },
     {
       "name": "消費品牌與零售",
-      "reason": "涵蓋快消品、零售通路及汽車製造，反映消費者支出與市場需求。",
+      "reason": "涵蓋快消品、零售通路、汽車及消費電子，直接反映消費者支出與市場信心。",
       "stocks": [
         {
           "code": "ROST",
@@ -6672,19 +6626,19 @@
     },
     {
       "name": "房地產投資信託 (REITs)",
-      "reason": "包含商業、醫療及工業房地產，透過租金收益提供穩定現金流。",
+      "reason": "包含商業房產、醫療房產及工業倉儲，對利率環境高度敏感。",
       "stocks": [
         {
           "code": "WELL",
           "name": "Welltower"
         },
         {
-          "code": "VTR",
-          "name": "Ventas"
+          "code": "HST",
+          "name": "Host Hotels & Resorts"
         },
         {
-          "code": "SPG",
-          "name": "Simon Property Group"
+          "code": "VTR",
+          "name": "Ventas"
         },
         {
           "code": "FRT",
@@ -6697,50 +6651,106 @@
         {
           "code": "IRM",
           "name": "Iron Mountain"
+        },
+        {
+          "code": "SPG",
+          "name": "Simon Property Group"
         }
       ]
     },
     {
-      "name": "原物料與資源",
-      "reason": "包含鋼鐵、金屬及農產品等基礎原材料，受全球大宗商品價格影響。",
+      "name": "網路資安與雲端軟體",
+      "reason": "聚焦於 SaaS、雲端監控與網路安全防禦，是數位轉型與企業 IT 支出核心。",
       "stocks": [
         {
-          "code": "NUE",
-          "name": "Nucor"
+          "code": "FTNT",
+          "name": "Fortinet"
         },
         {
-          "code": "STLD",
-          "name": "Steel Dynamics"
+          "code": "PANW",
+          "name": "Palo Alto Networks"
         },
         {
-          "code": "BALL",
-          "name": "Ball Corporation"
+          "code": "CRWD",
+          "name": "CrowdStrike"
         },
         {
-          "code": "ADM",
-          "name": "Archer Daniels Midland"
+          "code": "CSCO",
+          "name": "Cisco"
         },
         {
-          "code": "FCX",
-          "name": "Freeport-McMoRan"
+          "code": "DDOG",
+          "name": "Datadog"
+        }
+      ]
+    },
+    {
+      "name": "電力與公用事業",
+      "reason": "包含電力設備、公用事業及能源基礎設施，與電網升級及綠能轉型相關。",
+      "stocks": [
+        {
+          "code": "GEV",
+          "name": "GE Vernova"
+        },
+        {
+          "code": "EVRG",
+          "name": "Evergy"
+        },
+        {
+          "code": "ETR",
+          "name": "Entergy"
+        },
+        {
+          "code": "PNW",
+          "name": "Pinnacle West Capital"
+        }
+      ]
+    },
+    {
+      "name": "大型科技平台",
+      "reason": "由具備強大生態系的科技巨頭組成，主導搜尋、廣告與雲端平台。",
+      "stocks": [
+        {
+          "code": "GOOG",
+          "name": "Alphabet Inc. (Class C)"
+        },
+        {
+          "code": "GOOGL",
+          "name": "Alphabet Inc. (Class A)"
         }
       ]
     },
     {
       "name": "其他",
-      "reason": "無法歸類至上述明確題材的個股。",
+      "reason": "包含原物料、農業及無法歸類至上述核心題材的個股。",
       "stocks": [
         {
           "code": "WBD",
           "name": "Warner Bros. Discovery"
         },
         {
-          "code": "HST",
-          "name": "Host Hotels & Resorts"
+          "code": "KEYS",
+          "name": "Keysight Technologies"
+        },
+        {
+          "code": "FLEX",
+          "name": "Flex Ltd."
         },
         {
           "code": "BG",
           "name": "Bunge Global"
+        },
+        {
+          "code": "BALL",
+          "name": "Ball Corporation"
+        },
+        {
+          "code": "FCX",
+          "name": "Freeport-McMoRan"
+        },
+        {
+          "code": "ADM",
+          "name": "Archer Daniels Midland"
         }
       ]
     }
