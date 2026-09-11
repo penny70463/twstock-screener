@@ -9,15 +9,15 @@
       "status": "ok"
     },
     "curve": {
-      "value": 0.4,
-      "date": "2026-09-09",
+      "value": 0.39,
+      "date": "2026-09-10",
       "inverted": false,
       "status": "ok"
     },
     "hy": {
-      "value": 267.0,
-      "date": "2026-09-08",
-      "widen_3m": -13.0,
+      "value": 271.0,
+      "date": "2026-09-09",
+      "widen_3m": -7.0,
       "status": "ok"
     },
     "fedfunds": {
@@ -29,19 +29,19 @@
   },
   "reasons": [
     "Sahm -0.07",
-    "2s10s 0.40%",
-    "HY OAS 267bp",
+    "2s10s 0.39%",
+    "HY OAS 271bp",
     "Fed 3.63%"
   ],
-  "date": "2026-09-10",
+  "date": "2026-09-11",
   "etfs": {
     "0050.TW": {
       "action": "dca",
       "signal": "green"
     },
     "VOO": {
-      "action": "dca",
-      "signal": "green"
+      "action": "buy_dip",
+      "signal": "yellow"
     }
   }
 }
