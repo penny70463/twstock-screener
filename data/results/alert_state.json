@@ -1,39 +1,39 @@
 {
   "etfs": {
     "0050.TW": "green",
-    "VOO": "green",
+    "VOO": "yellow",
     "2330.TW": "yellow",
     "SMH": "yellow",
     "SOXQ": "yellow",
-    "00981A.TW": "green"
+    "00981A.TW": "yellow"
   },
   "exposure": {
-    "TW": 0.7000000000000001,
-    "US": 0.65
+    "TW": 0.8500000000000001,
+    "US": 0.6000000000000001
   },
   "kd_0050.TW": {
-    "k": 43.3,
-    "d": 64.0
+    "k": 40.3,
+    "d": 57.5
   },
   "kd_VOO": {
-    "k": 30.6,
-    "d": 35.4
+    "k": 22.6,
+    "d": 31.1
   },
   "kd_SMH": {
-    "k": 46.2,
-    "d": 54.6
+    "k": 34.2,
+    "d": 47.8
   },
   "kd_SOXQ": {
-    "k": 49.4,
-    "d": 56.6
+    "k": 37.0,
+    "d": 50.1
   },
   "kd_2330.TW": {
-    "k": 24.7,
-    "d": 44.0
+    "k": 18.3,
+    "d": 35.4
   },
   "kd_00981A.TW": {
-    "k": 32.4,
-    "d": 49.9
+    "k": 32.0,
+    "d": 46.8
   },
   "macro": {
     "regime": "favorable",
@@ -43,8 +43,8 @@
         "signal": "green"
       },
       "VOO": {
-        "action": "dca",
-        "signal": "green"
+        "action": "buy_dip",
+        "signal": "yellow"
       }
     },
     "action": "dca"
