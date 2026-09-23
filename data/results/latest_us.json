@@ -1,6 +1,6 @@
 {
   "date": "2026-09-22",
-  "generated_at": "2026-09-23T16:55:01+08:00",
+  "generated_at": "2026-09-23T18:30:17+08:00",
   "params": {
     "top_n": 200,
     "advisor_threshold": 70
@@ -5736,5 +5736,346 @@
       "capped": false
     }
   ],
-  "themes": []
+  "themes": [
+    {
+      "name": "AI 基礎建設與記憶體",
+      "reason": "專注於 AI 運算所需的記憶體、儲存設備及伺服器硬體。這些公司提供 HBM、SSD 及伺服器基礎設施以支持大模型運算。",
+      "stocks": [
+        {
+          "code": "MU",
+          "name": "Micron Technology"
+        },
+        {
+          "code": "WDC",
+          "name": "Western Digital"
+        },
+        {
+          "code": "STX",
+          "name": "Seagate Technology"
+        },
+        {
+          "code": "DELL",
+          "name": "Dell Technologies"
+        },
+        {
+          "code": "SNDK",
+          "name": "Sandisk"
+        }
+      ]
+    },
+    {
+      "name": "半導體設計與設備",
+      "reason": "涵蓋晶片設計、邏輯運算以及製造端所需的關鍵設備。這些公司是半導體產業鏈的上游核心。",
+      "stocks": [
+        {
+          "code": "AMD",
+          "name": "Advanced Micro Devices"
+        },
+        {
+          "code": "INTC",
+          "name": "Intel"
+        },
+        {
+          "code": "MRVL",
+          "name": "Marvell Technology"
+        },
+        {
+          "code": "AMAT",
+          "name": "Applied Materials"
+        },
+        {
+          "code": "LRCX",
+          "name": "Lam Research"
+        },
+        {
+          "code": "TER",
+          "name": "Teradyne"
+        }
+      ]
+    },
+    {
+      "name": "油氣能源與精煉",
+      "reason": "專注於原油精煉、運輸及能源基礎設施。受全球能源需求及原油價格波動影響。",
+      "stocks": [
+        {
+          "code": "VLO",
+          "name": "Valero Energy"
+        },
+        {
+          "code": "PSX",
+          "name": "Phillips 66"
+        },
+        {
+          "code": "TRGP",
+          "name": "Targa Resources"
+        },
+        {
+          "code": "MPC",
+          "name": "Marathon Petroleum"
+        }
+      ]
+    },
+    {
+      "name": "生技製藥與醫療保健",
+      "reason": "包含大型製藥公司、疫苗開發及醫療保險服務。關注新藥研發與醫療體系支出。",
+      "stocks": [
+        {
+          "code": "MRK",
+          "name": "Merck & Co."
+        },
+        {
+          "code": "JNJ",
+          "name": "Johnson & Johnson"
+        },
+        {
+          "code": "MRNA",
+          "name": "Moderna"
+        },
+        {
+          "code": "VTRS",
+          "name": "Viatris"
+        },
+        {
+          "code": "CNC",
+          "name": "Centene Corporation"
+        }
+      ]
+    },
+    {
+      "name": "金融服務與資產管理",
+      "reason": "涵蓋大型托管銀行與資產管理機構，受利率環境及市場交易量影響。",
+      "stocks": [
+        {
+          "code": "STT",
+          "name": "State Street Corporation"
+        },
+        {
+          "code": "BNY",
+          "name": "BNY Mellon"
+        }
+      ]
+    },
+    {
+      "name": "工業運輸與物流",
+      "reason": "包含貨運物流、鐵路運輸及工業設備，反映實體經濟的貿易流動與基礎建設需求。",
+      "stocks": [
+        {
+          "code": "FDX",
+          "name": "FedEx"
+        },
+        {
+          "code": "CSX",
+          "name": "CSX Corporation"
+        },
+        {
+          "code": "WAB",
+          "name": "Wabtec"
+        },
+        {
+          "code": "NDSN",
+          "name": "Nordson Corporation"
+        }
+      ]
+    },
+    {
+      "name": "零售消費",
+      "reason": "涵蓋大型折扣店與綜合零售商，反映美國消費者的支出能力與消費趨勢。",
+      "stocks": [
+        {
+          "code": "TGT",
+          "name": "Target Corporation"
+        },
+        {
+          "code": "ROST",
+          "name": "Ross Stores"
+        }
+      ]
+    },
+    {
+      "name": "其他",
+      "reason": "無法歸類至上述主流題材的個股。",
+      "stocks": [
+        {
+          "code": "NUE",
+          "name": "Nucor"
+        },
+        {
+          "code": "LITE",
+          "name": "Lumentum"
+        }
+      ]
+    },
+    {
+      "name": "AI 與消費電子",
+      "reason": "聚焦於 AI 運算、大型語言模型以及整合 AI 功能的硬體設備，是目前市場最強的成長動能。",
+      "stocks": [
+        {
+          "code": "GOOGL",
+          "name": "Alphabet Inc. (Class A)"
+        },
+        {
+          "code": "GOOG",
+          "name": "Alphabet Inc. (Class C)"
+        },
+        {
+          "code": "AAPL",
+          "name": "Apple Inc."
+        }
+      ]
+    },
+    {
+      "name": "半導體與光通訊",
+      "reason": "提供 AI 基礎設施所需的晶片以及高速數據傳輸的光纖元件，屬於 AI 硬體供應鏈。",
+      "stocks": [
+        {
+          "code": "TXN",
+          "name": "Texas Instruments"
+        },
+        {
+          "code": "GLW",
+          "name": "Corning Inc."
+        }
+      ]
+    },
+    {
+      "name": "生技製藥與醫療設備",
+      "reason": "涵蓋新藥研發、生物製藥以及精準醫療分析設備，受醫療需求與創新藥物驅動。",
+      "stocks": [
+        {
+          "code": "REGN",
+          "name": "Regeneron Pharmaceuticals"
+        },
+        {
+          "code": "GILD",
+          "name": "Gilead Sciences"
+        },
+        {
+          "code": "PFE",
+          "name": "Pfizer"
+        },
+        {
+          "code": "TMO",
+          "name": "Thermo Fisher Scientific"
+        },
+        {
+          "code": "WAT",
+          "name": "Waters Corporation"
+        },
+        {
+          "code": "RVTY",
+          "name": "Revvity"
+        },
+        {
+          "code": "WST",
+          "name": "West Pharmaceutical Services"
+        },
+        {
+          "code": "HSIC",
+          "name": "Henry Schein"
+        },
+        {
+          "code": "HUM",
+          "name": "Humana"
+        }
+      ]
+    },
+    {
+      "name": "銀行與金融服務",
+      "reason": "包含大型商業銀行、投資券商及支付服務，受利率環境與資本市場交易量影響。",
+      "stocks": [
+        {
+          "code": "USB",
+          "name": "U.S. Bancorp"
+        },
+        {
+          "code": "C",
+          "name": "Citigroup"
+        },
+        {
+          "code": "PNC",
+          "name": "PNC Financial Services"
+        },
+        {
+          "code": "IBKR",
+          "name": "Interactive Brokers"
+        },
+        {
+          "code": "CPAY",
+          "name": "Corpay"
+        },
+        {
+          "code": "ALL",
+          "name": "Allstate"
+        }
+      ]
+    },
+    {
+      "name": "工業自動化與基礎建設",
+      "reason": "涵蓋精密工程、物流運輸及建築控制系統，反映實體經濟復甦與工業升級。",
+      "stocks": [
+        {
+          "code": "PH",
+          "name": "Parker Hannifin"
+        },
+        {
+          "code": "NSC",
+          "name": "Norfolk Southern"
+        },
+        {
+          "code": "DE",
+          "name": "Deere & Company"
+        },
+        {
+          "code": "AME",
+          "name": "Ametek"
+        },
+        {
+          "code": "JCI",
+          "name": "Johnson Controls"
+        }
+      ]
+    },
+    {
+      "name": "能源轉型與電力",
+      "reason": "專注於電力設備與能源轉型技術，以滿足 AI 資料中心對電力的龐大需求。",
+      "stocks": [
+        {
+          "code": "GEV",
+          "name": "GE Vernova"
+        }
+      ]
+    },
+    {
+      "name": "貴金屬與原物料",
+      "reason": "包含金礦開採與工業材料，通常作為對抗通膨或避險的資產。",
+      "stocks": [
+        {
+          "code": "NEM",
+          "name": "Newmont"
+        },
+        {
+          "code": "BALL",
+          "name": "Ball Corporation"
+        },
+        {
+          "code": "IFF",
+          "name": "International Flavors & Fragrances"
+        }
+      ]
+    },
+    {
+      "name": "農業與食品供應鏈",
+      "reason": "涉及農機設備與全球糧食加工貿易，受商品價格與農業週期影響。",
+      "stocks": [
+        {
+          "code": "DE",
+          "name": "Deere & Company"
+        },
+        {
+          "code": "ADM",
+          "name": "Archer Daniels Midland"
+        }
+      ]
+    }
+  ]
 }
