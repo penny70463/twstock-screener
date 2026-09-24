@@ -54,9 +54,12 @@ def _format_pullback(data: dict) -> str:
 
 def _format_breakout(data: dict) -> str:
     """族群出量突破段落：今日有點火（>=2 檔）的族群，至多 3 個"""
+    timed_out = data.get("theme_status") == "timeout"
     themes = [t for t in data.get("themes", [])
               if t.get("fired_today_count", 0) >= 2
               and t.get("name") not in ("未分類", "其他")]
+    if timed_out and not themes:
+        return "🔥 族群突破：timeout"
     if not themes:
         return "🔥 族群突破：今日無族群點火"
     lines = ["🔥 族群出量突破（近10日）"]
@@ -65,6 +68,8 @@ def _format_breakout(data: dict) -> str:
         names = "、".join(fired[:6]) + ("…" if len(fired) > 6 else "")
         lines.append(f"・{t['name']}：今日 {t['fired_today_count']} 檔"
                      f"（累計 {t['count']}）{names}")
+    if timed_out:
+        lines.append("timeout")
     return "\n".join(lines)
 
 

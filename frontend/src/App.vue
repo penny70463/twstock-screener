@@ -249,6 +249,7 @@ const isSparklineUp = (prices) => {
       <!-- Theme Clusters -->
       <section class="section">
         <h2 class="section-title">熱門題材族群</h2>
+        <div v-if="data.theme_status === 'timeout'" class="glass-panel empty-state">timeout</div>
         <div class="theme-grid" v-if="data.themes && data.themes.length > 0">
           <div v-for="(theme, idx) in data.themes" :key="idx" class="glass-panel theme-card">
             <h3>{{ theme.name || '未命名題材' }}</h3>
@@ -260,8 +261,8 @@ const isSparklineUp = (prices) => {
             </div>
           </div>
         </div>
-        <div v-else class="glass-panel empty-state">
-          今日無題材分類資料。
+        <div v-else-if="data.theme_status !== 'timeout'" class="glass-panel empty-state">
+          {{ data.theme_status === 'empty' ? '無明顯題材' : '今日無題材分類資料。' }}
         </div>
       </section>
 

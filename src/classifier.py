@@ -41,7 +41,7 @@ def classify_themes(stocks: list[dict], market: str = "TW") -> dict:
     market 決定用台股或美股的題材 prompt。
     """
     if not stocks:
-        return {"themes": []}
+        return {"themes": [], "theme_status": "skipped"}
 
     system_prompt, merge_prompt = get_prompts(market)
     name_map = {s["code"]: s.get("name", s["code"]) for s in stocks}
@@ -49,12 +49,14 @@ def classify_themes(stocks: list[dict], market: str = "TW") -> dict:
     batches = [stocks[i : i + _BATCH_SIZE] for i in range(0, len(stocks), _BATCH_SIZE)]
 
     raw_themes: list[dict] = []
+    batch_statuses: list[str] = []
     for bi, batch in enumerate(batches, 1):
         if bi > 1:
             time.sleep(1.5)  # 批次間留白，降低 free tier 突發限流機率
-        themes = _classify_batch(client, batch, bi, system_prompt)
+        themes, status = _classify_batch(client, batch, bi, system_prompt)
         print(f"    批次 {bi}/{len(batches)}（{len(batch)} 檔）→ {len(themes)} 題材", flush=True)
         raw_themes.extend(themes)
+        batch_statuses.append(status)
 
     # 階段一：完全同名先併（codes 層級），減少要丟給階段二的量
     stage1 = _merge_exact(raw_themes)
@@ -63,37 +65,63 @@ def classify_themes(stocks: list[dict], market: str = "TW") -> dict:
     #   把精簡後的題材名+codes 丟回 LLM 做一次語意歸併。輸入小、輸出小 → 快又穩。
     #   多檔（>1 批）才需要；單批沒有跨批碎片問題。
     final = stage1
+    consolidate_timeout = False
     if len(batches) > 1 and stage1:
-        consolidated = _consolidate(client, stage1, merge_prompt)
+        consolidated, consolidate_timeout = _consolidate(client, stage1, merge_prompt)
         if consolidated:
             print(f"    階段二歸併：{len(stage1)} → {len(consolidated)} 題材", flush=True)
             final = consolidated
         else:
             print("    ! 階段二歸併失敗，沿用階段一結果", flush=True)
 
-    return {"themes": _attach_all(final, name_map)}
+    return {
+        "themes": _attach_all(final, name_map),
+        "theme_status": aggregate_theme_status(batch_statuses, consolidate_timeout),
+    }
 
 
 _BATCH_ATTEMPTS = 2  # 每批最多嘗試次數（NVIDIA 排隊逾時多為暫時性，重試一次通常就過）
 
 
-def _classify_batch(client: OpenAI, batch: list[dict], bi: int, system_prompt: str) -> list[dict]:
-    """單批分類，回傳原始 theme dict 清單（含 codes，尚未補名稱）。失敗回空清單。"""
+def is_timeout(exc: BaseException) -> bool:
+    msg = str(exc).lower()
+    return "timeout" in msg or "timed out" in msg
+
+
+def aggregate_theme_status(batch_statuses: list[str], consolidate_timeout: bool = False) -> str:
+    """ok：每批都拿到模型 JSON。empty：模型成功但沒有題材。timeout：有呼叫逾時。"""
+    if not batch_statuses:
+        return "skipped"
+    if "timeout" in batch_statuses or consolidate_timeout:
+        return "timeout"
+    if all(s == "empty" for s in batch_statuses):
+        return "empty"
+    if all(s == "ok" for s in batch_statuses):
+        return "ok"
+    if any(s == "failed" for s in batch_statuses):
+        return "failed"
+    return "ok"
+
+
+def _classify_batch(client: OpenAI, batch: list[dict], bi: int, system_prompt: str) -> tuple[list[dict], str]:
+    """單批分類。回傳 (theme dicts, status)。status 為 ok / empty / timeout / failed。"""
     messages = [
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": json.dumps(batch, ensure_ascii=False)},
     ]
     content = None
+    last_err: BaseException | None = None
     for attempt in range(1, _BATCH_ATTEMPTS + 1):
         try:
             content = _call(client, messages, json_mode=True)
             break
         except Exception as e:
+            last_err = e
             print(f"  ! 批次 {bi} 第 {attempt} 次 LLM 呼叫失敗: {e}", flush=True)
             if attempt < _BATCH_ATTEMPTS:
                 time.sleep(10)  # 排隊逾時後稍等再試，避開瞬間壅塞
     if content is None:
-        return []
+        return [], "timeout" if last_err and is_timeout(last_err) else "failed"
 
     parsed = _safe_parse(content)
     # 拿到回應但 parse 失敗才退非 JSON 模式（部分模型不支援 response_format）
@@ -105,8 +133,9 @@ def _classify_batch(client: OpenAI, batch: list[dict], bi: int, system_prompt: s
 
     if parsed is None:
         _dump_raw(content, bi)
-        return []
-    return [t for t in parsed.get("themes", []) if isinstance(t, dict)]
+        return [], "failed"
+    themes = [t for t in parsed.get("themes", []) if isinstance(t, dict)]
+    return themes, "ok" if themes else "empty"
 
 
 def _merge_exact(raw_themes: list[dict]) -> list[dict]:
@@ -132,7 +161,7 @@ def _merge_exact(raw_themes: list[dict]) -> list[dict]:
 _CONSOLIDATE_RETRIES = 3
 
 
-def _consolidate(client: OpenAI, themes: list[dict], merge_prompt: str) -> list[dict] | None:
+def _consolidate(client: OpenAI, themes: list[dict], merge_prompt: str) -> tuple[list[dict] | None, bool]:
     """階段二：把碎片化題材丟回 LLM 做語意歸併。輸入小、重試成本低，故重試數次救連線中斷。"""
     payload = [{"name": t["name"], "codes": t["codes"]} for t in themes]
     messages = [
@@ -140,10 +169,12 @@ def _consolidate(client: OpenAI, themes: list[dict], merge_prompt: str) -> list[
         {"role": "user", "content": json.dumps(payload, ensure_ascii=False)},
     ]
     last = ""
+    saw_timeout = False
     for attempt in range(1, _CONSOLIDATE_RETRIES + 1):
         try:
             content = _call(client, messages, json_mode=True)
         except Exception as e:
+            saw_timeout = saw_timeout or is_timeout(e)
             print(f"  ! 階段二第 {attempt} 次呼叫失敗: {e}", flush=True)
             time.sleep(2)
             continue
@@ -152,11 +183,11 @@ def _consolidate(client: OpenAI, themes: list[dict], merge_prompt: str) -> list[
         if parsed is not None:
             merged = [t for t in parsed.get("themes", []) if isinstance(t, dict)]
             if merged:
-                return merged
+                return merged, False
         print(f"  ! 階段二第 {attempt} 次 parse 失敗（長度 {len(content)}），重試", flush=True)
         time.sleep(2)
     _dump_raw(last, 0)
-    return None
+    return None, saw_timeout
 
 
 def _attach_all(themes: list[dict], name_map: dict) -> list[dict]:

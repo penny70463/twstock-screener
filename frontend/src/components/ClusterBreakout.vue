@@ -82,6 +82,7 @@ function hideTip() {
         進場參考價 = 波段首日的隔日開盤價。
       </p>
 
+      <div v-if="data.theme_status === 'timeout'" class="glass-panel empty-state">timeout</div>
       <div class="theme-grid" v-if="themes.length > 0">
         <div v-for="(theme, idx) in themes" :key="idx" class="glass-panel theme-card">
           <h3>

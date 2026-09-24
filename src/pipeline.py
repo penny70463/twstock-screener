@@ -183,7 +183,7 @@ def run(market: str = "TW", classify: bool = True, verbose: bool = True) -> dict
     })
 
     # 6. LLM 題材分類
-    themes = {"themes": []}
+    themes = {"themes": [], "theme_status": "skipped"}
     if classify and not result.empty:
         stocks = [
             {
@@ -198,7 +198,10 @@ def run(market: str = "TW", classify: bool = True, verbose: bool = True) -> dict
         try:
             themes = classify_themes(stocks, market=market)
         except Exception as e:
+            from src.classifier import is_timeout
+            status = "timeout" if is_timeout(e) else "failed"
             print(f"  ! LLM 題材分類失敗: {e}", flush=True)
+            themes = {"themes": [], "theme_status": status}
         _step("LLM 分類完成", t0, verbose)
 
     # 計算連續水位模型（三因子曝險建議）
@@ -266,6 +269,7 @@ def _build_payload(on_date: date, result: pd.DataFrame, themes: dict, market_sta
         "universe": f"{market} Market",
         "screened": records,
         "themes": themes.get("themes", []),
+        "theme_status": themes.get("theme_status", "ok" if themes.get("themes") else "empty"),
     }
 
 def _save(payload: dict, on_date: date, market: str = "TW") -> None:
@@ -292,6 +296,23 @@ def _generate_available_dates(market: str = "TW") -> None:
 LINE_LINK_BLOCK = "🔗 點此查看完整排行榜與持股體檢：\nhttps://twstock-screener.vercel.app/"
 
 
+def theme_headline(payload: dict) -> str:
+    """題材那一行。API timeout 只寫 timeout，不寫成沒有題材。"""
+    status = payload.get("theme_status")
+    names = "、".join(
+        t.get("name", "") for t in (payload.get("themes") or [])[:3] if t.get("name")
+    )
+    if status == "timeout":
+        return "timeout" if not names else f"{names}（timeout）"
+    if status == "failed":
+        return "分類失敗"
+    if status == "skipped":
+        return "—"
+    if not names:
+        return "無明顯題材"
+    return names
+
+
 def compose_daily_blocks(payloads: dict[str, dict]) -> list[str]:
     """組合每日訊息的段落（標題 + 各市場），不含結尾連結。
 
@@ -311,8 +332,7 @@ def compose_daily_blocks(payloads: dict[str, dict]) -> list[str]:
         market_label = payload["market_state"]["label"]
         threshold = payload["market_state"]["threshold"]
 
-        themes = payload.get("themes", [])
-        theme_names = "、".join([t.get("name", "") for t in themes[:3]]) if themes else "無明顯題材"
+        theme_names = theme_headline(payload)
 
         # 挑出最強 3 檔
         screened = payload.get("screened", [])

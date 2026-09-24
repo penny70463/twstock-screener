@@ -179,12 +179,20 @@ def main() -> None:
         stocks_in = [{"code": c, "name": uni[c]["stock_name"],
                       "industry": uni[c].get("industry_category", "")} for c in codes]
         print("LLM 題材分類中 ...", flush=True)
+        theme_status = "failed"
         try:
-            themes = classify_themes(stocks_in, market="TW").get("themes", [])
+            classified = classify_themes(stocks_in, market="TW")
+            themes = classified.get("themes", [])
+            theme_status = classified.get("theme_status", "failed")
         except Exception as e:
+            from src.classifier import is_timeout
+            theme_status = "timeout" if is_timeout(e) else "failed"
             print(f"  ! LLM 分類失敗：{e}", flush=True)
+    elif not codes or NO_LLM:
+        theme_status = "skipped"
     if not themes and codes:
-        themes = [{"name": "未分類", "reason": "LLM 未執行或失敗",
+        reason = "timeout" if theme_status == "timeout" else "LLM 未執行或失敗"
+        themes = [{"name": "未分類", "reason": reason,
                    "stocks": [{"code": c, "name": uni[c]["stock_name"]} for c in codes]}]
 
     # 組族群輸出：每檔附觸發日與今日狀態，族群依（今日點火、累計）排序
@@ -223,6 +231,7 @@ def main() -> None:
         "params": {"window_days": WINDOW, "break_days": BREAK_DAYS,
                    "vol_mult": VOL_MULT, "min_chg": MIN_CHG,
                    "exit_stop": EXIT_STOP, "exit_trail": EXIT_TRAIL},
+        "theme_status": theme_status,
         "themes": out_themes,
     }
     json_text = json.dumps(payload, ensure_ascii=False)
