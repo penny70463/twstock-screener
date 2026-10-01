@@ -249,7 +249,7 @@ const isSparklineUp = (prices) => {
       <!-- Theme Clusters -->
       <section class="section">
         <h2 class="section-title">熱門題材族群</h2>
-        <div v-if="data.theme_status === 'timeout'" class="glass-panel empty-state">timeout</div>
+        <div v-if="data.theme_status === 'timeout'" class="glass-panel theme-timeout">timeout</div>
         <div class="theme-grid" v-if="data.themes && data.themes.length > 0">
           <div v-for="(theme, idx) in data.themes" :key="idx" class="glass-panel theme-card">
             <h3>{{ theme.name || '未命名題材' }}</h3>
@@ -844,6 +844,13 @@ body {
 }
 
 /* Theme Grid */
+.theme-timeout {
+  margin: 0 0 1.25rem;
+  padding: 0.55rem 1rem;
+  text-align: center;
+  color: var(--text-muted);
+}
+
 .theme-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));

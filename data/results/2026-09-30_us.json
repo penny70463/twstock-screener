@@ -1,6 +1,6 @@
 {
   "date": "2026-09-30",
-  "generated_at": "2026-10-01T16:44:21+08:00",
+  "generated_at": "2026-10-01T17:24:04+08:00",
   "params": {
     "top_n": 200,
     "advisor_threshold": 70
@@ -5333,73 +5333,83 @@
   ],
   "themes": [
     {
-      "name": "AI 半導體與基礎設施",
-      "reason": "涵蓋半導體設計、設備以及支持 AI 運算的網路與數據中心硬體，是 AI 浪潮的最底層驅動力量。",
+      "name": "半導體與 AI 硬體",
+      "reason": "涵蓋晶片設計、記憶體、半導體設備及 AI 伺服器硬體，構成 AI 運算的核心基礎設施。",
       "stocks": [
+        {
+          "code": "SNDK",
+          "name": "Sandisk"
+        },
+        {
+          "code": "MU",
+          "name": "Micron Technology"
+        },
+        {
+          "code": "WDC",
+          "name": "Western Digital"
+        },
+        {
+          "code": "AMD",
+          "name": "Advanced Micro Devices"
+        },
+        {
+          "code": "DELL",
+          "name": "Dell Technologies"
+        },
+        {
+          "code": "STX",
+          "name": "Seagate Technology"
+        },
+        {
+          "code": "AMAT",
+          "name": "Applied Materials"
+        },
+        {
+          "code": "TER",
+          "name": "Teradyne"
+        },
+        {
+          "code": "INTC",
+          "name": "Intel"
+        },
+        {
+          "code": "HPE",
+          "name": "Hewlett Packard Enterprise"
+        },
         {
           "code": "LRCX",
           "name": "Lam Research"
-        },
-        {
-          "code": "KEYS",
-          "name": "Keysight Technologies"
-        },
-        {
-          "code": "COHR",
-          "name": "Coherent Corp."
         },
         {
           "code": "MRVL",
           "name": "Marvell Technology"
         },
         {
-          "code": "CSCO",
-          "name": "Cisco"
-        },
-        {
-          "code": "EQIX",
-          "name": "Equinix"
-        },
-        {
-          "code": "NTAP",
-          "name": "NetApp"
-        },
-        {
-          "code": "GLW",
-          "name": "Corning Inc."
-        },
-        {
-          "code": "TXN",
-          "name": "Texas Instruments"
+          "code": "KEYS",
+          "name": "Keysight Technologies"
         },
         {
           "code": "KLAC",
           "name": "KLA Corporation"
+        },
+        {
+          "code": "TXN",
+          "name": "Texas Instruments"
         }
       ]
     },
     {
-      "name": "雲端軟體與資安",
-      "reason": "包含 SaaS 平台、雲端監控及網路安全防護，聚焦於企業數位轉型與數據保護需求。",
+      "name": "雲端服務與網路資安",
+      "reason": "包含 AI 雲端平台、SaaS 監控工具及網路安全防護，聚焦於數位轉型與企業軟體需求。",
       "stocks": [
+        {
+          "code": "FTNT",
+          "name": "Fortinet"
+        },
         {
           "code": "PANW",
           "name": "Palo Alto Networks"
         },
-        {
-          "code": "CRWD",
-          "name": "CrowdStrike"
-        },
-        {
-          "code": "DDOG",
-          "name": "Datadog"
-        }
-      ]
-    },
-    {
-      "name": "大型科技與平台",
-      "reason": "由領先的科技巨頭組成，擁有強大的生態系統、雲端平台及消費電子產品線。",
-      "stocks": [
         {
           "code": "GOOGL",
           "name": "Alphabet Inc. (Class A)"
@@ -5409,38 +5419,68 @@
           "name": "Alphabet Inc. (Class C)"
         },
         {
-          "code": "ADI",
-          "name": "Analog Devices"
-        },
-        {
-          "code": "FLEX",
-          "name": "Flex Ltd."
-        },
-        {
-          "code": "AAPL",
-          "name": "Apple Inc."
+          "code": "DDOG",
+          "name": "Datadog"
         }
       ]
     },
     {
-      "name": "生技製藥與醫療設備",
-      "reason": "整合 GLP-1 減重藥、生物製藥、醫療診斷設備及管理服務，涵蓋從研發到臨床應用的醫療產業鏈。",
+      "name": "網路通訊與光學元件",
+      "reason": "聚焦於光纖、光通訊元件及網路設備，提供 AI 與 5G 時代所需的高速傳輸能力。",
       "stocks": [
         {
-          "code": "LLY",
-          "name": "Lilly (Eli)"
+          "code": "LITE",
+          "name": "Lumentum"
         },
         {
-          "code": "BIIB",
-          "name": "Biogen"
+          "code": "CSCO",
+          "name": "Cisco"
         },
         {
-          "code": "CAH",
-          "name": "Cardinal Health"
+          "code": "MRVL",
+          "name": "Marvell Technology"
         },
         {
-          "code": "CNC",
-          "name": "Centene Corporation"
+          "code": "GLW",
+          "name": "Corning Inc."
+        },
+        {
+          "code": "COHR",
+          "name": "Coherent Corp."
+        }
+      ]
+    },
+    {
+      "name": "生技製藥與醫療保健",
+      "reason": "整合藥廠、醫療設備、生物製藥服務及醫療保險，涵蓋從研發、生產到醫療服務的完整鏈條。",
+      "stocks": [
+        {
+          "code": "MRK",
+          "name": "Merck & Co."
+        },
+        {
+          "code": "JNJ",
+          "name": "Johnson & Johnson"
+        },
+        {
+          "code": "VTRS",
+          "name": "Viatris"
+        },
+        {
+          "code": "MRNA",
+          "name": "Moderna"
+        },
+        {
+          "code": "BMY",
+          "name": "Bristol Myers Squibb"
+        },
+        {
+          "code": "AMGN",
+          "name": "Amgen"
+        },
+        {
+          "code": "CRL",
+          "name": "Charles River Laboratories"
         },
         {
           "code": "INCY",
@@ -5451,44 +5491,24 @@
           "name": "Henry Schein"
         },
         {
-          "code": "RVTY",
-          "name": "Revvity"
-        },
-        {
-          "code": "VRTX",
-          "name": "Vertex Pharmaceuticals"
-        },
-        {
-          "code": "REGN",
-          "name": "Regeneron Pharmaceuticals"
-        },
-        {
-          "code": "BDX",
-          "name": "Becton Dickinson"
+          "code": "PFE",
+          "name": "Pfizer"
         },
         {
           "code": "GILD",
           "name": "Gilead Sciences"
         },
         {
-          "code": "WAT",
-          "name": "Waters Corporation"
-        },
-        {
           "code": "DGX",
           "name": "Quest Diagnostics"
         },
         {
-          "code": "PFE",
-          "name": "Pfizer"
+          "code": "BDX",
+          "name": "Becton Dickinson"
         },
         {
-          "code": "TMO",
-          "name": "Thermo Fisher Scientific"
-        },
-        {
-          "code": "IQV",
-          "name": "IQVIA"
+          "code": "WAT",
+          "name": "Waters Corporation"
         },
         {
           "code": "WST",
@@ -5499,26 +5519,50 @@
           "name": "Dexcom"
         },
         {
+          "code": "LLY",
+          "name": "Lilly (Eli)"
+        },
+        {
+          "code": "CAH",
+          "name": "Cardinal Health"
+        },
+        {
+          "code": "CNC",
+          "name": "Centene Corporation"
+        },
+        {
+          "code": "TMO",
+          "name": "Thermo Fisher Scientific"
+        },
+        {
+          "code": "IQV",
+          "name": "IQVIA"
+        },
+        {
           "code": "HUM",
           "name": "Humana"
         }
       ]
     },
     {
-      "name": "能源與原材料",
-      "reason": "包含傳統油氣開採、能源運輸以及貴金屬與化學原材料，受全球大宗商品價格影響。",
+      "name": "能源與油氣基礎設施",
+      "reason": "包含上游開採、中游運輸及下游煉製，以及與能源轉型相關的電力基礎設施。",
       "stocks": [
         {
-          "code": "APA",
-          "name": "APA Corporation"
+          "code": "VLO",
+          "name": "Valero Energy"
         },
         {
-          "code": "XOM",
-          "name": "ExxonMobil"
+          "code": "PSX",
+          "name": "Phillips 66"
         },
         {
-          "code": "CVX",
-          "name": "Chevron Corporation"
+          "code": "MPC",
+          "name": "Marathon Petroleum"
+        },
+        {
+          "code": "TRGP",
+          "name": "Targa Resources"
         },
         {
           "code": "OKE",
@@ -5529,8 +5573,12 @@
           "name": "ConocoPhillips"
         },
         {
-          "code": "FANG",
-          "name": "Diamondback Energy"
+          "code": "APA",
+          "name": "APA Corporation"
+        },
+        {
+          "code": "XOM",
+          "name": "ExxonMobil"
         },
         {
           "code": "DVN",
@@ -5541,19 +5589,57 @@
           "name": "EOG Resources"
         },
         {
-          "code": "NEM",
-          "name": "Newmont"
+          "code": "GEV",
+          "name": "GE Vernova"
         },
         {
-          "code": "CF",
-          "name": "CF Industries"
+          "code": "JCI",
+          "name": "Johnson Controls"
+        },
+        {
+          "code": "PWR",
+          "name": "Quanta Services"
         }
       ]
     },
     {
-      "name": "工業自動化與基礎建設",
-      "reason": "涵蓋工業設備、物流運輸、電力基礎設施及能源轉型設備，聚焦於實體經濟的自動化升級。",
+      "name": "金融服務與資產管理",
+      "reason": "涵蓋大型銀行、資產管理公司及金融服務提供商，反映資本市場與信貸環境。",
       "stocks": [
+        {
+          "code": "STT",
+          "name": "State Street Corporation"
+        },
+        {
+          "code": "AIZ",
+          "name": "Assurant"
+        },
+        {
+          "code": "IVZ",
+          "name": "Invesco"
+        },
+        {
+          "code": "BNY",
+          "name": "BNY Mellon"
+        },
+        {
+          "code": "BEN",
+          "name": "Franklin Resources"
+        }
+      ]
+    },
+    {
+      "name": "工業、材料與基礎建設",
+      "reason": "整合重工業設備、基礎材料、工業自動化及基礎建設，與實體經濟與基建投資高度相關。",
+      "stocks": [
+        {
+          "code": "NUE",
+          "name": "Nucor"
+        },
+        {
+          "code": "FCX",
+          "name": "Freeport-McMoRan"
+        },
         {
           "code": "IEX",
           "name": "IDEX Corporation"
@@ -5571,101 +5657,51 @@
           "name": "Wabtec"
         },
         {
-          "code": "GWW",
-          "name": "W. W. Grainger"
+          "code": "EXPD",
+          "name": "Expeditors International"
         },
         {
-          "code": "FIX",
-          "name": "Comfort Systems USA"
-        },
-        {
-          "code": "UNP",
-          "name": "Union Pacific Corporation"
-        },
-        {
-          "code": "DE",
-          "name": "Deere & Company"
+          "code": "STLD",
+          "name": "Steel Dynamics"
         },
         {
           "code": "PH",
           "name": "Parker Hannifin"
         },
         {
-          "code": "PWR",
-          "name": "Quanta Services"
-        },
-        {
-          "code": "GEV",
-          "name": "GE Vernova"
-        },
-        {
-          "code": "JCI",
-          "name": "Johnson Controls"
+          "code": "SWK",
+          "name": "Stanley Black & Decker"
         },
         {
           "code": "AME",
           "name": "Ametek"
         },
         {
-          "code": "SWK",
-          "name": "Stanley Black & Decker"
+          "code": "CF",
+          "name": "CF Industries"
         }
       ]
     },
     {
-      "name": "金融服務與資產管理",
-      "reason": "整合商業銀行、券商、保險及資產管理公司，反映整體金融市場的資本流動與信用環境。",
+      "name": "消費、零售與旅遊",
+      "reason": "包含傳統消費品、零售通路及旅遊服務，反映消費者支出與經濟景氣。",
       "stocks": [
         {
-          "code": "BEN",
-          "name": "Franklin Resources"
+          "code": "TGT",
+          "name": "Target Corporation"
         },
         {
-          "code": "NTRS",
-          "name": "Northern Trust"
+          "code": "KO",
+          "name": "Coca-Cola Company (The)"
         },
         {
-          "code": "PFG",
-          "name": "Principal Financial Group"
+          "code": "CSX",
+          "name": "CSX Corporation"
         },
         {
-          "code": "TRV",
-          "name": "Travelers Companies (The)"
+          "code": "ROST",
+          "name": "Ross Stores"
         },
-        {
-          "code": "AIZ",
-          "name": "Assurant"
-        },
-        {
-          "code": "IVZ",
-          "name": "Invesco"
-        },
-        {
-          "code": "USB",
-          "name": "U.S. Bancorp"
-        },
-        {
-          "code": "IBKR",
-          "name": "Interactive Brokers"
-        },
-        {
-          "code": "C",
-          "name": "Citigroup"
-        },
-        {
-          "code": "CPAY",
-          "name": "Corpay"
-        },
-        {
-          "code": "GL",
-          "name": "Globe Life"
-        }
-      ]
-    },
-    {
-      "name": "消費、旅遊與房地產",
-      "reason": "包含消費品牌、旅遊服務及相關房地產 REITs，與消費者信心及旅遊復甦高度相關。",
-      "stocks": [
         {
           "code": "HST",
           "name": "Host Hotels & Resorts"
@@ -5675,62 +5711,26 @@
           "name": "Airbnb"
         },
         {
+          "code": "DAL",
+          "name": "Delta Air Lines"
+        }
+      ]
+    },
+    {
+      "name": "其他",
+      "reason": "無法歸類至上述明確題材的個股，包含媒體、農業及電信等多元領域。",
+      "stocks": [
+        {
+          "code": "WBD",
+          "name": "Warner Bros. Discovery"
+        },
+        {
           "code": "ADM",
           "name": "Archer Daniels Midland"
         },
         {
           "code": "IFF",
           "name": "International Flavors & Fragrances"
-        },
-        {
-          "code": "MAR",
-          "name": "Marriott International"
-        },
-        {
-          "code": "KDP",
-          "name": "Keurig Dr Pepper"
-        },
-        {
-          "code": "SJM",
-          "name": "J.M. Smucker Company (The)"
-        },
-        {
-          "code": "DAL",
-          "name": "Delta Air Lines"
-        },
-        {
-          "code": "WELL",
-          "name": "Welltower"
-        },
-        {
-          "code": "VTR",
-          "name": "Ventas"
-        },
-        {
-          "code": "ROST",
-          "name": "Ross Stores"
-        },
-        {
-          "code": "SPG",
-          "name": "Simon Property Group"
-        }
-      ]
-    },
-    {
-      "name": "其他",
-      "reason": "無法歸類至上述明確題材的個股。",
-      "stocks": [
-        {
-          "code": "STLD",
-          "name": "Steel Dynamics"
-        },
-        {
-          "code": "WBD",
-          "name": "Warner Bros. Discovery"
-        },
-        {
-          "code": "EXPD",
-          "name": "Expeditors International"
         },
         {
           "code": "VZ",

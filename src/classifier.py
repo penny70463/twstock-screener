@@ -29,9 +29,8 @@ def _client() -> OpenAI:
     )
 
 
-# CI 出口到 NVIDIA 的長請求會在 ~270s 被砍（與請求長短相關）。切小批讓每次請求
-# 遠低於該上限；且單批失敗只少該批題材，不會整批 0。30 檔/批 ≈ 5 批。
-_BATCH_SIZE = 30
+# 10 檔一批：請求較短，比較不會撞上 240 秒；單批逾時也不會把整天題材清成 0。
+_BATCH_SIZE = 10
 
 
 def classify_themes(stocks: list[dict], market: str = "TW") -> dict:
@@ -50,13 +49,27 @@ def classify_themes(stocks: list[dict], market: str = "TW") -> dict:
 
     raw_themes: list[dict] = []
     batch_statuses: list[str] = []
+    failed: list[tuple[int, list[dict]]] = []
     for bi, batch in enumerate(batches, 1):
         if bi > 1:
-            time.sleep(1.5)  # 批次間留白，降低 free tier 突發限流機率
+            time.sleep(1.5)
         themes, status = _classify_batch(client, batch, bi, system_prompt)
         print(f"    批次 {bi}/{len(batches)}（{len(batch)} 檔）→ {len(themes)} 題材", flush=True)
+        if status in ("timeout", "failed"):
+            failed.append((bi, batch))
+            continue
         raw_themes.extend(themes)
         batch_statuses.append(status)
+
+    # 緊接著重試多半還是逾時。等其他批跑完再打一次，成功的呼叫都是隔了一批之後。
+    if failed:
+        print(f"  失敗 {len(failed)} 批，稍後重試", flush=True)
+        time.sleep(20)
+        for bi, batch in failed:
+            themes, status = _classify_batch(client, batch, bi, system_prompt)
+            print(f"    重試批次 {bi}/{len(batches)}（{len(batch)} 檔）→ {len(themes)} 題材", flush=True)
+            raw_themes.extend(themes)
+            batch_statuses.append(status)
 
     # 階段一：完全同名先併（codes 層級），減少要丟給階段二的量
     stage1 = _merge_exact(raw_themes)
@@ -80,7 +93,7 @@ def classify_themes(stocks: list[dict], market: str = "TW") -> dict:
     }
 
 
-_BATCH_ATTEMPTS = 2  # 每批最多嘗試次數（NVIDIA 排隊逾時多為暫時性，重試一次通常就過）
+_BATCH_ATTEMPTS = 1  # 第二次嘗試改在全部分批之後，不在失敗當下連打
 
 
 def is_timeout(exc: BaseException) -> bool:
@@ -158,7 +171,7 @@ def _merge_exact(raw_themes: list[dict]) -> list[dict]:
     return out
 
 
-_CONSOLIDATE_RETRIES = 3
+_CONSOLIDATE_RETRIES = 1
 
 
 def _consolidate(client: OpenAI, themes: list[dict], merge_prompt: str) -> tuple[list[dict] | None, bool]:

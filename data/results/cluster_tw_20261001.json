@@ -1,1 +1,1133 @@
-{"date": "2026-10-01", "generated_at": "2026-10-01T17:10:43", "params": {"window_days": 10, "break_days": 60, "vol_mult": 2.0, "min_chg": 0.035, "exit_stop": 0.15, "exit_trail": 0.25}, "theme_status": "timeout", "themes": [{"name": "電腦週邊與硬體設備", "reason": "生產電腦硬體、儲存裝置及相關週邊設備之製造商。", "stocks": [{"stock_id": "6150", "stock_name": "撼訊", "industry_category": "電腦及週邊設備業", "close": 69.9, "chg_pct": 9.9, "fired_dates": ["10-01"], "fired_today": true, "vol_x": 14.3, "wave_start": "2026-10-01", "entry_ref": null, "exit_line": 59.42, "exit_hit": false}, {"stock_id": "3701", "stock_name": "大眾控", "industry_category": "電腦及週邊設備業", "close": 50.4, "chg_pct": 9.8, "fired_dates": ["09-30", "10-01"], "fired_today": true, "vol_x": 7.1, "wave_start": "2026-09-30", "entry_ref": 46.25, "exit_line": 39.31, "exit_hit": false}, {"stock_id": "2399", "stock_name": "映泰", "industry_category": "電腦及週邊設備業", "close": 51.3, "chg_pct": 4.8, "fired_dates": ["10-01"], "fired_today": true, "vol_x": 3.4, "wave_start": "2026-10-01", "entry_ref": null, "exit_line": 43.6, "exit_hit": false}, {"stock_id": "1569", "stock_name": "濱川", "industry_category": "電腦及週邊設備業", "close": 63.8, "chg_pct": 1.9, "fired_dates": ["09-18", "09-21", "09-22"], "fired_today": false, "vol_x": 9.9, "wave_start": "2026-09-11", "entry_ref": 49.6, "exit_line": 48.75, "exit_hit": false}], "count": 4, "fired_today_count": 3}, {"name": "半導體材料與化學品", "reason": "包含半導體製程所需之特種氣體、化學藥劑及相關材料供應商，為晶圓製造之基礎耗材。", "stocks": [{"stock_id": "2340", "stock_name": "台亞", "industry_category": "半導體業", "close": 43.85, "chg_pct": 7.5, "fired_dates": ["09-30", "10-01"], "fired_today": true, "vol_x": 7.9, "wave_start": "2026-09-30", "entry_ref": 40.8, "exit_line": 34.68, "exit_hit": false}, {"stock_id": "3042", "stock_name": "晶技", "industry_category": "電子零組件業", "close": 218.5, "chg_pct": 4.0, "fired_dates": ["10-01"], "fired_today": true, "vol_x": 2.3, "wave_start": "2026-10-01", "entry_ref": null, "exit_line": 185.72, "exit_hit": false}, {"stock_id": "3016", "stock_name": "嘉晶", "industry_category": "半導體業", "close": 168.0, "chg_pct": -0.6, "fired_dates": ["09-23", "09-24", "09-29"], "fired_today": false, "vol_x": 4.9, "wave_start": "2026-09-23", "entry_ref": 147.5, "exit_line": 129.38, "exit_hit": false}, {"stock_id": "1595", "stock_name": "川寶", "industry_category": "半導體業", "close": 83.3, "chg_pct": -2.3, "fired_dates": ["09-30"], "fired_today": false, "vol_x": 5.9, "wave_start": "2026-09-30", "entry_ref": 86.0, "exit_line": 73.1, "exit_hit": false}, {"stock_id": "4768", "stock_name": "晶呈科技", "industry_category": "化學工業", "close": 367.0, "chg_pct": -3.4, "fired_dates": ["09-30"], "fired_today": false, "vol_x": 6.8, "wave_start": "2026-09-30", "entry_ref": 392.5, "exit_line": 333.62, "exit_hit": false}], "count": 5, "fired_today_count": 2}, {"name": "IC 設計與矽智財 (IP)", "reason": "涵蓋晶片設計、矽智財授權及相關電路設計服務，處於半導體產業最上游。", "stocks": [{"stock_id": "6533", "stock_name": "晶心科", "industry_category": "半導體業", "close": 366.5, "chg_pct": 9.9, "fired_dates": ["09-18", "09-24", "09-29", "09-30", "10-01"], "fired_today": true, "vol_x": 5.5, "wave_start": "2026-09-18", "entry_ref": 269.0, "exit_line": 274.88, "exit_hit": false}, {"stock_id": "3094", "stock_name": "聯傑", "industry_category": "半導體業", "close": 67.7, "chg_pct": 9.9, "fired_dates": ["09-18", "10-01"], "fired_today": true, "vol_x": 2.4, "wave_start": "2026-09-04", "entry_ref": 49.0, "exit_line": 50.77, "exit_hit": false}, {"stock_id": "3529", "stock_name": "力旺", "industry_category": "半導體業", "close": 3245.0, "chg_pct": -1.8, "fired_dates": ["09-23"], "fired_today": false, "vol_x": 2.1, "wave_start": "2026-09-23", "entry_ref": 3250.0, "exit_line": 2762.5, "exit_hit": false}, {"stock_id": "6643", "stock_name": "M31", "industry_category": "半導體業", "close": 521.0, "chg_pct": -6.1, "fired_dates": ["09-24", "09-30"], "fired_today": false, "vol_x": 3.3, "wave_start": "2026-09-24", "entry_ref": 509.0, "exit_line": 432.65, "exit_hit": false}], "count": 4, "fired_today_count": 2}, {"name": "光電與光通訊", "reason": "整合光電元件、LED 及光纖通訊設備，涵蓋光傳輸與光電轉換技術。", "stocks": [{"stock_id": "8240", "stock_name": "華宏", "industry_category": "光電業", "close": 60.2, "chg_pct": 5.1, "fired_dates": ["10-01"], "fired_today": true, "vol_x": 5.7, "wave_start": "2026-10-01", "entry_ref": null, "exit_line": 51.17, "exit_hit": false}, {"stock_id": "6168", "stock_name": "宏齊", "industry_category": "光電業", "close": 47.0, "chg_pct": 3.9, "fired_dates": ["09-17", "09-18"], "fired_today": false, "vol_x": 4.1, "wave_start": "2026-09-17", "entry_ref": 37.15, "exit_line": 35.25, "exit_hit": false}, {"stock_id": "2466", "stock_name": "冠西電", "industry_category": "光電業", "close": 128.5, "chg_pct": 3.2, "fired_dates": ["09-30"], "fired_today": false, "vol_x": 2.2, "wave_start": "2026-09-30", "entry_ref": 128.0, "exit_line": 108.8, "exit_hit": false}, {"stock_id": "6706", "stock_name": "惠特", "industry_category": "光電業", "close": 154.5, "chg_pct": 3.0, "fired_dates": ["09-21"], "fired_today": false, "vol_x": 2.8, "wave_start": "2026-09-21", "entry_ref": 165.5, "exit_line": 140.67, "exit_hit": false}, {"stock_id": "4956", "stock_name": "光鋐", "industry_category": "光電業", "close": 47.25, "chg_pct": 1.6, "fired_dates": ["09-18", "09-21"], "fired_today": false, "vol_x": 5.6, "wave_start": "2026-09-18", "entry_ref": 42.9, "exit_line": 36.47, "exit_hit": false}, {"stock_id": "7717", "stock_name": "萊德光電-KY", "industry_category": "通信網路業", "close": 551.0, "chg_pct": -8.8, "fired_dates": ["09-17", "09-18"], "fired_today": false, "vol_x": 2.7, "wave_start": "2026-09-17", "entry_ref": 601.0, "exit_line": 510.85, "exit_hit": false}], "count": 6, "fired_today_count": 1}, {"name": "電子零組件與模組", "reason": "提供電子產品所需之基礎零組件與功能模組，應用於多元電子設備。", "stocks": [{"stock_id": "6672", "stock_name": "騰輝電子-KY", "industry_category": "電子零組件業", "close": 405.5, "chg_pct": 9.9, "fired_dates": ["09-24", "10-01"], "fired_today": true, "vol_x": 3.1, "wave_start": "2026-09-24", "entry_ref": 330.5, "exit_line": 304.12, "exit_hit": false}, {"stock_id": "3605", "stock_name": "宏致", "industry_category": "電子零組件業", "close": 178.0, "chg_pct": 4.4, "fired_dates": ["09-18", "09-21"], "fired_today": false, "vol_x": 3.0, "wave_start": "2026-09-18", "entry_ref": 154.0, "exit_line": 137.62, "exit_hit": false}, {"stock_id": "6207", "stock_name": "雷科", "industry_category": "電子零組件業", "close": 145.0, "chg_pct": -4.0, "fired_dates": ["09-30"], "fired_today": false, "vol_x": 2.9, "wave_start": "2026-09-30", "entry_ref": 153.0, "exit_line": 130.05, "exit_hit": false}], "count": 3, "fired_today_count": 1}, {"name": "半導體製程與元件", "reason": "涉及半導體前段製程設備或特定製程元件之供應。", "stocks": [{"stock_id": "6485", "stock_name": "點序", "industry_category": "半導體業", "close": 84.7, "chg_pct": 10.0, "fired_dates": ["10-01"], "fired_today": true, "vol_x": 7.4, "wave_start": "2026-10-01", "entry_ref": null, "exit_line": 71.99, "exit_hit": false}, {"stock_id": "4923", "stock_name": "力士", "industry_category": "半導體業", "close": 65.2, "chg_pct": 6.2, "fired_dates": ["09-23"], "fired_today": false, "vol_x": 4.9, "wave_start": "2026-09-23", "entry_ref": 66.7, "exit_line": 56.69, "exit_hit": false}, {"stock_id": "6532", "stock_name": "瑞耘", "industry_category": "半導體業", "close": 122.5, "chg_pct": 3.4, "fired_dates": ["09-29"], "fired_today": false, "vol_x": 2.8, "wave_start": "2026-09-29", "entry_ref": 114.0, "exit_line": 96.9, "exit_hit": false}], "count": 3, "fired_today_count": 1}, {"name": "重電與電網基礎設施", "reason": "涵蓋高壓電設備、電網建設及電力傳輸基礎設施，與能源配電密切相關。", "stocks": [{"stock_id": "6425", "stock_name": "易發", "industry_category": "電機機械", "close": 81.3, "chg_pct": 2.9, "fired_dates": ["09-21", "09-30"], "fired_today": false, "vol_x": 4.0, "wave_start": "2026-09-21", "entry_ref": 74.8, "exit_line": 63.58, "exit_hit": false}, {"stock_id": "3162", "stock_name": "精確", "industry_category": "電機機械", "close": 87.5, "chg_pct": 2.5, "fired_dates": ["09-30"], "fired_today": false, "vol_x": 4.7, "wave_start": "2026-09-30", "entry_ref": 86.0, "exit_line": 73.1, "exit_hit": false}, {"stock_id": "2371", "stock_name": "大同", "industry_category": "電機機械", "close": 30.5, "chg_pct": 0.2, "fired_dates": ["09-17", "09-30"], "fired_today": false, "vol_x": 2.7, "wave_start": "2026-09-17", "entry_ref": 29.85, "exit_line": 25.37, "exit_hit": false}, {"stock_id": "1528", "stock_name": "恩德", "industry_category": "電機機械", "close": 25.0, "chg_pct": -3.3, "fired_dates": ["09-21"], "fired_today": false, "vol_x": 3.6, "wave_start": "2026-09-21", "entry_ref": 27.35, "exit_line": 23.25, "exit_hit": false}], "count": 4, "fired_today_count": 0}, {"name": "半導體封裝測試與元件", "reason": "涵蓋半導體後段封裝測試及相關元件供應商，聚焦於晶片封裝技術與模組化生產。", "stocks": [{"stock_id": "3189", "stock_name": "景碩", "industry_category": "半導體業", "close": 1010.0, "chg_pct": 4.1, "fired_dates": ["09-24"], "fired_today": false, "vol_x": 2.2, "wave_start": "2026-09-24", "entry_ref": 960.0, "exit_line": 816.0, "exit_hit": false}, {"stock_id": "3264", "stock_name": "欣銓", "industry_category": "半導體業", "close": 245.5, "chg_pct": 0.8, "fired_dates": ["09-18", "09-21"], "fired_today": false, "vol_x": 3.2, "wave_start": "2026-09-18", "entry_ref": 274.0, "exit_line": 232.9, "exit_hit": false}, {"stock_id": "6526", "stock_name": "達發", "industry_category": "半導體業", "close": 829.0, "chg_pct": -1.3, "fired_dates": ["09-21", "09-22", "09-23"], "fired_today": false, "vol_x": 4.7, "wave_start": "2026-09-21", "entry_ref": 736.0, "exit_line": 630.0, "exit_hit": false}], "count": 3, "fired_today_count": 0}, {"name": "半導體設備與工程", "reason": "專注於半導體廠房建設、製程設備安裝及維護工程之供應鏈。", "stocks": [{"stock_id": "6691", "stock_name": "洋基工程", "industry_category": "其他電子業", "close": 733.0, "chg_pct": 1.9, "fired_dates": ["09-30"], "fired_today": false, "vol_x": 4.6, "wave_start": "2026-09-30", "entry_ref": 727.0, "exit_line": 617.95, "exit_hit": false}, {"stock_id": "2404", "stock_name": "漢唐", "industry_category": "其他電子業", "close": 1305.0, "chg_pct": 1.2, "fired_dates": ["09-30"], "fired_today": false, "vol_x": 2.1, "wave_start": "2026-09-30", "entry_ref": 1280.0, "exit_line": 1088.0, "exit_hit": false}, {"stock_id": "3653", "stock_name": "健策", "industry_category": "電子零組件業", "close": 6875.0, "chg_pct": 1.1, "fired_dates": ["09-24"], "fired_today": false, "vol_x": 2.4, "wave_start": "2026-09-24", "entry_ref": 7000.0, "exit_line": 5950.0, "exit_hit": false}], "count": 3, "fired_today_count": 0}, {"name": "面板與顯示技術", "reason": "包含面板驅動、顯示模組及相關顯示技術之開發與生產。", "stocks": [{"stock_id": "2409", "stock_name": "友達", "industry_category": "光電業", "close": 38.3, "chg_pct": -0.6, "fired_dates": ["09-21", "09-22"], "fired_today": false, "vol_x": 3.6, "wave_start": "2026-09-21", "entry_ref": 34.9, "exit_line": 29.67, "exit_hit": false}, {"stock_id": "6278", "stock_name": "台表科", "industry_category": "光電業", "close": 216.5, "chg_pct": -0.7, "fired_dates": ["09-22"], "fired_today": false, "vol_x": 3.0, "wave_start": "2026-09-22", "entry_ref": 212.5, "exit_line": 180.62, "exit_hit": false}, {"stock_id": "6456", "stock_name": "GIS-KY", "industry_category": "光電業", "close": 87.9, "chg_pct": -4.5, "fired_dates": ["09-23", "09-29"], "fired_today": false, "vol_x": 3.0, "wave_start": "2026-09-23", "entry_ref": 78.0, "exit_line": 69.0, "exit_hit": false}], "count": 3, "fired_today_count": 0}, {"name": "鋼鐵工業", "reason": "專注於鋼鐵原物料生產、加工及相關金屬製品製造。", "stocks": [{"stock_id": "2030", "stock_name": "彰源", "industry_category": "鋼鐵工業", "close": 37.65, "chg_pct": 2.6, "fired_dates": ["09-18", "09-22", "09-24", "09-30"], "fired_today": false, "vol_x": 3.8, "wave_start": "2026-09-18", "entry_ref": 24.8, "exit_line": 28.24, "exit_hit": false}, {"stock_id": "2032", "stock_name": "新鋼", "industry_category": "鋼鐵工業", "close": 19.6, "chg_pct": -3.4, "fired_dates": ["09-24", "09-29"], "fired_today": false, "vol_x": 25.8, "wave_start": "2026-09-24", "entry_ref": 18.9, "exit_line": 16.06, "exit_hit": false}, {"stock_id": "2034", "stock_name": "允強", "industry_category": "鋼鐵工業", "close": 23.6, "chg_pct": -4.8, "fired_dates": ["09-24", "09-30"], "fired_today": false, "vol_x": 6.7, "wave_start": "2026-09-24", "entry_ref": 23.1, "exit_line": 19.64, "exit_hit": false}], "count": 3, "fired_today_count": 0}, {"name": "綠能與能源轉型", "reason": "聚焦於再生能源開發、節能設備及能源轉型相關之基礎設施。", "stocks": [{"stock_id": "1101", "stock_name": "台泥", "industry_category": "水泥工業", "close": 25.55, "chg_pct": -2.9, "fired_dates": ["09-23"], "fired_today": false, "vol_x": 2.5, "wave_start": "2026-09-23", "entry_ref": 25.7, "exit_line": 21.85, "exit_hit": false}, {"stock_id": "3576", "stock_name": "聯合再生", "industry_category": "光電業", "close": 18.5, "chg_pct": -6.1, "fired_dates": ["09-30"], "fired_today": false, "vol_x": 7.5, "wave_start": "2026-09-30", "entry_ref": 19.9, "exit_line": 16.91, "exit_hit": false}], "count": 2, "fired_today_count": 0}, {"name": "基礎化學工業", "reason": "生產工業基礎化學原料，供應多種下游工業應用。", "stocks": [{"stock_id": "1709", "stock_name": "和益", "industry_category": "化學工業", "close": 53.2, "chg_pct": 9.9, "fired_dates": ["09-17", "09-22", "09-23"], "fired_today": false, "vol_x": 3.9, "wave_start": "2026-09-17", "entry_ref": 41.85, "exit_line": 39.9, "exit_hit": false}, {"stock_id": "1727", "stock_name": "中華化", "industry_category": "化學工業", "close": 112.0, "chg_pct": 2.8, "fired_dates": ["09-17", "09-23"], "fired_today": false, "vol_x": 3.6, "wave_start": "2026-09-17", "entry_ref": 105.0, "exit_line": 89.25, "exit_hit": false}], "count": 2, "fired_today_count": 0}, {"name": "特種化學材料", "reason": "生產高附加價值之特種化學品，應用於特定工業或電子製程。", "stocks": [{"stock_id": "4770", "stock_name": "上品", "industry_category": "化學工業", "close": 275.0, "chg_pct": -2.5, "fired_dates": ["09-18", "09-23"], "fired_today": false, "vol_x": 4.1, "wave_start": "2026-09-07", "entry_ref": 239.0, "exit_line": 214.88, "exit_hit": false}, {"stock_id": "4763", "stock_name": "材料*-KY", "industry_category": "化學工業", "close": 46.85, "chg_pct": -4.2, "fired_dates": ["09-18"], "fired_today": false, "vol_x": 2.0, "wave_start": "2026-09-18", "entry_ref": 51.2, "exit_line": 43.52, "exit_hit": false}], "count": 2, "fired_today_count": 0}, {"name": "其他", "reason": "包含產業類別較為分散或未達單一題材規模之個股。", "stocks": [{"stock_id": "3311", "stock_name": "閎暉", "industry_category": "通信網路業", "close": 45.15, "chg_pct": 10.0, "fired_dates": ["09-18", "09-30", "10-01"], "fired_today": true, "vol_x": 6.9, "wave_start": "2026-09-18", "entry_ref": 38.5, "exit_line": 33.86, "exit_hit": false}, {"stock_id": "3147", "stock_name": "大綜", "industry_category": "資訊服務業", "close": 267.5, "chg_pct": 9.9, "fired_dates": ["10-01"], "fired_today": true, "vol_x": 3.0, "wave_start": "2026-10-01", "entry_ref": null, "exit_line": 227.38, "exit_hit": false}, {"stock_id": "6933", "stock_name": "AMAX-KY", "industry_category": "電腦及週邊設備業", "close": 394.5, "chg_pct": 6.3, "fired_dates": ["09-17", "09-24"], "fired_today": false, "vol_x": 4.2, "wave_start": "2026-09-17", "entry_ref": 355.0, "exit_line": 301.75, "exit_hit": false}, {"stock_id": "1560", "stock_name": "中砂", "industry_category": "電機機械", "close": 1000.0, "chg_pct": 3.8, "fired_dates": ["09-17", "09-18", "09-22"], "fired_today": false, "vol_x": 2.3, "wave_start": "2026-09-11", "entry_ref": 775.0, "exit_line": 750.0, "exit_hit": false}, {"stock_id": "7799", "stock_name": "禾榮科", "industry_category": "生技醫療業", "close": 555.0, "chg_pct": 3.0, "fired_dates": ["09-17", "09-23", "09-30"], "fired_today": false, "vol_x": 2.3, "wave_start": "2026-09-17", "entry_ref": 513.0, "exit_line": 436.05, "exit_hit": false}, {"stock_id": "2254", "stock_name": "巨鎧精密-創", "industry_category": "汽車工業", "close": 94.1, "chg_pct": 1.6, "fired_dates": ["09-23"], "fired_today": false, "vol_x": 2.5, "wave_start": "2026-09-23", "entry_ref": 86.8, "exit_line": 73.78, "exit_hit": false}, {"stock_id": "6199", "stock_name": "天品", "industry_category": "其他", "close": 128.0, "chg_pct": 0.4, "fired_dates": ["09-18"], "fired_today": false, "vol_x": 2.5, "wave_start": "2026-09-18", "entry_ref": 112.5, "exit_line": 96.0, "exit_hit": false}, {"stock_id": "3219", "stock_name": "倚強科", "industry_category": "其他電子業", "close": 131.5, "chg_pct": 0.0, "fired_dates": ["09-21", "09-22", "09-30"], "fired_today": false, "vol_x": 4.9, "wave_start": "2026-09-21", "entry_ref": 104.5, "exit_line": 98.62, "exit_hit": false}, {"stock_id": "2855", "stock_name": "統一證", "industry_category": "金融保險業", "close": 56.4, "chg_pct": -0.4, "fired_dates": ["09-21"], "fired_today": false, "vol_x": 2.9, "wave_start": "2026-09-21", "entry_ref": 57.3, "exit_line": 48.7, "exit_hit": false}, {"stock_id": "3029", "stock_name": "零壹", "industry_category": "資訊服務業", "close": 119.0, "chg_pct": -0.8, "fired_dates": ["09-18"], "fired_today": false, "vol_x": 2.2, "wave_start": "2026-09-18", "entry_ref": 125.5, "exit_line": 106.67, "exit_hit": false}, {"stock_id": "6133", "stock_name": "金橋", "industry_category": "電子零組件業", "close": 29.3, "chg_pct": -1.0, "fired_dates": ["09-18", "09-29", "09-30"], "fired_today": false, "vol_x": 4.9, "wave_start": "2026-09-18", "entry_ref": 27.45, "exit_line": 23.33, "exit_hit": false}, {"stock_id": "3518", "stock_name": "柏騰", "industry_category": "其他電子業", "close": 40.35, "chg_pct": -1.8, "fired_dates": ["09-29", "09-30"], "fired_today": false, "vol_x": 5.0, "wave_start": "2026-09-29", "entry_ref": 40.5, "exit_line": 34.42, "exit_hit": false}, {"stock_id": "2221", "stock_name": "大甲", "industry_category": "其他", "close": 179.0, "chg_pct": -9.4, "fired_dates": ["09-16", "09-18"], "fired_today": false, "vol_x": 2.8, "wave_start": "2026-08-24", "entry_ref": 64.0, "exit_line": 148.12, "exit_hit": false}], "count": 13, "fired_today_count": 2}]}
+{
+  "date": "2026-10-01",
+  "generated_at": "2026-10-01T17:24:04+08:00",
+  "params": {
+    "window_days": 10,
+    "break_days": 60,
+    "vol_mult": 2.0,
+    "min_chg": 0.035,
+    "exit_stop": 0.15,
+    "exit_trail": 0.25
+  },
+  "theme_status": "timeout",
+  "themes": [
+    {
+      "name": "Mini LED/Micro LED",
+      "reason": "專注於次世代顯示技術，包含驅動 IC、封裝及面板模組，提升螢幕對比度與亮度。",
+      "stocks": [
+        {
+          "stock_id": "6672",
+          "stock_name": "騰輝電子-KY",
+          "industry_category": "電子零組件業",
+          "close": 405.5,
+          "chg_pct": 9.9,
+          "fired_dates": [
+            "09-24",
+            "10-01"
+          ],
+          "fired_today": true,
+          "vol_x": 3.1,
+          "wave_start": "2026-09-24",
+          "entry_ref": 330.5,
+          "exit_line": 304.12,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "8240",
+          "stock_name": "華宏",
+          "industry_category": "光電業",
+          "close": 60.2,
+          "chg_pct": 5.1,
+          "fired_dates": [
+            "10-01"
+          ],
+          "fired_today": true,
+          "vol_x": 5.7,
+          "wave_start": "2026-10-01",
+          "entry_ref": null,
+          "exit_line": 51.17,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "6168",
+          "stock_name": "宏齊",
+          "industry_category": "光電業",
+          "close": 47.0,
+          "chg_pct": 3.9,
+          "fired_dates": [
+            "09-17",
+            "09-18"
+          ],
+          "fired_today": false,
+          "vol_x": 4.1,
+          "wave_start": "2026-09-17",
+          "entry_ref": 37.15,
+          "exit_line": 35.25,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "2466",
+          "stock_name": "冠西電",
+          "industry_category": "光電業",
+          "close": 128.5,
+          "chg_pct": 3.2,
+          "fired_dates": [
+            "09-30"
+          ],
+          "fired_today": false,
+          "vol_x": 2.2,
+          "wave_start": "2026-09-30",
+          "entry_ref": 128.0,
+          "exit_line": 108.8,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "6706",
+          "stock_name": "惠特",
+          "industry_category": "光電業",
+          "close": 154.5,
+          "chg_pct": 3.0,
+          "fired_dates": [
+            "09-21"
+          ],
+          "fired_today": false,
+          "vol_x": 2.8,
+          "wave_start": "2026-09-21",
+          "entry_ref": 165.5,
+          "exit_line": 140.67,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "4956",
+          "stock_name": "光鋐",
+          "industry_category": "光電業",
+          "close": 47.25,
+          "chg_pct": 1.6,
+          "fired_dates": [
+            "09-18",
+            "09-21"
+          ],
+          "fired_today": false,
+          "vol_x": 5.6,
+          "wave_start": "2026-09-18",
+          "entry_ref": 42.9,
+          "exit_line": 36.47,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "7717",
+          "stock_name": "萊德光電-KY",
+          "industry_category": "通信網路業",
+          "close": 551.0,
+          "chg_pct": -8.8,
+          "fired_dates": [
+            "09-17",
+            "09-18"
+          ],
+          "fired_today": false,
+          "vol_x": 2.7,
+          "wave_start": "2026-09-17",
+          "entry_ref": 601.0,
+          "exit_line": 510.85,
+          "exit_hit": false
+        }
+      ],
+      "count": 7,
+      "fired_today_count": 2
+    },
+    {
+      "name": "半導體封裝與元件",
+      "reason": "涵蓋半導體後段封裝測試及相關元件，提供晶片最終封裝與電路連接之關鍵技術。",
+      "stocks": [
+        {
+          "stock_id": "6485",
+          "stock_name": "點序",
+          "industry_category": "半導體業",
+          "close": 84.7,
+          "chg_pct": 10.0,
+          "fired_dates": [
+            "10-01"
+          ],
+          "fired_today": true,
+          "vol_x": 7.4,
+          "wave_start": "2026-10-01",
+          "entry_ref": null,
+          "exit_line": 71.99,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "4923",
+          "stock_name": "力士",
+          "industry_category": "半導體業",
+          "close": 65.2,
+          "chg_pct": 6.2,
+          "fired_dates": [
+            "09-23"
+          ],
+          "fired_today": false,
+          "vol_x": 4.9,
+          "wave_start": "2026-09-23",
+          "entry_ref": 66.7,
+          "exit_line": 56.69,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "3189",
+          "stock_name": "景碩",
+          "industry_category": "半導體業",
+          "close": 1010.0,
+          "chg_pct": 4.1,
+          "fired_dates": [
+            "09-24"
+          ],
+          "fired_today": false,
+          "vol_x": 2.2,
+          "wave_start": "2026-09-24",
+          "entry_ref": 960.0,
+          "exit_line": 816.0,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "6532",
+          "stock_name": "瑞耘",
+          "industry_category": "半導體業",
+          "close": 122.5,
+          "chg_pct": 3.4,
+          "fired_dates": [
+            "09-29"
+          ],
+          "fired_today": false,
+          "vol_x": 2.8,
+          "wave_start": "2026-09-29",
+          "entry_ref": 114.0,
+          "exit_line": 96.9,
+          "exit_hit": false
+        }
+      ],
+      "count": 4,
+      "fired_today_count": 1
+    },
+    {
+      "name": "IC 設計/半導體元件",
+      "reason": "負責積體電路之設計與開發，將邏輯功能轉化為晶片設計圖，為半導體產業最上游。",
+      "stocks": [
+        {
+          "stock_id": "3094",
+          "stock_name": "聯傑",
+          "industry_category": "半導體業",
+          "close": 67.7,
+          "chg_pct": 9.9,
+          "fired_dates": [
+            "09-18",
+            "10-01"
+          ],
+          "fired_today": true,
+          "vol_x": 2.4,
+          "wave_start": "2026-09-04",
+          "entry_ref": 49.0,
+          "exit_line": 50.77,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "3529",
+          "stock_name": "力旺",
+          "industry_category": "半導體業",
+          "close": 3245.0,
+          "chg_pct": -1.8,
+          "fired_dates": [
+            "09-23"
+          ],
+          "fired_today": false,
+          "vol_x": 2.1,
+          "wave_start": "2026-09-23",
+          "entry_ref": 3250.0,
+          "exit_line": 2762.5,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "6643",
+          "stock_name": "M31",
+          "industry_category": "半導體業",
+          "close": 521.0,
+          "chg_pct": -6.1,
+          "fired_dates": [
+            "09-24",
+            "09-30"
+          ],
+          "fired_today": false,
+          "vol_x": 3.3,
+          "wave_start": "2026-09-24",
+          "entry_ref": 509.0,
+          "exit_line": 432.65,
+          "exit_hit": false
+        }
+      ],
+      "count": 3,
+      "fired_today_count": 1
+    },
+    {
+      "name": "AI 伺服器/邊緣運算",
+      "reason": "提供 AI 運算所需之伺服器硬體、模組及邊緣運算設備，支持高效能運算需求。",
+      "stocks": [
+        {
+          "stock_id": "3147",
+          "stock_name": "大綜",
+          "industry_category": "資訊服務業",
+          "close": 267.5,
+          "chg_pct": 9.9,
+          "fired_dates": [
+            "10-01"
+          ],
+          "fired_today": true,
+          "vol_x": 3.0,
+          "wave_start": "2026-10-01",
+          "entry_ref": null,
+          "exit_line": 227.38,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "6933",
+          "stock_name": "AMAX-KY",
+          "industry_category": "電腦及週邊設備業",
+          "close": 394.5,
+          "chg_pct": 6.3,
+          "fired_dates": [
+            "09-17",
+            "09-24"
+          ],
+          "fired_today": false,
+          "vol_x": 4.2,
+          "wave_start": "2026-09-17",
+          "entry_ref": 355.0,
+          "exit_line": 301.75,
+          "exit_hit": false
+        }
+      ],
+      "count": 2,
+      "fired_today_count": 1
+    },
+    {
+      "name": "重電/電網設備",
+      "reason": "專注於電力傳輸、變壓器及電網基礎設施升級，受益於全球電網更新與能源轉型需求。",
+      "stocks": [
+        {
+          "stock_id": "6425",
+          "stock_name": "易發",
+          "industry_category": "電機機械",
+          "close": 81.3,
+          "chg_pct": 2.9,
+          "fired_dates": [
+            "09-21",
+            "09-30"
+          ],
+          "fired_today": false,
+          "vol_x": 4.0,
+          "wave_start": "2026-09-21",
+          "entry_ref": 74.8,
+          "exit_line": 63.58,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "3162",
+          "stock_name": "精確",
+          "industry_category": "電機機械",
+          "close": 87.5,
+          "chg_pct": 2.5,
+          "fired_dates": [
+            "09-30"
+          ],
+          "fired_today": false,
+          "vol_x": 4.7,
+          "wave_start": "2026-09-30",
+          "entry_ref": 86.0,
+          "exit_line": 73.1,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "2371",
+          "stock_name": "大同",
+          "industry_category": "電機機械",
+          "close": 30.5,
+          "chg_pct": 0.2,
+          "fired_dates": [
+            "09-17",
+            "09-30"
+          ],
+          "fired_today": false,
+          "vol_x": 2.7,
+          "wave_start": "2026-09-17",
+          "entry_ref": 29.85,
+          "exit_line": 25.37,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "1528",
+          "stock_name": "恩德",
+          "industry_category": "電機機械",
+          "close": 25.0,
+          "chg_pct": -3.3,
+          "fired_dates": [
+            "09-21"
+          ],
+          "fired_today": false,
+          "vol_x": 3.6,
+          "wave_start": "2026-09-21",
+          "entry_ref": 27.35,
+          "exit_line": 23.25,
+          "exit_hit": false
+        }
+      ],
+      "count": 4,
+      "fired_today_count": 0
+    },
+    {
+      "name": "特種化學品/高性能材料",
+      "reason": "生產高純度化學品或工業特種材料，主要供應半導體、面板或精密工業之製程原料。",
+      "stocks": [
+        {
+          "stock_id": "1709",
+          "stock_name": "和益",
+          "industry_category": "化學工業",
+          "close": 53.2,
+          "chg_pct": 9.9,
+          "fired_dates": [
+            "09-17",
+            "09-22",
+            "09-23"
+          ],
+          "fired_today": false,
+          "vol_x": 3.9,
+          "wave_start": "2026-09-17",
+          "entry_ref": 41.85,
+          "exit_line": 39.9,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "1727",
+          "stock_name": "中華化",
+          "industry_category": "化學工業",
+          "close": 112.0,
+          "chg_pct": 2.8,
+          "fired_dates": [
+            "09-17",
+            "09-23"
+          ],
+          "fired_today": false,
+          "vol_x": 3.6,
+          "wave_start": "2026-09-17",
+          "entry_ref": 105.0,
+          "exit_line": 89.25,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "4770",
+          "stock_name": "上品",
+          "industry_category": "化學工業",
+          "close": 275.0,
+          "chg_pct": -2.5,
+          "fired_dates": [
+            "09-18",
+            "09-23"
+          ],
+          "fired_today": false,
+          "vol_x": 4.1,
+          "wave_start": "2026-09-07",
+          "entry_ref": 239.0,
+          "exit_line": 214.88,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "4763",
+          "stock_name": "材料*-KY",
+          "industry_category": "化學工業",
+          "close": 46.85,
+          "chg_pct": -4.2,
+          "fired_dates": [
+            "09-18"
+          ],
+          "fired_today": false,
+          "vol_x": 2.0,
+          "wave_start": "2026-09-18",
+          "entry_ref": 51.2,
+          "exit_line": 43.52,
+          "exit_hit": false
+        }
+      ],
+      "count": 4,
+      "fired_today_count": 0
+    },
+    {
+      "name": "半導體設備與零組件",
+      "reason": "提供半導體前段製程所需之生產設備、精密零件及耗材，直接影響晶圓產能。",
+      "stocks": [
+        {
+          "stock_id": "3653",
+          "stock_name": "健策",
+          "industry_category": "電子零組件業",
+          "close": 6875.0,
+          "chg_pct": 1.1,
+          "fired_dates": [
+            "09-24"
+          ],
+          "fired_today": false,
+          "vol_x": 2.4,
+          "wave_start": "2026-09-24",
+          "entry_ref": 7000.0,
+          "exit_line": 5950.0,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "3264",
+          "stock_name": "欣銓",
+          "industry_category": "半導體業",
+          "close": 245.5,
+          "chg_pct": 0.8,
+          "fired_dates": [
+            "09-18",
+            "09-21"
+          ],
+          "fired_today": false,
+          "vol_x": 3.2,
+          "wave_start": "2026-09-18",
+          "entry_ref": 274.0,
+          "exit_line": 232.9,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "6526",
+          "stock_name": "達發",
+          "industry_category": "半導體業",
+          "close": 829.0,
+          "chg_pct": -1.3,
+          "fired_dates": [
+            "09-21",
+            "09-22",
+            "09-23"
+          ],
+          "fired_today": false,
+          "vol_x": 4.7,
+          "wave_start": "2026-09-21",
+          "entry_ref": 736.0,
+          "exit_line": 630.0,
+          "exit_hit": false
+        }
+      ],
+      "count": 3,
+      "fired_today_count": 0
+    },
+    {
+      "name": "面板與玻璃基板",
+      "reason": "涵蓋顯示面板製造及玻璃基板供應，為螢幕顯示與封裝基材之核心供應鏈。",
+      "stocks": [
+        {
+          "stock_id": "2409",
+          "stock_name": "友達",
+          "industry_category": "光電業",
+          "close": 38.3,
+          "chg_pct": -0.6,
+          "fired_dates": [
+            "09-21",
+            "09-22"
+          ],
+          "fired_today": false,
+          "vol_x": 3.6,
+          "wave_start": "2026-09-21",
+          "entry_ref": 34.9,
+          "exit_line": 29.67,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "6278",
+          "stock_name": "台表科",
+          "industry_category": "光電業",
+          "close": 216.5,
+          "chg_pct": -0.7,
+          "fired_dates": [
+            "09-22"
+          ],
+          "fired_today": false,
+          "vol_x": 3.0,
+          "wave_start": "2026-09-22",
+          "entry_ref": 212.5,
+          "exit_line": 180.62,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "6456",
+          "stock_name": "GIS-KY",
+          "industry_category": "光電業",
+          "close": 87.9,
+          "chg_pct": -4.5,
+          "fired_dates": [
+            "09-23",
+            "09-29"
+          ],
+          "fired_today": false,
+          "vol_x": 3.0,
+          "wave_start": "2026-09-23",
+          "entry_ref": 78.0,
+          "exit_line": 69.0,
+          "exit_hit": false
+        }
+      ],
+      "count": 3,
+      "fired_today_count": 0
+    },
+    {
+      "name": "電子零組件",
+      "reason": "提供電子產品所需之基礎被動元件或連接器，為各類電子設備之核心零件供應商。",
+      "stocks": [
+        {
+          "stock_id": "3605",
+          "stock_name": "宏致",
+          "industry_category": "電子零組件業",
+          "close": 178.0,
+          "chg_pct": 4.4,
+          "fired_dates": [
+            "09-18",
+            "09-21"
+          ],
+          "fired_today": false,
+          "vol_x": 3.0,
+          "wave_start": "2026-09-18",
+          "entry_ref": 154.0,
+          "exit_line": 137.62,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "6207",
+          "stock_name": "雷科",
+          "industry_category": "電子零組件業",
+          "close": 145.0,
+          "chg_pct": -4.0,
+          "fired_dates": [
+            "09-30"
+          ],
+          "fired_today": false,
+          "vol_x": 2.9,
+          "wave_start": "2026-09-30",
+          "entry_ref": 153.0,
+          "exit_line": 130.05,
+          "exit_hit": false
+        }
+      ],
+      "count": 2,
+      "fired_today_count": 0
+    },
+    {
+      "name": "綠能/儲能轉型",
+      "reason": "涉及再生能源開發、儲能系統整合及能源管理，推動低碳能源轉型。",
+      "stocks": [
+        {
+          "stock_id": "1101",
+          "stock_name": "台泥",
+          "industry_category": "水泥工業",
+          "close": 25.55,
+          "chg_pct": -2.9,
+          "fired_dates": [
+            "09-23"
+          ],
+          "fired_today": false,
+          "vol_x": 2.5,
+          "wave_start": "2026-09-23",
+          "entry_ref": 25.7,
+          "exit_line": 21.85,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "3576",
+          "stock_name": "聯合再生",
+          "industry_category": "光電業",
+          "close": 18.5,
+          "chg_pct": -6.1,
+          "fired_dates": [
+            "09-30"
+          ],
+          "fired_today": false,
+          "vol_x": 7.5,
+          "wave_start": "2026-09-30",
+          "entry_ref": 19.9,
+          "exit_line": 16.91,
+          "exit_hit": false
+        }
+      ],
+      "count": 2,
+      "fired_today_count": 0
+    },
+    {
+      "name": "半導體廠房工程",
+      "reason": "專精於無塵室、廠房機電工程及半導體廠之基礎建設，為晶圓廠擴產之必要條件。",
+      "stocks": [
+        {
+          "stock_id": "6691",
+          "stock_name": "洋基工程",
+          "industry_category": "其他電子業",
+          "close": 733.0,
+          "chg_pct": 1.9,
+          "fired_dates": [
+            "09-30"
+          ],
+          "fired_today": false,
+          "vol_x": 4.6,
+          "wave_start": "2026-09-30",
+          "entry_ref": 727.0,
+          "exit_line": 617.95,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "2404",
+          "stock_name": "漢唐",
+          "industry_category": "其他電子業",
+          "close": 1305.0,
+          "chg_pct": 1.2,
+          "fired_dates": [
+            "09-30"
+          ],
+          "fired_today": false,
+          "vol_x": 2.1,
+          "wave_start": "2026-09-30",
+          "entry_ref": 1280.0,
+          "exit_line": 1088.0,
+          "exit_hit": false
+        }
+      ],
+      "count": 2,
+      "fired_today_count": 0
+    },
+    {
+      "name": "鋼鐵工業",
+      "reason": "從事鋼鐵原物料生產與加工，提供基礎工業建材與結構件。",
+      "stocks": [
+        {
+          "stock_id": "2030",
+          "stock_name": "彰源",
+          "industry_category": "鋼鐵工業",
+          "close": 37.65,
+          "chg_pct": 2.6,
+          "fired_dates": [
+            "09-18",
+            "09-22",
+            "09-24",
+            "09-30"
+          ],
+          "fired_today": false,
+          "vol_x": 3.8,
+          "wave_start": "2026-09-18",
+          "entry_ref": 24.8,
+          "exit_line": 28.24,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "2032",
+          "stock_name": "新鋼",
+          "industry_category": "鋼鐵工業",
+          "close": 19.6,
+          "chg_pct": -3.4,
+          "fired_dates": [
+            "09-24",
+            "09-29"
+          ],
+          "fired_today": false,
+          "vol_x": 25.8,
+          "wave_start": "2026-09-24",
+          "entry_ref": 18.9,
+          "exit_line": 16.06,
+          "exit_hit": false
+        }
+      ],
+      "count": 2,
+      "fired_today_count": 0
+    },
+    {
+      "name": "未分類",
+      "reason": "timeout",
+      "stocks": [
+        {
+          "stock_id": "6150",
+          "stock_name": "撼訊",
+          "industry_category": "電腦及週邊設備業",
+          "close": 69.9,
+          "chg_pct": 9.9,
+          "fired_dates": [
+            "10-01"
+          ],
+          "fired_today": true,
+          "vol_x": 14.3,
+          "wave_start": "2026-10-01",
+          "entry_ref": null,
+          "exit_line": 59.42,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "6533",
+          "stock_name": "晶心科",
+          "industry_category": "半導體業",
+          "close": 366.5,
+          "chg_pct": 9.9,
+          "fired_dates": [
+            "09-18",
+            "09-24",
+            "09-29",
+            "09-30",
+            "10-01"
+          ],
+          "fired_today": true,
+          "vol_x": 5.5,
+          "wave_start": "2026-09-18",
+          "entry_ref": 269.0,
+          "exit_line": 274.88,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "3701",
+          "stock_name": "大眾控",
+          "industry_category": "電腦及週邊設備業",
+          "close": 50.4,
+          "chg_pct": 9.8,
+          "fired_dates": [
+            "09-30",
+            "10-01"
+          ],
+          "fired_today": true,
+          "vol_x": 7.1,
+          "wave_start": "2026-09-30",
+          "entry_ref": 46.25,
+          "exit_line": 39.31,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "2340",
+          "stock_name": "台亞",
+          "industry_category": "半導體業",
+          "close": 43.85,
+          "chg_pct": 7.5,
+          "fired_dates": [
+            "09-30",
+            "10-01"
+          ],
+          "fired_today": true,
+          "vol_x": 7.9,
+          "wave_start": "2026-09-30",
+          "entry_ref": 40.8,
+          "exit_line": 34.68,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "2399",
+          "stock_name": "映泰",
+          "industry_category": "電腦及週邊設備業",
+          "close": 51.3,
+          "chg_pct": 4.8,
+          "fired_dates": [
+            "10-01"
+          ],
+          "fired_today": true,
+          "vol_x": 3.4,
+          "wave_start": "2026-10-01",
+          "entry_ref": null,
+          "exit_line": 43.6,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "3042",
+          "stock_name": "晶技",
+          "industry_category": "電子零組件業",
+          "close": 218.5,
+          "chg_pct": 4.0,
+          "fired_dates": [
+            "10-01"
+          ],
+          "fired_today": true,
+          "vol_x": 2.3,
+          "wave_start": "2026-10-01",
+          "entry_ref": null,
+          "exit_line": 185.72,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "1569",
+          "stock_name": "濱川",
+          "industry_category": "電腦及週邊設備業",
+          "close": 63.8,
+          "chg_pct": 1.9,
+          "fired_dates": [
+            "09-18",
+            "09-21",
+            "09-22"
+          ],
+          "fired_today": false,
+          "vol_x": 9.9,
+          "wave_start": "2026-09-11",
+          "entry_ref": 49.6,
+          "exit_line": 48.75,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "3016",
+          "stock_name": "嘉晶",
+          "industry_category": "半導體業",
+          "close": 168.0,
+          "chg_pct": -0.6,
+          "fired_dates": [
+            "09-23",
+            "09-24",
+            "09-29"
+          ],
+          "fired_today": false,
+          "vol_x": 4.9,
+          "wave_start": "2026-09-23",
+          "entry_ref": 147.5,
+          "exit_line": 129.38,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "1595",
+          "stock_name": "川寶",
+          "industry_category": "半導體業",
+          "close": 83.3,
+          "chg_pct": -2.3,
+          "fired_dates": [
+            "09-30"
+          ],
+          "fired_today": false,
+          "vol_x": 5.9,
+          "wave_start": "2026-09-30",
+          "entry_ref": 86.0,
+          "exit_line": 73.1,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "4768",
+          "stock_name": "晶呈科技",
+          "industry_category": "化學工業",
+          "close": 367.0,
+          "chg_pct": -3.4,
+          "fired_dates": [
+            "09-30"
+          ],
+          "fired_today": false,
+          "vol_x": 6.8,
+          "wave_start": "2026-09-30",
+          "entry_ref": 392.5,
+          "exit_line": 333.62,
+          "exit_hit": false
+        }
+      ],
+      "count": 10,
+      "fired_today_count": 6
+    },
+    {
+      "name": "其他",
+      "reason": "包含金融、零售、醫療等多元產業，且目前無單一強烈題材可歸類之個股。",
+      "stocks": [
+        {
+          "stock_id": "3311",
+          "stock_name": "閎暉",
+          "industry_category": "通信網路業",
+          "close": 45.15,
+          "chg_pct": 10.0,
+          "fired_dates": [
+            "09-18",
+            "09-30",
+            "10-01"
+          ],
+          "fired_today": true,
+          "vol_x": 6.9,
+          "wave_start": "2026-09-18",
+          "entry_ref": 38.5,
+          "exit_line": 33.86,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "1560",
+          "stock_name": "中砂",
+          "industry_category": "電機機械",
+          "close": 1000.0,
+          "chg_pct": 3.8,
+          "fired_dates": [
+            "09-17",
+            "09-18",
+            "09-22"
+          ],
+          "fired_today": false,
+          "vol_x": 2.3,
+          "wave_start": "2026-09-11",
+          "entry_ref": 775.0,
+          "exit_line": 750.0,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "7799",
+          "stock_name": "禾榮科",
+          "industry_category": "生技醫療業",
+          "close": 555.0,
+          "chg_pct": 3.0,
+          "fired_dates": [
+            "09-17",
+            "09-23",
+            "09-30"
+          ],
+          "fired_today": false,
+          "vol_x": 2.3,
+          "wave_start": "2026-09-17",
+          "entry_ref": 513.0,
+          "exit_line": 436.05,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "2254",
+          "stock_name": "巨鎧精密-創",
+          "industry_category": "汽車工業",
+          "close": 94.1,
+          "chg_pct": 1.6,
+          "fired_dates": [
+            "09-23"
+          ],
+          "fired_today": false,
+          "vol_x": 2.5,
+          "wave_start": "2026-09-23",
+          "entry_ref": 86.8,
+          "exit_line": 73.78,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "6199",
+          "stock_name": "天品",
+          "industry_category": "其他",
+          "close": 128.0,
+          "chg_pct": 0.4,
+          "fired_dates": [
+            "09-18"
+          ],
+          "fired_today": false,
+          "vol_x": 2.5,
+          "wave_start": "2026-09-18",
+          "entry_ref": 112.5,
+          "exit_line": 96.0,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "3219",
+          "stock_name": "倚強科",
+          "industry_category": "其他電子業",
+          "close": 131.5,
+          "chg_pct": 0.0,
+          "fired_dates": [
+            "09-21",
+            "09-22",
+            "09-30"
+          ],
+          "fired_today": false,
+          "vol_x": 4.9,
+          "wave_start": "2026-09-21",
+          "entry_ref": 104.5,
+          "exit_line": 98.62,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "2855",
+          "stock_name": "統一證",
+          "industry_category": "金融保險業",
+          "close": 56.4,
+          "chg_pct": -0.4,
+          "fired_dates": [
+            "09-21"
+          ],
+          "fired_today": false,
+          "vol_x": 2.9,
+          "wave_start": "2026-09-21",
+          "entry_ref": 57.3,
+          "exit_line": 48.7,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "3029",
+          "stock_name": "零壹",
+          "industry_category": "資訊服務業",
+          "close": 119.0,
+          "chg_pct": -0.8,
+          "fired_dates": [
+            "09-18"
+          ],
+          "fired_today": false,
+          "vol_x": 2.2,
+          "wave_start": "2026-09-18",
+          "entry_ref": 125.5,
+          "exit_line": 106.67,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "6133",
+          "stock_name": "金橋",
+          "industry_category": "電子零組件業",
+          "close": 29.3,
+          "chg_pct": -1.0,
+          "fired_dates": [
+            "09-18",
+            "09-29",
+            "09-30"
+          ],
+          "fired_today": false,
+          "vol_x": 4.9,
+          "wave_start": "2026-09-18",
+          "entry_ref": 27.45,
+          "exit_line": 23.33,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "3518",
+          "stock_name": "柏騰",
+          "industry_category": "其他電子業",
+          "close": 40.35,
+          "chg_pct": -1.8,
+          "fired_dates": [
+            "09-29",
+            "09-30"
+          ],
+          "fired_today": false,
+          "vol_x": 5.0,
+          "wave_start": "2026-09-29",
+          "entry_ref": 40.5,
+          "exit_line": 34.42,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "2034",
+          "stock_name": "允強",
+          "industry_category": "鋼鐵工業",
+          "close": 23.6,
+          "chg_pct": -4.8,
+          "fired_dates": [
+            "09-24",
+            "09-30"
+          ],
+          "fired_today": false,
+          "vol_x": 6.7,
+          "wave_start": "2026-09-24",
+          "entry_ref": 23.1,
+          "exit_line": 19.64,
+          "exit_hit": false
+        },
+        {
+          "stock_id": "2221",
+          "stock_name": "大甲",
+          "industry_category": "其他",
+          "close": 179.0,
+          "chg_pct": -9.4,
+          "fired_dates": [
+            "09-16",
+            "09-18"
+          ],
+          "fired_today": false,
+          "vol_x": 2.8,
+          "wave_start": "2026-08-24",
+          "entry_ref": 64.0,
+          "exit_line": 148.12,
+          "exit_hit": false
+        }
+      ],
+      "count": 12,
+      "fired_today_count": 1
+    }
+  ]
+}
