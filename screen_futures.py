@@ -37,6 +37,15 @@ DEALER_WEIGHT = 0.3   # 自營商權重
 FOREIGN_WEIGHT = 0.1  # 外資權重
 
 
+def session_date(asof: str, taifex_date: str | None, twii_date: str | None) -> str:
+    """結果檔日期用資料的交易日，不用行事曆今天。
+
+    期交所 API 忽略請求日、回最近交易日。週末補跑若把 date 蓋成今天，
+    LINE 會因與主篩選（最後交易日）不同而略過這段。
+    """
+    return taifex_date or twii_date or asof
+
+
 def get_us_overnight_signal() -> dict:
     """美股隔夜信號（開盤前判定）
 
@@ -131,6 +140,7 @@ def get_taifex_signal(day: dt.date) -> dict:
                 "foreign_net": foreign_net,
                 "weighted_score": round(net_score, 0),
                 "source": "taifex_api",
+                "date": data_txf.get("date"),
             }
 
         # 備選方案：用法人現貨買賣超推估期貨信號
@@ -177,14 +187,21 @@ def main() -> None:
     taifex_sig = get_taifex_signal(asof)
 
     # 下載加權指數（作為台指期基準）
-    # period=5d：假日/收盤後 1d 會拿到空資料，取近 5 天的最後一筆收盤
+    # period=5d：假日/收盤後 1d 會拿到空資料，取近 5 天最後一根有效收盤
+    twii_close = None
+    twii_date = None
     try:
         twii = yf.download("^TWII", period="5d", progress=False)
         if isinstance(twii.columns, pd.MultiIndex):
             twii.columns = twii.columns.get_level_values(0)
-        twii_close = float(twii["Close"].iloc[-1]) if not twii.empty else None
+        closes = twii["Close"].dropna() if not twii.empty and "Close" in twii.columns else None
+        if closes is not None and len(closes):
+            twii_close = float(closes.iloc[-1])
+            ts = closes.index[-1]
+            twii_date = ts.date().isoformat() if hasattr(ts, "date") else str(ts)[:10]
     except Exception:
         twii_close = None
+        twii_date = None
 
     # 合成進出場信號
     us_bullish = us_sig.get("us_signal") == "bullish"
@@ -196,7 +213,7 @@ def main() -> None:
     mixed_signal = not (buy_signal or sell_signal)
 
     payload = {
-        "date": ASOF,
+        "date": session_date(ASOF, taifex_sig.get("date"), twii_date),
         "generated_at": dt.datetime.now().isoformat(timespec="seconds"),
         "regime": regime,
         "twii_close": round(twii_close, 2) if twii_close else None,
