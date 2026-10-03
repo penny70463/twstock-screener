@@ -12,41 +12,41 @@
     "US": 0.5
   },
   "kd_0050.TW": {
-    "k": 79.0,
-    "d": 73.1
+    "k": 78.7,
+    "d": 75.7
   },
   "kd_VOO": {
-    "k": 49.3,
-    "d": 60.9
+    "k": 51.5,
+    "d": 53.9
   },
   "kd_SMH": {
-    "k": 88.9,
-    "d": 85.0
+    "k": 89.5,
+    "d": 87.7
   },
   "kd_SOXQ": {
-    "k": 86.9,
-    "d": 84.2
+    "k": 87.9,
+    "d": 86.4
   },
   "kd_2330.TW": {
-    "k": 83.1,
-    "d": 73.3
+    "k": 82.5,
+    "d": 76.4
   },
   "kd_00981A.TW": {
-    "k": 87.3,
-    "d": 76.2
+    "k": 88.7,
+    "d": 82.6
   },
   "macro": {
-    "regime": "favorable",
+    "regime": "deteriorating",
     "etfs": {
       "0050.TW": {
-        "action": "dca",
+        "action": "hold_dca",
         "signal": "green"
       },
       "VOO": {
-        "action": "dca",
+        "action": "hold_dca",
         "signal": "green"
       }
     },
-    "action": "dca"
+    "action": "hold_dca"
   }
 }

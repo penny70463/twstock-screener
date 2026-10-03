@@ -1,46 +1,46 @@
 {
-  "regime": "favorable",
-  "regime_zh": "好",
+  "regime": "deteriorating",
+  "regime_zh": "警戒",
   "legs": {
     "sahm": {
-      "value": -0.07,
-      "date": "2026-08-01",
+      "value": 0.0,
+      "date": "2026-09-01",
       "triggered": false,
       "status": "ok"
     },
     "curve": {
-      "value": 0.41,
-      "date": "2026-09-30",
+      "value": 0.45,
+      "date": "2026-10-02",
       "inverted": false,
       "status": "ok"
     },
     "hy": {
-      "value": 308.0,
-      "date": "2026-09-29",
-      "widen_3m": 34.0,
+      "value": 324.0,
+      "date": "2026-10-01",
+      "widen_3m": 50.0,
       "status": "ok"
     },
     "fedfunds": {
-      "value": 3.63,
-      "date": "2026-08-01",
-      "hiking_6m": false,
-      "status": "ok"
+      "value": 3.75,
+      "date": "2026-09-01",
+      "hiking_6m": true,
+      "status": "watch"
     }
   },
   "reasons": [
-    "Sahm -0.07",
-    "2s10s 0.41%",
-    "HY OAS 308bp",
-    "Fed 3.63%"
+    "Sahm 0.00",
+    "2s10s 0.45%",
+    "HY OAS 324bp",
+    "Fed 3.75%升息中"
   ],
-  "date": "2026-10-01",
+  "date": "2026-10-03",
   "etfs": {
     "0050.TW": {
-      "action": "dca",
+      "action": "hold_dca",
       "signal": "green"
     },
     "VOO": {
-      "action": "dca",
+      "action": "hold_dca",
       "signal": "green"
     }
   }
