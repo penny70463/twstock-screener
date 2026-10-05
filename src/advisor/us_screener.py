@@ -21,6 +21,7 @@ import pandas as pd
 
 from . import config
 from .indicators import sma, atr
+from .scoring import position_size
 
 FORMATION = 252      # 形成期（12 月）
 SKIP = 21            # 跳過最近 1 月（避開短期反轉）
@@ -77,16 +78,14 @@ def _volume_score(df: pd.DataFrame) -> tuple[float, list[str]]:
     return score, sigs
 
 
-def _stops(df: pd.DataFrame) -> dict:
-    """ATR 停損與建議股數（沿用台股風控公式，美股以「股數」表示）。"""
+def _stops(df: pd.DataFrame, exposure: float = 1.0) -> dict:
+    """ATR 停損與建議股數（共用台股風控公式 + 單檔權重上限，美股以「股數」表示）。"""
     close = float(df["Close"].iloc[-1])
     a = float(atr(df).iloc[-1])
 
     def calc(mult):
         stop = close - mult * a
-        risk = max(close - stop, 1e-9)
-        shares = int(config.CAPITAL * config.RISK_PER_TRADE / risk)
-        return round(stop, 2), max(shares, 0)
+        return round(stop, 2), position_size(close, stop, exposure, unit=1)
 
     s_stop, s_n = calc(config.ATR_STOP_MULT_SHORT)
     w_stop, w_n = calc(config.ATR_STOP_MULT_SWING)
@@ -100,7 +99,8 @@ def run_screen(universe: pd.DataFrame,
                history: dict[str, pd.DataFrame],
                inst=None, revenue=None,
                threshold: float = 70.0,
-               market: str = "US") -> tuple[pd.DataFrame, pd.DataFrame]:
+               market: str = "US",
+               exposure: float = 1.0) -> tuple[pd.DataFrame, pd.DataFrame]:
     """美股動能選股。簽名與 advisor.screener.run_screen 對齊（inst/revenue 忽略）。
 
     回傳 (過濾後的股票, 全股票池評分)。ETF 計入評分供前端檢視，但不列入 screened。
@@ -165,7 +165,7 @@ def run_screen(universe: pd.DataFrame,
             "籌碼": None,
             "營收": None,
             "RS": round(rs_val, 0),
-            **_stops(df),
+            **_stops(df, exposure),
             "訊號": signal,
             "sparkline": [round(float(x), 2) for x in c.tail(20).tolist()],
         }

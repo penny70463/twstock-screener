@@ -10,8 +10,9 @@ def run_screen(universe: pd.DataFrame,
                inst: pd.DataFrame | None,
                revenue: pd.DataFrame | None,
                threshold: float,
-               market: str = "TW") -> tuple[pd.DataFrame, pd.DataFrame]:
-    """回傳 (過濾後的股票, 全股票池評分)"""
+               market: str = "TW",
+               exposure: float = 1.0) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """回傳 (過濾後的股票, 全股票池評分)；exposure 用於縮放建議張數上限"""
     meta = universe.set_index("code")
 
     # RS 百分位必須跨「整個股票池」計算，這是相對強度的意義所在
@@ -31,7 +32,8 @@ def run_screen(universe: pd.DataFrame,
                     "長線停損": 0.0, "長線張數": 0, "訊號": f"未通過: {reason}", "sparkline": []
                 }
             else:
-                result = scoring.score_stock(code, df, float(rs_pct[code]), inst, revenue)
+                result = scoring.score_stock(code, df, float(rs_pct[code]), inst, revenue,
+                                             exposure=exposure)
         except Exception:
             continue
             

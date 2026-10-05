@@ -1,4 +1,4 @@
-"""五維度評分引擎：趨勢 25 / 動能 30 / 量能 15 / 籌碼 20 / 營收 10
+"""五維度評分引擎：趨勢 30 / 動能 35 / 量能 15 / 籌碼 10 / 營收 10（權重見 config.py）
 
 設計原則：
 - 維度內的子項彼此互補、維度間盡量去相關，避免「同一件事計兩次分」
@@ -148,12 +148,33 @@ def revenue_score(code: str, revenue: pd.DataFrame | None) -> float | None:
     return 0.0
 
 
+# ── 部位大小 ───────────────────────────────────────────────
+
+def position_size(close: float, stop: float, exposure: float = 1.0,
+                  unit: int = 1000) -> int:
+    """建議部位（以 unit 股為單位：台股 1000=張，美股 1=股）。
+
+    取兩者較小值：
+    - 風險法：停損時虧損 = CAPITAL × RISK_PER_TRADE
+    - 權重上限：市值 ≤ CAPITAL × MAX_POSITION_WEIGHT × 曝險水位
+    只用風險法時，低波動股停損距離小會算出超過總資金一半的部位
+    （2026-10-02 latest_tw.json：9933 短線 12 張 ≈ 資金 55%），故加上限。
+    """
+    risk_per_share = max(close - stop, 1e-9)
+    by_risk = config.CAPITAL * config.RISK_PER_TRADE / risk_per_share
+    expo = min(max(exposure, 0.0), 1.0)
+    by_weight = config.CAPITAL * config.MAX_POSITION_WEIGHT * expo / max(close, 1e-9)
+    return max(int(min(by_risk, by_weight) / unit), 0)
+
+
 # ── 綜合評分 ───────────────────────────────────────────────
 
 def score_stock(code: str, df: pd.DataFrame, rs_pct: float,
                 inst: pd.DataFrame | None,
-                revenue: pd.DataFrame | None) -> dict | None:
-    """對單一個股完整評分；未過硬性排除回傳 None"""
+                revenue: pd.DataFrame | None,
+                exposure: float = 1.0) -> dict | None:
+    """對單一個股完整評分；未過硬性排除回傳 None。
+    exposure：當日曝險水位（0–1），用於縮放單檔部位上限。"""
     ok, _reason = hard_filter(df)
     if not ok:
         return None
@@ -181,13 +202,16 @@ def score_stock(code: str, df: pd.DataFrame, rs_pct: float,
     
     def calc_strategy(mult):
         stop = close - mult * atr_val
-        risk_per_share = max(close - stop, 1e-9)
-        lots = int(config.CAPITAL * config.RISK_PER_TRADE / risk_per_share / 1000)
-        return round(stop, 2), max(lots, 0)
+        return round(stop, 2), position_size(close, stop, exposure, unit=1000)
         
     stop_short, lots_short = calc_strategy(config.ATR_STOP_MULT_SHORT)
     stop_swing, lots_swing = calc_strategy(config.ATR_STOP_MULT_SWING)
     stop_long, lots_long = calc_strategy(config.ATR_STOP_MULT_LONG)
+    
+    # X3: MA20停損
+    ma20_val = df["Close"].rolling(20).mean().iloc[-1]
+    stop_ma20 = round(float(ma20_val), 2)
+    lots_ma20 = position_size(close, stop_ma20, exposure, unit=1000)
 
     def _r(x):
         return round(x, 1) if x is not None else None
@@ -200,5 +224,6 @@ def score_stock(code: str, df: pd.DataFrame, rs_pct: float,
         "短線停損": stop_short, "短線張數": lots_short,
         "波段停損": stop_swing, "波段張數": lots_swing,
         "長線停損": stop_long,  "長線張數": lots_long,
+        "月線停損": stop_ma20,  "月線張數": lots_ma20,
         "訊號": "、".join(n for n, on in sig_today.items() if on),
     }

@@ -320,17 +320,127 @@ def run_compare(period: str) -> None:
 
 
 # ---------------------------------------------------------------------------
+# 水位平滑比較（--smooth，2026-10 策略檢討 #8）
+# 假設：趨勢分級是 0/1 條件，指數在季線附近震盪時水位來回跳 0.2，徒增周轉。
+# 預先登記採納門檻：某平滑變體需在該市場 3y 與 5y「扣成本夏普」都高於 S0，
+# 且最大回撤不比 S0 差超過 2pp，才建議上線（台、美分開裁決）。
+# ---------------------------------------------------------------------------
+COST_BUY = config.PF_FEE                  # 0.1425%
+COST_SELL = config.PF_FEE + 0.001         # 手續費 + ETF 證交稅 0.1%
+
+
+def _hysteresis(ratio: pd.Series, band: float) -> pd.Series:
+    """ratio>1+band 轉 True、<1−band 轉 False，帶內維持前一狀態。"""
+    state, out = False, []
+    for r in ratio.to_numpy():
+        if np.isnan(r):
+            out.append(state)
+            continue
+        if r > 1 + band:
+            state = True
+        elif r < 1 - band:
+            state = False
+        out.append(state)
+    return pd.Series(out, index=ratio.index, dtype=float)
+
+
+def _expo_variant(index_close: pd.Series, breadth: pd.Series, vol_target: float,
+                  kind: str) -> pd.Series:
+    ma60 = index_close.rolling(60).mean()
+    ma120 = index_close.rolling(120).mean()
+    b_norm = ((breadth.reindex(index_close.index).ffill() - config.BREADTH_LOW)
+              / (config.BREADTH_HIGH - config.BREADTH_LOW)).clip(0, 1)
+    realized = index_close.pct_change().rolling(20).std() * np.sqrt(252)
+    vol_scale = (vol_target / realized).clip(upper=1.0)
+
+    if kind == "hyst":
+        trend = (_hysteresis(index_close / ma60, 0.01) * 0.4
+                 + _hysteresis(ma60 / ma120, 0.005) * 0.3
+                 + (ma60 > ma60.shift(10)) * 0.3)
+    else:
+        trend = calc_trend(index_close)
+    raw = ((config.EXP_W_TREND * trend + config.EXP_W_BREADTH * b_norm) * vol_scale).clip(0, 1)
+    if kind == "ema":
+        raw = raw.ewm(span=5, adjust=False).mean()
+    expo = (raw / config.EXP_STEP).round() * config.EXP_STEP
+    valid = expo.where(ma120.notna() & realized.notna())
+    if kind == "minchg":
+        held, out = np.nan, []
+        for x in valid.to_numpy():
+            if np.isnan(x):
+                out.append(np.nan)
+                continue
+            if np.isnan(held) or abs(x - held) >= 0.15 or x == 0.0:
+                held = x
+            out.append(held)
+        valid = pd.Series(out, index=expo.index)
+    return valid.dropna()
+
+
+def _net_metrics(index_close: pd.Series, expo: pd.Series) -> dict:
+    m = simulate_returns(index_close, expo)
+    ret = index_close.pct_change()
+    pos = expo.shift(1)
+    d = expo.diff().fillna(0)
+    cost = (d.clip(lower=0) * COST_BUY + (-d).clip(lower=0) * COST_SELL).shift(1)
+    strat = (ret * pos - cost).dropna()
+    n = len(strat)
+    eq = (1 + strat).cumprod()
+    ann = eq.iloc[-1] ** (252 / n) - 1
+    vol = strat.std() * np.sqrt(252)
+    yrs = len(expo) / 252
+    m.update({
+        "net_sharpe": round(ann / vol if vol > 0 else 0.0, 2),
+        "net_ret": round(ann * 100, 2),
+        "turn": round(float(d.abs().sum()) / yrs, 2),
+        "changes": round(float((d != 0).sum()) / yrs, 1),
+    })
+    return m
+
+
+def smooth_market(label: str, index_symbol: str, tickers: list,
+                  market: str, period: str) -> None:
+    print(f"\n{'='*72}\n  {label} 水位平滑比較（{period}）\n{'='*72}")
+    index_close = download_index(index_symbol, period)
+    panel = download_breadth_panel(tickers, period)
+    breadth = calc_breadth(panel)
+    target = config.VOL_TARGET_US if market == "US" else config.VOL_TARGET_TW
+    variants = {
+        "S0 現行": "base",
+        "S1 均線遲滯帶±1%": "hyst",
+        "S2 變動≥15%才調": "minchg",
+        "S3 EMA5 平滑": "ema",
+    }
+    print(f"  {'變體':<16s} {'年化':>7s} {'夏普':>5s} {'扣成本夏普':>8s} {'回撤':>7s} "
+          f"{'平均水位':>7s} {'年周轉':>6s} {'年調整次':>7s}")
+    for name, kind in variants.items():
+        m = _net_metrics(index_close, _expo_variant(index_close, breadth, target, kind))
+        print(f"  {name:<16s} {m['ann_ret']:>6.2f}% {m['sharpe']:>5.2f} {m['net_sharpe']:>8.2f} "
+              f"{m['maxdd']:>6.2f}% {m['avg_expo']:>6.1f}% {m['turn']:>5.2f}x {m['changes']:>7.1f}")
+
+
+def run_smooth(period: str) -> None:
+    smooth_market("🇹🇼 台股", "^TWII", get_tw_tickers(), "TW", period)
+    smooth_market("🇺🇸 美股", "^GSPC", get_sp500_tickers(), "US", period)
+
+
+# ---------------------------------------------------------------------------
 # 主程式
 # ---------------------------------------------------------------------------
 def main():
     parser = argparse.ArgumentParser(description="曝險水位回測")
     parser.add_argument("--compare", action="store_true",
                         help="比較固定 vs 自適應 VOL_TARGET 的報酬")
+    parser.add_argument("--smooth", action="store_true",
+                        help="比較水位平滑變體（遲滯帶 / 最小變動 / EMA）")
     parser.add_argument("--period", default="3y", help="回測期間（如 3y、5y）")
     args = parser.parse_args()
 
     if args.compare:
         run_compare(args.period)
+        return
+    if args.smooth:
+        run_smooth(args.period)
         return
 
     print("🔬 開始三年歷史曝險水位回測...\n")

@@ -17,7 +17,10 @@
 腳本涵蓋不到的判斷（子項覆蓋、回報誠實度）仍依下列條文：
 
 1. **診斷乾淨**：改動的每個檔案 IDE diagnostics / linter 無 error（無 IDE 診斷時以 `python -m py_compile <檔案>` 為底線）
-2. **策略參數改動必回測**：改了 `src/advisor/config.py` 的任何參數，必須跑對應的 `tests/backtest_*.py` 並在回報中附上前後對比數字——「參數看起來合理」不算驗證
+2. **策略參數改動必回測與 OOS 驗證**：
+   - 改了 `src/advisor/config.py` 的任何參數，必須跑對應的 `tests/backtest_*.py` 並在回報中附上前後對比數字——「參數看起來合理」不算驗證。
+   - **強制保留最近 6~12 個月作為樣本外驗證（Out-of-Sample, OOS）**。調參只能根據 In-Sample 表現，若新參數在 OOS 期間崩潰或輸給原版，則嚴格否決該參數。
+   - **採納門檻需預先寫死**：在跑回測前就要在腳本或對話中定義好「要贏過原版多少、哪些指標必須贏」，避免看著結果挑標準。
 3. **實跑過受影響流程**：
    - 篩選邏輯改動 → `python run_pipeline.py`（或針對性測試）跑通
    - 警報邏輯改動 → `python etf_alert.py --dry-run`（絕不在驗證時真發 LINE）

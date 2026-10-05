@@ -128,9 +128,32 @@ def run(market: str = "TW", classify: bool = True, verbose: bool = True) -> dict
     if verbose:
         print(f"[{on_date}] 大盤狀態: {market_state['label']}, 建議門檻: {threshold}", flush=True)
     
+    # 3.5 連續水位模型（三因子曝險建議）——移到選股前，讓建議張數上限隨水位縮放
+    #     （單檔上限 = CAPITAL × MAX_POSITION_WEIGHT × 水位）；失敗時以 1.0 計，不影響選股
+    exposure_for_sizing = 1.0
+    try:
+        close_panel = pd.DataFrame({code: df["Close"] for code, df in history.items() if df is not None and "Close" in df.columns})
+        if not close_panel.empty:
+            exposure_info = adv_market.get_exposure_live(close_panel, market=market)
+            market_state["exposure"] = exposure_info["exposure"]
+            market_state["trend_score"] = exposure_info["trend"]
+            market_state["breadth"] = exposure_info["breadth"]
+            market_state["realized_vol"] = exposure_info["realized_vol"]
+            market_state["vol_scale"] = exposure_info["vol_scale"]
+            exposure_for_sizing = float(exposure_info["exposure"])
+            if verbose:
+                print(f"  連續水位模型: 建議曝險 {exposure_info['exposure']*100:.0f}% "
+                      f"(趨勢={exposure_info['trend']}, 寬度={exposure_info['breadth']}%, "
+                      f"波動率={exposure_info['realized_vol']}%)", flush=True)
+        _step("連續水位模型完成", t0, verbose)
+    except Exception as e:
+        if verbose:
+            print(f"  ! 連續水位模型計算失敗（不影響選股）: {e}", flush=True)
+
     # 4. 執行選股：台股用五因子；美股用橫斷面動能策略（回測驗證的美股原生策略）
     screener = adv_us_screener if market == "US" else adv_screener
-    screened_df, universe_df = screener.run_screen(universe, history, inst, revenue, threshold, market=market)
+    screened_df, universe_df = screener.run_screen(universe, history, inst, revenue, threshold,
+                                                   market=market, exposure=exposure_for_sizing)
     _step("評分與篩選完成", t0, verbose)
     
     # 5. 算漲幅 → 排序 → 產業集中度上限；0 檔時整段跳過（這些操作依賴 screened_df
@@ -203,25 +226,6 @@ def run(market: str = "TW", classify: bool = True, verbose: bool = True) -> dict
             print(f"  ! LLM 題材分類失敗: {e}", flush=True)
             themes = {"themes": [], "theme_status": status}
         _step("LLM 分類完成", t0, verbose)
-
-    # 計算連續水位模型（三因子曝險建議）
-    try:
-        close_panel = pd.DataFrame({code: df["Close"] for code, df in history.items() if df is not None and "Close" in df.columns})
-        if not close_panel.empty:
-            exposure_info = adv_market.get_exposure_live(close_panel, market=market)
-            market_state["exposure"] = exposure_info["exposure"]
-            market_state["trend_score"] = exposure_info["trend"]
-            market_state["breadth"] = exposure_info["breadth"]
-            market_state["realized_vol"] = exposure_info["realized_vol"]
-            market_state["vol_scale"] = exposure_info["vol_scale"]
-            if verbose:
-                print(f"  連續水位模型: 建議曝險 {exposure_info['exposure']*100:.0f}% "
-                      f"(趨勢={exposure_info['trend']}, 寬度={exposure_info['breadth']}%, "
-                      f"波動率={exposure_info['realized_vol']}%)", flush=True)
-        _step("連續水位模型完成", t0, verbose)
-    except Exception as e:
-        if verbose:
-            print(f"  ! 連續水位模型計算失敗（不影響選股）: {e}", flush=True)
 
     payload = _build_payload(on_date, result, themes, market_state, market=market)
     _save(payload, on_date, market=market)

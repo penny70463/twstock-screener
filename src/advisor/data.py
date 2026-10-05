@@ -28,17 +28,110 @@ CACHE_DIR = Path(__file__).parent / "cache"
 NAME_MAP_PATH = CACHE_DIR / "name_map.json"
 
 
+def _download_resumable(url: str, max_slices: int = 800, **kwargs) -> bytes:
+    """GET 完整 body。連線被截斷且對方支援 Range 時，從已收位元組續傳。
+
+    TPEX nginx 收盤高峰常在 ~8–16KB 切斷（2026-09-14 排程：讀了 16KB／缺 4.4MB
+    後 IncompleteRead，重試 8 次仍從 byte 0 重抓、每次同樣被切）。該端點宣告
+    Accept-Ranges: bytes，實測 3 段即可拼回完整 JSON。從頭重試無效，必須續傳。
+    """
+    kwargs = dict(kwargs)
+    headers_base = dict(kwargs.pop("headers", HEADERS))
+    kwargs.setdefault("timeout", 30)
+    buf = bytearray()
+    total: int | None = None
+    last_err: Exception = RuntimeError("empty download")
+    slices = 0
+
+    for _ in range(max_slices):
+        headers = dict(headers_base)
+        if buf:
+            headers["Range"] = f"bytes={len(buf)}-"
+        try:
+            resp = requests.get(url, headers=headers, stream=True, **kwargs)
+        except requests.exceptions.SSLError:
+            import urllib3
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+            kwargs["verify"] = False
+            last_err = requests.exceptions.SSLError("ssl")
+            continue
+        except (requests.exceptions.ConnectionError,
+                requests.exceptions.ChunkedEncodingError,
+                requests.exceptions.Timeout) as e:
+            last_err = e
+            if not buf:
+                raise
+            time.sleep(0.2)
+            continue
+
+        try:
+            if resp.status_code == 416:
+                break
+            resp.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            last_err = e
+            if not buf:
+                raise
+            time.sleep(0.2)
+            continue
+
+        # 對方忽略 Range、從頭重送 → 丟棄半截，改用這次的 body
+        if buf and resp.status_code == 200:
+            buf = bytearray()
+            total = None
+
+        slices += 1
+        if slices == 2 and buf:
+            print(f"  ! HTTP 截斷，改 Range 續傳（已收 {len(buf)} bytes）")
+
+        cr = resp.headers.get("Content-Range") or ""
+        cl = resp.headers.get("Content-Length")
+        if total is None:
+            if "/" in cr:
+                try:
+                    total = int(cr.rsplit("/", 1)[-1])
+                except ValueError:
+                    pass
+            elif cl and resp.status_code == 200:
+                try:
+                    total = int(cl)
+                except ValueError:
+                    pass
+
+        cut = False
+        try:
+            for chunk in resp.iter_content(8192):
+                if chunk:
+                    buf.extend(chunk)
+        except (requests.exceptions.ChunkedEncodingError,
+                requests.exceptions.ConnectionError,
+                requests.exceptions.Timeout) as e:
+            last_err = e
+            cut = True
+
+        if total is not None and len(buf) >= total:
+            if slices > 1:
+                print(f"  [+] Range 續傳完成 {len(buf)} bytes / {slices} 段")
+            return bytes(buf)
+        if not cut and total is None:
+            return bytes(buf)
+
+    if total is not None and len(buf) >= total:
+        return bytes(buf)
+    raise last_err
+
+
 def _get_json(url: str, retries: int = 8, **kwargs):
-    """GET 並回傳解析後的 JSON；取得與解析任一失敗都走 SSL fallback + 退避重試。
+    """GET 並回傳解析後的 JSON；截斷走 Range 續傳，其餘失敗退避重試。
 
     - TPEX 憑證缺 Subject Key Identifier，Python 3.13 的嚴格驗證會間歇性
       失敗，失敗時退回不驗證（皆為公開行情資料）
     - TWSE/TPEX 對連續請求會重置連線，指數退避重試
-    - TPEX openapi 收盤後高峰常截斷回應，實測截斷率約五成，重試預算需拉到
-      分鐘級才扛得住連續截斷。截斷有兩種表現，都納入同一套重試：
-        1. 傳輸層截斷：requests 讀 body 時拋 ChunkedEncodingError
-        2. 內容截斷：HTTP 傳輸完整但 JSON 本身被切斷（Unterminated string），
-           由 resp.json() 拋 JSONDecodeError
+    - TPEX openapi 收盤後高峰常截斷回應。兩種截斷都要接：
+        1. 傳輸層截斷：讀 body 時 ChunkedEncodingError → Range 續傳
+           （從頭重試無效，見 2026-09-14）
+        2. 內容截斷：HTTP 完整但 JSON 被切斷（Unterminated string），
+           由 json.loads 拋 JSONDecodeError → 退避整段重抓
            （2026-07-23 排程即因此掛掉——舊版只重試傳輸層，漏了這種）
 
     TWSE/TPEX 的 JSON 端點一律走這裡，避免內容截斷直接炸掉呼叫端。"""
@@ -47,9 +140,8 @@ def _get_json(url: str, retries: int = 8, **kwargs):
     last_err: Exception = RuntimeError("unreachable")
     for attempt in range(retries):
         try:
-            resp = requests.get(url, **kwargs)
-            resp.raise_for_status()
-            return resp.json()  # 內容截斷會在此拋 JSONDecodeError → 重試
+            body = _download_resumable(url, **kwargs)
+            return json.loads(body)
         except requests.exceptions.SSLError:
             import urllib3
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -624,8 +716,9 @@ def fetch_institutional(days: int = config.INST_DAYS,
                         recs.update(tpex_inst_one_day(day))
                     except Exception:
                         pass
-                store[datestr] = recs  # 確認結果（含真假日）才入庫
-                changed = True
+                if recs or (dt.date.today() - day).days >= 2:
+                    store[datestr] = recs  # 確認結果（含真假日）才入庫
+                    changed = True
             except Exception:
                 recs = {}  # 失敗不入庫，下次再試
             time.sleep(1.5)  # TWSE/TPEX 皆有頻率限制
