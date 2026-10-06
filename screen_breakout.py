@@ -181,7 +181,7 @@ def main() -> None:
         print("LLM 題材分類中 ...", flush=True)
         theme_status = "failed"
         try:
-            classified = classify_themes(stocks_in, market="TW")
+            classified = classify_themes(stocks_in, market="TW", cache_ns="breakout-tw")
             themes = classified.get("themes", [])
             theme_status = classified.get("theme_status", "failed")
         except Exception as e:

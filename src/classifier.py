@@ -32,20 +32,102 @@ def _client() -> OpenAI:
 # 10 檔一批：請求較短，比較不會撞上 240 秒；單批逾時也不會把整天題材清成 0。
 _BATCH_SIZE = 10
 
+# 成功分到的題材依代號留下。隔日同一檔不再打 API。
+# 「其他／未分類」是收納桶，不是穩定題材，不進快取，下次仍送 LLM。
+_CACHE_PATH = Path(__file__).resolve().parents[1] / "data" / "cache" / "theme_by_code.json"
+_CACHE_SKIP_THEMES = frozenset({"未分類", "未命名", "其他"})
 
-def classify_themes(stocks: list[dict], market: str = "TW") -> dict:
+
+def _load_cache() -> dict:
+    try:
+        data = json.loads(_CACHE_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def _save_cache(cache: dict) -> None:
+    _CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    _CACHE_PATH.write_text(
+        json.dumps(cache, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+
+
+def _partition_cached(stocks: list[dict], market_cache: dict) -> tuple[list[dict], list[dict]]:
+    """快取命中且名稱沒變的留在本地，其餘送 LLM。回傳 (fresh, cached)。"""
+    fresh: list[dict] = []
+    cached: list[dict] = []
+    for s in stocks:
+        code = str(s.get("code", "")).strip()
+        name = s.get("name") or code
+        hit = market_cache.get(code) if isinstance(market_cache, dict) else None
+        theme = hit.get("theme") if isinstance(hit, dict) else ""
+        if theme and theme not in _CACHE_SKIP_THEMES and hit.get("name") == name:
+            cached.append({**s, "code": code, "name": name, "theme": theme, "reason": hit.get("reason", "")})
+        else:
+            fresh.append({**s, "code": code, "name": name})
+    return fresh, cached
+
+
+def _cached_as_raw(cached: list[dict]) -> list[dict]:
+    order: list[str] = []
+    bucket: dict[str, dict] = {}
+    for s in cached:
+        theme = s["theme"]
+        if theme not in bucket:
+            bucket[theme] = {"reason": s.get("reason", ""), "codes": []}
+            order.append(theme)
+        bucket[theme]["codes"].append(s["code"])
+    return [{"name": name, "reason": bucket[name]["reason"], "codes": bucket[name]["codes"]} for name in order]
+
+
+def _store_cache(cache: dict, market: str, themes: list[dict]) -> None:
+    """只寫入這次結果裡、有穩定題材名的代號。逾時沒出現的代號維持未快取。"""
+    market_cache = cache.setdefault(market, {})
+    if not isinstance(market_cache, dict):
+        market_cache = {}
+        cache[market] = market_cache
+    for t in themes:
+        theme = (t.get("name") or "").strip()
+        if not theme or theme in _CACHE_SKIP_THEMES:
+            continue
+        reason = t.get("reason", "")
+        for s in t.get("stocks") or []:
+            code = str(s.get("code", "")).strip()
+            if not code:
+                continue
+            market_cache[code] = {
+                "theme": theme,
+                "reason": reason,
+                "name": s.get("name") or code,
+            }
+
+
+def classify_themes(stocks: list[dict], market: str = "TW", cache_ns: str | None = None) -> dict:
     """stocks: [{"code","name","industry"}...] -> {"themes":[{name,reason,stocks:[{code,name}]}]}。
 
     分批呼叫 LLM（避開 CI 長請求被砍），各批結果再依題材名合併。LLM 只回 code，名稱本地補回。
     market 決定用台股或美股的題材 prompt。
+    代號已有快取且名稱未變則不送 API；這次成功分到的代號寫回快取。
+    cache_ns 把每日篩選和族群突破分開。同一檔在兩份清單裡的題材不必相同。
     """
     if not stocks:
         return {"themes": [], "theme_status": "skipped"}
 
+    ns = cache_ns or market
+    cache = _load_cache()
+    fresh, cached = _partition_cached(stocks, cache.get(ns) or {})
+    name_map = {s["code"]: s.get("name", s["code"]) for s in fresh + cached}
+    if cached:
+        print(f"  題材快取命中 {len(cached)} 檔，送 LLM {len(fresh)} 檔", flush=True)
+    if not fresh:
+        themes = _attach_all(_cached_as_raw(cached), name_map)
+        return {"themes": themes, "theme_status": "ok"}
+
     system_prompt, merge_prompt = get_prompts(market)
-    name_map = {s["code"]: s.get("name", s["code"]) for s in stocks}
     client = _client()
-    batches = [stocks[i : i + _BATCH_SIZE] for i in range(0, len(stocks), _BATCH_SIZE)]
+    batches = [fresh[i : i + _BATCH_SIZE] for i in range(0, len(fresh), _BATCH_SIZE)]
 
     raw_themes: list[dict] = []
     batch_statuses: list[str] = []
@@ -71,15 +153,15 @@ def classify_themes(stocks: list[dict], market: str = "TW") -> dict:
             raw_themes.extend(themes)
             batch_statuses.append(status)
 
-    # 階段一：完全同名先併（codes 層級），減少要丟給階段二的量
-    stage1 = _merge_exact(raw_themes)
+    # 階段一：完全同名先併（codes 層級），再併入快取裡已分過的代號。
+    stage1 = _merge_exact(raw_themes + _cached_as_raw(cached))
 
     # 階段二：分批會把同題材切成近義名（記憶體/記憶體封測…），且各批有各自「其他」。
     #   把精簡後的題材名+codes 丟回 LLM 做一次語意歸併。輸入小、輸出小 → 快又穩。
-    #   多檔（>1 批）才需要；單批沒有跨批碎片問題。
+    #   多檔（>1 批）或有快取要併進來才需要；這次全部逾時就不再打階段二。
     final = stage1
     consolidate_timeout = False
-    if len(batches) > 1 and stage1:
+    if raw_themes and stage1 and (len(batches) > 1 or cached):
         consolidated, consolidate_timeout = _consolidate(client, stage1, merge_prompt)
         if consolidated:
             print(f"    階段二歸併：{len(stage1)} → {len(consolidated)} 題材", flush=True)
@@ -87,8 +169,11 @@ def classify_themes(stocks: list[dict], market: str = "TW") -> dict:
         else:
             print("    ! 階段二歸併失敗，沿用階段一結果", flush=True)
 
+    attached = _attach_all(final, name_map)
+    _store_cache(cache, ns, attached)
+    _save_cache(cache)
     return {
-        "themes": _attach_all(final, name_map),
+        "themes": attached,
         "theme_status": aggregate_theme_status(batch_statuses, consolidate_timeout),
     }
 

@@ -219,7 +219,7 @@ def run(market: str = "TW", classify: bool = True, verbose: bool = True) -> dict
         if verbose:
             print(f"  LLM 分類中（{len(stocks)} 檔）...", flush=True)
         try:
-            themes = classify_themes(stocks, market=market)
+            themes = classify_themes(stocks, market=market, cache_ns=f"screen-{market}")
         except Exception as e:
             from src.classifier import is_timeout
             status = "timeout" if is_timeout(e) else "failed"
