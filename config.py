@@ -31,6 +31,16 @@ class Settings:
     )
     nvidia_model: str = os.getenv("NVIDIA_MODEL") or "meta/llama-3.1-70b-instruct"
 
+    # 題材分類用哪一家。排程要換回 NVIDIA：THEME_LLM=nvidia
+    theme_llm: str = (os.getenv("THEME_LLM") or "nvidia").strip().lower()
+    gemini_api_key: str = os.getenv("GEMINI_API_KEY", "")
+    gemini_base_url: str = (
+        os.getenv("GEMINI_BASE_URL")
+        or "https://generativelanguage.googleapis.com/v1beta/openai/"
+    )
+    # 3.8-flash 在 2026-10-06 實測回 503；3.5-flash 18.7 秒回完同一批。
+    gemini_model: str = os.getenv("GEMINI_MODEL") or "gemini-3.5-flash"
+
     finmind_token: str = os.getenv("FINMIND_TOKEN", "")
 
     top_n: int = int(os.getenv("TOP_N", "200"))
@@ -42,9 +52,24 @@ class Settings:
     def max_ma(self) -> int:
         return max(self.ma_windows)
 
+    @property
+    def theme_model(self) -> str:
+        if self.theme_llm == "gemini":
+            return self.gemini_model
+        return self.nvidia_model
+
     def require_nvidia(self) -> None:
         if not self.nvidia_api_key:
             raise RuntimeError("缺少 NVIDIA_API_KEY，請在 .env 設定")
+
+    def require_theme_llm(self) -> None:
+        if self.theme_llm == "gemini":
+            if not self.gemini_api_key:
+                raise RuntimeError("THEME_LLM=gemini 但缺少 GEMINI_API_KEY，請在 .env 設定")
+            return
+        if self.theme_llm != "nvidia":
+            raise RuntimeError(f"不支援的 THEME_LLM={self.theme_llm}，可用 nvidia 或 gemini")
+        self.require_nvidia()
 
 
 settings = Settings()

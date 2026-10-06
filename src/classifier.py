@@ -15,12 +15,20 @@ from src.prompts import get_prompts
 
 
 def _client() -> OpenAI:
-    settings.require_nvidia()
-    # gemma free tier 延遲極不穩（10s~500s+）且連跑會被限流。分批呼叫，每批設較短 timeout，
-    # SDK 層不重試（max_retries=0），重試由 _classify_batch 以批次為單位控制：
-    # 失敗批次重試一次即放棄，保住其他批的題材（部分結果勝過全 0；
+    settings.require_theme_llm()
+    # 免費額度延遲不穩且連跑會被限流。分批呼叫，SDK 不重試（max_retries=0），
+    # 重試由 _classify_batch 以批次為單位控制：失敗批次稍後再試一次即放棄，
+    # 保住其他批的題材（部分結果勝過全 0；
     # 但股票少時只有一批，不重試會一次失敗就整天 0 題材——2026-07-14 實際發生過）。
     # 串流讓正常批次的連線持續有資料，避免被當 idle 砍。
+    # Gemini 實測一批約 20 秒。timeout 收到 60 秒，避免端點又掛時每批空等 240 秒。
+    if settings.theme_llm == "gemini":
+        return OpenAI(
+            api_key=settings.gemini_api_key,
+            base_url=settings.gemini_base_url,
+            timeout=60.0,
+            max_retries=0,
+        )
     return OpenAI(
         api_key=settings.nvidia_api_key,
         base_url=settings.nvidia_base_url,
@@ -126,6 +134,7 @@ def classify_themes(stocks: list[dict], market: str = "TW", cache_ns: str | None
         return {"themes": themes, "theme_status": "ok"}
 
     system_prompt, merge_prompt = get_prompts(market)
+    print(f"  題材 LLM：{settings.theme_llm} / {settings.theme_model}", flush=True)
     client = _client()
     batches = [fresh[i : i + _BATCH_SIZE] for i in range(0, len(fresh), _BATCH_SIZE)]
 
@@ -317,7 +326,7 @@ def _dump_raw(content: str, bi: int) -> None:
 
 def _call(client: OpenAI, messages: list[dict], json_mode: bool) -> str:
     kwargs = {
-        "model": settings.nvidia_model,
+        "model": settings.theme_model,
         "messages": messages,
         "temperature": 0.2,
         # 125 檔分類完整輸出可達 ~3000 字，預設 max_tokens 偏小會截斷 → JSON 壞掉 → 0 題材
