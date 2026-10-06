@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue'
 import PortfolioReview from './components/PortfolioReview.vue'
 import EtfTrafficLight from './components/EtfTrafficLight.vue'
 import PullbackScreen from './components/PullbackScreen.vue'
@@ -11,7 +11,7 @@ import ShortSell from './components/ShortSell.vue'
 import Futures from './components/Futures.vue'
 import RankingRange from './components/RankingRange.vue'
 import CalendarPicker from './components/CalendarPicker.vue'
-import { getDataStaleness } from './utils/dataFreshness'
+import { getDataStaleness, nowInTaipei, toYMD } from './utils/dataFreshness'
 
 const activeMarket = ref('TW')
 const activeTab = ref('screener')
@@ -22,23 +22,29 @@ const error = ref(null)
 const availableDates = ref([])
 const selectedDate = ref('latest')
 
-const fetchData = async () => {
-  loading.value = true
-  error.value = null
-  const fileName = selectedDate.value === 'latest' 
-    ? `latest_${activeMarket.value.toLowerCase()}.json` 
-    : `${selectedDate.value}_${activeMarket.value.toLowerCase()}.json`
-  const DATA_URL = import.meta.env.DEV 
-    ? `/api/${fileName}` 
+const fetchData = async ({ quiet = false } = {}) => {
+  const requestedDate = selectedDate.value
+  const requestedMarket = activeMarket.value
+  if (!quiet) {
+    loading.value = true
+    error.value = null
+  }
+  const fileName = requestedDate === 'latest'
+    ? `latest_${requestedMarket.toLowerCase()}.json`
+    : `${requestedDate}_${requestedMarket.toLowerCase()}.json`
+  const DATA_URL = import.meta.env.DEV
+    ? `/api/${fileName}`
     : `https://raw.githubusercontent.com/penny70463/twstock-screener/master/data/results/${fileName}`
   try {
     const response = await fetch(DATA_URL, { cache: 'no-store' })
     if (!response.ok) throw new Error('Failed to fetch data')
+    if (selectedDate.value !== requestedDate || activeMarket.value !== requestedMarket) return
     data.value = await response.json()
+    if (quiet) error.value = null
   } catch (e) {
-    error.value = e.message
+    if (!quiet) error.value = e.message
   } finally {
-    loading.value = false
+    if (!quiet) loading.value = false
   }
 }
 
@@ -57,9 +63,32 @@ const fetchDates = async () => {
   }
 }
 
+// 分頁留著跨日不會自己重抓。回到前景、或台北日期變了，才悄悄更新「最新」。
+const refreshLatestQuietly = () => {
+  if (document.visibilityState !== 'visible') return
+  if (selectedDate.value !== 'latest') return
+  fetchDates()
+  fetchData({ quiet: true })
+}
+
+let seenTaipeiDay = toYMD(nowInTaipei())
+const onVisible = () => refreshLatestQuietly()
+const dayTimer = setInterval(() => {
+  const day = toYMD(nowInTaipei())
+  if (day === seenTaipeiDay) return
+  seenTaipeiDay = day
+  refreshLatestQuietly()
+}, 60_000)
+
 onMounted(() => {
+  document.addEventListener('visibilitychange', onVisible)
   fetchDates()
   fetchData()
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('visibilitychange', onVisible)
+  clearInterval(dayTimer)
 })
 
 watch(selectedDate, () => {
