@@ -1,6 +1,6 @@
 {
   "date": "2026-10-07",
-  "generated_at": "2026-10-08T16:09:45+08:00",
+  "generated_at": "2026-10-08T16:35:45+08:00",
   "params": {
     "top_n": 200,
     "advisor_threshold": 70
@@ -5333,58 +5333,12 @@
   ],
   "themes": [
     {
-      "name": "記憶體與儲存技術",
-      "reason": "記憶體是數位時代與 AI 運算不可或缺的基礎媒介。這群股票專注於快閃記憶體與動態隨機存取記憶體（DRAM）的研發與製造，直接受惠於半導體週期復甦。",
+      "name": "伺服器與資訊硬體",
+      "reason": "涵蓋企業級伺服器及個人電腦硬體製造商。這些公司受惠於資料中心與企業基礎設施的持續投資及升級需求。",
       "stocks": [
         {
-          "code": "SNDK",
-          "name": "Sandisk"
-        },
-        {
-          "code": "MU",
-          "name": "Micron Technology"
-        }
-      ]
-    },
-    {
-      "name": "石油煉製與能源基礎建設",
-      "reason": "此題材涵蓋美國主要的獨立煉油商與中游能源管道商。在能源需求穩健及精煉利差維持高檔的背景下，這些公司具備極佳的現金流與營運韌性。",
-      "stocks": [
-        {
-          "code": "VLO",
-          "name": "Valero Energy"
-        },
-        {
-          "code": "PSX",
-          "name": "Phillips 66"
-        },
-        {
-          "code": "MPC",
-          "name": "Marathon Petroleum"
-        },
-        {
-          "code": "TRGP",
-          "name": "Targa Resources"
-        }
-      ]
-    },
-    {
-      "name": "民生消費與零售",
-      "reason": "代表美國大型連鎖零售商，主要受惠於民生必需品與一般消費性商品的穩定需求，是觀察美國內需消費韌性的指標股。",
-      "stocks": [
-        {
-          "code": "TGT",
-          "name": "Target Corporation"
-        }
-      ]
-    },
-    {
-      "name": "AI 基礎建設與硬體",
-      "reason": "隨著人工智慧與資料中心需求爆發，高速運算與傳輸成為關鍵。這群股票涵蓋了 AI 伺服器、高頻寬記憶體及光通訊元件，是 AI 實體基礎建設的核心受益者。",
-      "stocks": [
-        {
-          "code": "LITE",
-          "name": "Lumentum"
+          "code": "HPE",
+          "name": "Hewlett Packard Enterprise"
         },
         {
           "code": "DELL",
@@ -5393,33 +5347,17 @@
       ]
     },
     {
-      "name": "資料儲存與記憶體",
-      "reason": "AI 資料中心與雲端運算需要海量的數據儲存空間。這群股票是全球硬碟與快閃記憶體（NAND/HDD）的龍頭廠商，受惠於企業級儲存設備的強勁需求與報價回升。",
+      "name": "資產管理與託管銀行",
+      "reason": "包含提供資產管理、財富管理及機構託管服務的金融機構。其營收主要來自管理資產規模(AUM)的手續費及服務費。",
       "stocks": [
         {
-          "code": "STX",
-          "name": "Seagate Technology"
+          "code": "BEN",
+          "name": "Franklin Resources"
         },
         {
-          "code": "WDC",
-          "name": "Western Digital"
-        }
-      ]
-    },
-    {
-      "name": "基礎建設與鋼鐵材料",
-      "reason": "鋼鐵是工業製造與國家基礎建設的基石。該公司作為美國最大的鋼鐵生產商，直接受益於美國本土製造業回流及基礎建設法案的長期推動。",
-      "stocks": [
-        {
-          "code": "NUE",
-          "name": "Nucor"
-        }
-      ]
-    },
-    {
-      "name": "託管銀行與資產管理",
-      "reason": "這群股票為全球領先的託管銀行與資產管理機構，主要提供證券服務、資產託管及財富管理。在市場交易熱絡及資產規模增長下，其手續費收入與利息淨收益具備穩定成長動能。",
-      "stocks": [
+          "code": "IVZ",
+          "name": "Invesco"
+        },
         {
           "code": "STT",
           "name": "State Street Corporation"
@@ -5427,13 +5365,193 @@
         {
           "code": "BNY",
           "name": "BNY Mellon"
+        },
+        {
+          "code": "PFG",
+          "name": "Principal Financial Group"
+        },
+        {
+          "code": "NTRS",
+          "name": "Northern Trust"
         }
       ]
     },
     {
-      "name": "生技製藥與醫療保健",
-      "reason": "這群股票涵蓋全球大型製藥廠、學名藥巨頭及創新生技公司。受惠於人口老化、新藥研發（如癌症、免疫療法）及疫苗技術的持續突破，具備防禦性與成長性雙重題材。",
+      "name": "銀行與支付服務",
+      "reason": "涵蓋大型跨國銀行與提供企業支付解決方案的金融服務公司。受惠於全球金融交易、利差及商業消費活動。",
       "stocks": [
+        {
+          "code": "C",
+          "name": "Citigroup"
+        },
+        {
+          "code": "CPAY",
+          "name": "Corpay"
+        }
+      ]
+    },
+    {
+      "name": "測試與量測儀器",
+      "reason": "提供電子測試、半導體測試及精密測量設備的公司。隨著5G、AI和自動化發展，推升對先進測試設備的需求。",
+      "stocks": [
+        {
+          "code": "KEYS",
+          "name": "Keysight Technologies"
+        },
+        {
+          "code": "TER",
+          "name": "Teradyne"
+        }
+      ]
+    },
+    {
+      "name": "零售百貨",
+      "reason": "包含大型綜合連鎖折扣店與民生消費品零售商。這類企業在不同經濟週期中，透過價格優勢與多元商品維持穩定的消費客群。",
+      "stocks": [
+        {
+          "code": "ROST",
+          "name": "Ross Stores"
+        },
+        {
+          "code": "TGT",
+          "name": "Target Corporation"
+        }
+      ]
+    },
+    {
+      "name": "鋼鐵製造",
+      "reason": "涵蓋美國主要的鋼鐵生產與材料製造商。受惠於國內基礎建設計畫、製造業回流以及工業建設需求。",
+      "stocks": [
+        {
+          "code": "STLD",
+          "name": "Steel Dynamics"
+        },
+        {
+          "code": "NUE",
+          "name": "Nucor"
+        }
+      ]
+    },
+    {
+      "name": "飲料與消費品牌",
+      "reason": "包含全球知名的無酒精飲料與機能性飲料品牌。這類防禦性消費股具備高度品牌忠誠度及穩定的現金流。",
+      "stocks": [
+        {
+          "code": "KO",
+          "name": "Coca-Cola Company (The)"
+        },
+        {
+          "code": "KDP",
+          "name": "Keurig Dr Pepper"
+        },
+        {
+          "code": "MNST",
+          "name": "Monster Beverage"
+        }
+      ]
+    },
+    {
+      "name": "網通與資料中心晶片",
+      "reason": "專注於資料中心、雲端運算及高速網路傳輸的半導體設計公司。在AI及巨量資料時代中扮演關鍵的資料處理角色。",
+      "stocks": [
+        {
+          "code": "MRVL",
+          "name": "Marvell Technology"
+        }
+      ]
+    },
+    {
+      "name": "金屬與礦業",
+      "reason": "包含從事銅礦、金礦等基本金屬與貴金屬開採的企業。金屬價格走勢及全球工業、避險需求直接影響其獲利。",
+      "stocks": [
+        {
+          "code": "FCX",
+          "name": "Freeport-McMoRan"
+        },
+        {
+          "code": "NEM",
+          "name": "Newmont"
+        }
+      ]
+    },
+    {
+      "name": "醫療服務與通路",
+      "reason": "涵蓋醫藥批發分銷、連鎖藥局以及透析等專業醫療服務提供者。這些企業是維持醫療體系運作的重要基礎設施。",
+      "stocks": [
+        {
+          "code": "CAH",
+          "name": "Cardinal Health"
+        },
+        {
+          "code": "CVS",
+          "name": "CVS Health"
+        },
+        {
+          "code": "DVA",
+          "name": "DaVita"
+        },
+        {
+          "code": "HSIC",
+          "name": "Henry Schein"
+        }
+      ]
+    },
+    {
+      "name": "網路資安",
+      "reason": "提供防火牆、端點防護及雲端安全解決方案的軟體公司。隨著網路威脅增加與數位轉型，企業對資安的投資持續成長。",
+      "stocks": [
+        {
+          "code": "FTNT",
+          "name": "Fortinet"
+        },
+        {
+          "code": "CRWD",
+          "name": "CrowdStrike"
+        },
+        {
+          "code": "PANW",
+          "name": "Palo Alto Networks"
+        }
+      ]
+    },
+    {
+      "name": "光通訊元件與設備",
+      "reason": "製造光學元件、光纖網路及高速傳輸設備的公司。受惠於電信網路升級與資料中心之間大量的數據傳輸需求。",
+      "stocks": [
+        {
+          "code": "COHR",
+          "name": "Coherent Corp."
+        },
+        {
+          "code": "CIEN",
+          "name": "Ciena"
+        },
+        {
+          "code": "LITE",
+          "name": "Lumentum"
+        }
+      ]
+    },
+    {
+      "name": "生技製藥",
+      "reason": "涵蓋大型跨國藥廠及專注於創新療法（如腫瘤、免疫、減重藥物）的生物製藥公司。擁有強大的研發能力及專利保護的藥物產品線。",
+      "stocks": [
+        {
+          "code": "BMY",
+          "name": "Bristol Myers Squibb"
+        },
+        {
+          "code": "INCY",
+          "name": "Incyte"
+        },
+        {
+          "code": "GILD",
+          "name": "Gilead Sciences"
+        },
+        {
+          "code": "AMGN",
+          "name": "Amgen"
+        },
         {
           "code": "MRK",
           "name": "Merck & Co."
@@ -5449,135 +5567,7 @@
         {
           "code": "MRNA",
           "name": "Moderna"
-        }
-      ]
-    },
-    {
-      "name": "半導體與運算晶片",
-      "reason": "隨著 AI 運算與資料中心需求爆發，高效能處理器（CPU/GPU）成為核心硬體。這群股票為全球領先的晶片設計與製造商，直接受益於運算晶片升級潮與半導體景氣復甦。",
-      "stocks": [
-        {
-          "code": "INTC",
-          "name": "Intel"
         },
-        {
-          "code": "AMD",
-          "name": "Advanced Micro Devices"
-        }
-      ]
-    },
-    {
-      "name": "金融服務",
-      "reason": "涵蓋大型銀行、金融服務及支付處理公司，共同受益於利率環境與金融體系運作。",
-      "stocks": [
-        {
-          "code": "PFG",
-          "name": "Principal Financial Group"
-        },
-        {
-          "code": "NTRS",
-          "name": "Northern Trust"
-        },
-        {
-          "code": "C",
-          "name": "Citigroup"
-        },
-        {
-          "code": "CPAY",
-          "name": "Corpay"
-        }
-      ]
-    },
-    {
-      "name": "半導體與 AI 基礎建設",
-      "reason": "包含半導體設備與資料中心基礎設施，是驅動 AI 運算能力的核心硬體供應鏈。",
-      "stocks": [
-        {
-          "code": "AMAT",
-          "name": "Applied Materials"
-        },
-        {
-          "code": "EQIX",
-          "name": "Equinix"
-        }
-      ]
-    },
-    {
-      "name": "油氣能源",
-      "reason": "專注於原油開採、生產與能源開發的企業，受全球能源價格與地緣政治影響。",
-      "stocks": [
-        {
-          "code": "CVX",
-          "name": "Chevron Corporation"
-        },
-        {
-          "code": "EOG",
-          "name": "EOG Resources"
-        },
-        {
-          "code": "FANG",
-          "name": "Diamondback Energy"
-        }
-      ]
-    },
-    {
-      "name": "工業與物流",
-      "reason": "包含重工業設備、基礎建設以及物流供應鏈，反映實體經濟的建設與運輸需求。",
-      "stocks": [
-        {
-          "code": "IEX",
-          "name": "IDEX Corporation"
-        },
-        {
-          "code": "CAT",
-          "name": "Caterpillar Inc."
-        },
-        {
-          "code": "EXPD",
-          "name": "Expeditors International"
-        },
-        {
-          "code": "DE",
-          "name": "Deere & Company"
-        }
-      ]
-    },
-    {
-      "name": "AI 資料中心與電網基礎建設",
-      "reason": "AI 算力爆發帶動龐大的電力、散熱與光纖傳輸需求。這群股票涵蓋發電與電網設備、電力工程建設、資料中心冷卻系統（HVAC）及高速光纖網路。",
-      "stocks": [
-        {
-          "code": "GLW",
-          "name": "Corning Inc."
-        },
-        {
-          "code": "GEV",
-          "name": "GE Vernova"
-        },
-        {
-          "code": "JCI",
-          "name": "Johnson Controls"
-        },
-        {
-          "code": "PWR",
-          "name": "Quanta Services"
-        }
-      ]
-    },
-    {
-      "name": "網路資安",
-      "reason": "隨著企業數位轉型與 AI 威脅增加，專注於提供雲端安全與威脅防禦解決方案的廠商。",
-      "stocks": [
-        {
-          "code": "PANW",
-          "name": "Palo Alto Networks"
-        }
-      ]
-    },
-    {
-      "name": "醫療保健與生技",
-      "reason": "整合生技製藥與醫療保險管理，專注於生物醫學創新與健康管理服務。",
-      "stocks": [
         {
           "code": "REGN",
           "name": "Regeneron Pharmaceuticals"
@@ -5591,81 +5581,83 @@
           "name": "Vertex Pharmaceuticals"
         },
         {
-          "code": "HUM",
-          "name": "Humana"
+          "code": "LLY",
+          "name": "Lilly (Eli)"
         }
       ]
     },
     {
-      "name": "基礎材料與特用化學",
-      "reason": "涵蓋農業化肥與食品特用化學品。這類公司提供全球農業生產與民生消費品不可或缺的基礎原料，具備抗通膨與防禦性特質。",
+      "name": "機電與基礎建設工程",
+      "reason": "提供機電整合、空調系統及電網基礎設施建置的工程與製造公司。受惠於資料中心建設、能源轉型與電網現代化趨勢。",
       "stocks": [
         {
-          "code": "IFF",
-          "name": "International Flavors & Fragrances"
+          "code": "FIX",
+          "name": "Comfort Systems USA"
         },
         {
-          "code": "CF",
-          "name": "CF Industries"
-        }
-      ]
-    },
-    {
-      "name": "消費品牌與飲料",
-      "reason": "包含能量飲料與咖啡等快消品，受消費力與品牌忠誠度驅動的必需消費品類股。",
-      "stocks": [
-        {
-          "code": "KDP",
-          "name": "Keurig Dr Pepper"
+          "code": "PWR",
+          "name": "Quanta Services"
         },
         {
-          "code": "MNST",
-          "name": "Monster Beverage"
+          "code": "GEV",
+          "name": "GE Vernova"
+        },
+        {
+          "code": "JCI",
+          "name": "Johnson Controls"
         }
       ]
     },
     {
-      "name": "半導體與設備",
-      "reason": "包含半導體前段檢測設備龍頭與全球模擬晶片大廠。受惠於半導體製程升級、車用與工業晶片長期需求，是科技產業的核心基石。",
+      "name": "半導體設備",
+      "reason": "為半導體製造商提供晶圓生產、製程控制與檢測設備的龍頭企業。晶片製程微縮與產能擴充推動了對高階製程設備的長期需求。",
       "stocks": [
+        {
+          "code": "LRCX",
+          "name": "Lam Research"
+        },
+        {
+          "code": "AMAT",
+          "name": "Applied Materials"
+        },
         {
           "code": "KLAC",
           "name": "KLA Corporation"
+        }
+      ]
+    },
+    {
+      "name": "油氣探勘與生產",
+      "reason": "從事原油與天然氣探勘、開採的上游能源企業及整合型石油巨頭。其營運表現高度連動於全球能源價格與供需狀況。",
+      "stocks": [
+        {
+          "code": "APA",
+          "name": "APA Corporation"
         },
         {
-          "code": "TXN",
-          "name": "Texas Instruments"
-        }
-      ]
-    },
-    {
-      "name": "AI 與大型科技",
-      "reason": "聚焦於開發生成式 AI 模型、硬體整合及雲端生態系的科技巨頭，主導市場 AI 應用趨勢。",
-      "stocks": [
-        {
-          "code": "GOOG",
-          "name": "Alphabet Inc. (Class C)"
+          "code": "XOM",
+          "name": "ExxonMobil"
         },
         {
-          "code": "AAPL",
-          "name": "Apple Inc."
-        }
-      ]
-    },
-    {
-      "name": "鐵路運輸與物流",
-      "reason": "鐵路運輸是北美貨運與供應鏈的命脈，其營運狀況直接反映實體經濟與工業製造的復甦力道。",
-      "stocks": [
+          "code": "COP",
+          "name": "ConocoPhillips"
+        },
         {
-          "code": "UNP",
-          "name": "Union Pacific Corporation"
-        }
-      ]
-    },
-    {
-      "name": "傳統能源與油氣開採",
-      "reason": "以石油與天然氣勘探開採為主，受惠於地緣政治風險帶來的油價支撐、OPEC+ 減產政策，以及知名投資人（如巴菲特）的資金加持效應。",
-      "stocks": [
+          "code": "DVN",
+          "name": "Devon Energy"
+        },
+        {
+          "code": "CVX",
+          "name": "Chevron Corporation"
+        },
+        {
+          "code": "EOG",
+          "name": "EOG Resources"
+        },
+        {
+          "code": "FANG",
+          "name": "Diamondback Energy"
+        },
         {
           "code": "OXY",
           "name": "Occidental Petroleum"
@@ -5673,19 +5665,179 @@
       ]
     },
     {
-      "name": "GLP-1 減重藥與生技",
-      "reason": "專注於開發新型代謝疾病藥物，尤其是市場需求極高的 GLP-1 類減重與糖尿病藥物。",
+      "name": "網通設備",
+      "reason": "提供企業級網路交換器、路由器及通訊基礎設施的設備大廠。支撐全球網路互連及企業IT架構的核心運作。",
       "stocks": [
         {
-          "code": "LLY",
-          "name": "Lilly (Eli)"
+          "code": "CSCO",
+          "name": "Cisco"
         }
       ]
     },
     {
-      "name": "保險與風險管理",
-      "reason": "此題材涵蓋財產、意外及人壽保險巨頭。在利率維持高檔的環境下，保險公司能獲取更高的再投資收益，且近期保費調升趨勢顯著，帶動整體獲利與股價動能。",
+      "name": "鐵路運輸",
+      "reason": "經營北美主要鐵路網絡的貨運公司。鐵路是運輸大宗物資與工業產品最具成本效益的方式，具備高度護城河。",
       "stocks": [
+        {
+          "code": "CSX",
+          "name": "CSX Corporation"
+        },
+        {
+          "code": "UNP",
+          "name": "Union Pacific Corporation"
+        }
+      ]
+    },
+    {
+      "name": "房地產投資信託",
+      "reason": "包含投資於飯店觀光、醫療護理設施以及資料中心的REITs。透過持有特定領域的不動產收取穩定的租金收益。",
+      "stocks": [
+        {
+          "code": "HST",
+          "name": "Host Hotels & Resorts"
+        },
+        {
+          "code": "WELL",
+          "name": "Welltower"
+        },
+        {
+          "code": "EQIX",
+          "name": "Equinix"
+        }
+      ]
+    },
+    {
+      "name": "工業控制與精密機械",
+      "reason": "生產精密流體控制、工業儀器、電動工具與機械零組件的製造商。產品廣泛應用於各類工業自動化與製造流程中。",
+      "stocks": [
+        {
+          "code": "NDSN",
+          "name": "Nordson Corporation"
+        },
+        {
+          "code": "PH",
+          "name": "Parker Hannifin"
+        },
+        {
+          "code": "SWK",
+          "name": "Stanley Black & Decker"
+        },
+        {
+          "code": "AME",
+          "name": "Ametek"
+        },
+        {
+          "code": "IEX",
+          "name": "IDEX Corporation"
+        }
+      ]
+    },
+    {
+      "name": "軌道與重型機械設備",
+      "reason": "製造農業機械、工程重機具以及鐵路機車設備的工業巨頭。受惠於全球農業發展、基礎建設投資及軌道運輸升級。",
+      "stocks": [
+        {
+          "code": "WAB",
+          "name": "Wabtec"
+        },
+        {
+          "code": "CAT",
+          "name": "Caterpillar Inc."
+        },
+        {
+          "code": "DE",
+          "name": "Deere & Company"
+        }
+      ]
+    },
+    {
+      "name": "油氣管線與中游設施",
+      "reason": "負責天然氣與原油運輸管線、儲存與處理等中游基礎設施營運的公司。商業模式類似過路費，具備穩定的現金流。",
+      "stocks": [
+        {
+          "code": "OKE",
+          "name": "Oneok"
+        },
+        {
+          "code": "KMI",
+          "name": "Kinder Morgan"
+        },
+        {
+          "code": "WMB",
+          "name": "Williams Companies"
+        },
+        {
+          "code": "TRGP",
+          "name": "Targa Resources"
+        }
+      ]
+    },
+    {
+      "name": "石油煉製",
+      "reason": "從事原油煉製並生產汽油、柴油及石化產品的下游能源公司。獲利能力取決於煉油價差（Crack Spread）與終端油品需求。",
+      "stocks": [
+        {
+          "code": "VLO",
+          "name": "Valero Energy"
+        },
+        {
+          "code": "PSX",
+          "name": "Phillips 66"
+        },
+        {
+          "code": "MPC",
+          "name": "Marathon Petroleum"
+        }
+      ]
+    },
+    {
+      "name": "工業分銷與物流",
+      "reason": "包含工業維護耗材（MRO）的分銷商以及全球貨運代理物流服務商。企業營運依賴強大的供應鏈管理與全球運輸網絡。",
+      "stocks": [
+        {
+          "code": "GWW",
+          "name": "W. W. Grainger"
+        },
+        {
+          "code": "EXPD",
+          "name": "Expeditors International"
+        }
+      ]
+    },
+    {
+      "name": "醫療保險與管理式護理",
+      "reason": "提供各類醫療保險計畫與政府醫療補助管理服務的企業。透過規模優勢進行醫療成本控管並服務廣大保戶。",
+      "stocks": [
+        {
+          "code": "CNC",
+          "name": "Centene Corporation"
+        },
+        {
+          "code": "HUM",
+          "name": "Humana"
+        }
+      ]
+    },
+    {
+      "name": "保險服務",
+      "reason": "涵蓋財產險、意外險、壽險與風險管理的多元保險公司。透過承保利潤及龐大浮存金的投資收益來維持穩定獲利。",
+      "stocks": [
+        {
+          "code": "TRV",
+          "name": "Travelers Companies (The)"
+        },
+        {
+          "code": "AIZ",
+          "name": "Assurant"
+        },
+        {
+          "code": "MET",
+          "name": "MetLife"
+        },
+        {
+          "code": "GL",
+          "name": "Globe Life"
+        },
         {
           "code": "PRU",
           "name": "Prudential Financial"
@@ -5701,15 +5853,197 @@
       ]
     },
     {
-      "name": "旅遊與休閒消費",
-      "reason": "涵蓋航空與國際連鎖酒店龍頭，直接受益於全球商務旅行與休閒旅遊需求的強勁復甦，消費者對於體驗式消費的支出依然保持高度韌性。",
+      "name": "農產與化學品",
+      "reason": "包含大宗農產穀物貿易、種子農業技術以及特用與肥料化學品生產商。為全球糧食供應鏈與工業材料的重要基石。",
       "stocks": [
+        {
+          "code": "ADM",
+          "name": "Archer Daniels Midland"
+        },
+        {
+          "code": "CTVA",
+          "name": "Corteva"
+        },
+        {
+          "code": "IFF",
+          "name": "International Flavors & Fragrances"
+        },
+        {
+          "code": "CF",
+          "name": "CF Industries"
+        }
+      ]
+    },
+    {
+      "name": "電子製造服務",
+      "reason": "提供全球品牌代工生產（EMS）及供應鏈解決方案的電子製造廠。涵蓋從產品設計到量產與售後等一條龍服務。",
+      "stocks": [
+        {
+          "code": "FLEX",
+          "name": "Flex Ltd."
+        }
+      ]
+    },
+    {
+      "name": "類比與混合訊號晶片",
+      "reason": "專注於生產類比IC與混合訊號晶片的半導體大廠。產品生命週期長，且廣泛應用於汽車、工業與消費性電子領域。",
+      "stocks": [
+        {
+          "code": "ADI",
+          "name": "Analog Devices"
+        },
+        {
+          "code": "TXN",
+          "name": "Texas Instruments"
+        }
+      ]
+    },
+    {
+      "name": "醫學檢驗與生命科學儀器",
+      "reason": "提供臨床血液檢測、醫學診斷服務以及生命科學實驗儀器的公司。協助疾病診斷、預防醫學及生物醫學研究發展。",
+      "stocks": [
+        {
+          "code": "DGX",
+          "name": "Quest Diagnostics"
+        },
+        {
+          "code": "LH",
+          "name": "Labcorp"
+        },
+        {
+          "code": "RVTY",
+          "name": "Revvity"
+        }
+      ]
+    },
+    {
+      "name": "汽車製造與轉型",
+      "reason": "傳統跨國汽車製造大廠。近年致力於推動產品線轉型，積極發展電動車與自動駕駛技術。",
+      "stocks": [
+        {
+          "code": "GM",
+          "name": "General Motors"
+        }
+      ]
+    },
+    {
+      "name": "生技委託研究",
+      "reason": "提供藥物研發、毒理測試及臨床試驗外包服務（CRO）的企業。協助製藥公司加速新藥開發流程並降低研發成本。",
+      "stocks": [
+        {
+          "code": "CRL",
+          "name": "Charles River Laboratories"
+        }
+      ]
+    },
+    {
+      "name": "資料儲存設備與系統",
+      "reason": "提供企業級儲存系統、硬碟及雲端數據管理解決方案的公司。滿足企業龐大數據儲存、備份及資料治理的需求。",
+      "stocks": [
+        {
+          "code": "NTAP",
+          "name": "NetApp"
+        },
+        {
+          "code": "STX",
+          "name": "Seagate Technology"
+        },
+        {
+          "code": "WDC",
+          "name": "Western Digital"
+        }
+      ]
+    },
+    {
+      "name": "記憶體技術",
+      "reason": "專注於DRAM及NAND Flash等記憶體晶片與隨身碟產品製造。市場具高度週期性，受惠於AI與伺服器帶動的高頻寬記憶體需求。",
+      "stocks": [
+        {
+          "code": "SNDK",
+          "name": "Sandisk"
+        },
+        {
+          "code": "MU",
+          "name": "Micron Technology"
+        }
+      ]
+    },
+    {
+      "name": "旅遊與航空休閒",
+      "reason": "包含全球大型航空公司及線上旅遊共享住宿平台。營收與全球旅遊復甦及休閒商務差旅需求高度相關。",
+      "stocks": [
+        {
+          "code": "ABNB",
+          "name": "Airbnb"
+        },
         {
           "code": "DAL",
           "name": "Delta Air Lines"
         }
       ]
+    },
+    {
+      "name": "電信基礎網路",
+      "reason": "經營行動通訊、寬頻與固網服務的龍頭電信營運商。提供防禦性高的穩定現金流與高股息配發。",
+      "stocks": [
+        {
+          "code": "VZ",
+          "name": "Verizon"
+        }
+      ]
+    },
+    {
+      "name": "大型科技與雲端服務",
+      "reason": "主導全球網路搜尋、智慧型手機生態系統及公有雲服務的科技巨頭。擁有龐大的用戶基數，並積極投資AI技術創新。",
+      "stocks": [
+        {
+          "code": "GOOGL",
+          "name": "Alphabet Inc. (Class A)"
+        },
+        {
+          "code": "GOOG",
+          "name": "Alphabet Inc. (Class C)"
+        },
+        {
+          "code": "AAPL",
+          "name": "Apple Inc."
+        }
+      ]
+    },
+    {
+      "name": "菸草與防禦型消費",
+      "reason": "生產香菸及新興無煙菸草產品的跨國集團。所屬產業具備高度進入障礙及強大的定價能力，為典型的防禦型價值股。",
+      "stocks": [
+        {
+          "code": "PM",
+          "name": "Philip Morris International"
+        }
+      ]
+    },
+    {
+      "name": "半導體與運算晶片",
+      "reason": "設計與製造電腦CPU、伺服器處理器與繪圖晶片(GPU)的半導體大廠。是驅動全球PC、伺服器運算力及AI應用的核心企業。",
+      "stocks": [
+        {
+          "code": "INTC",
+          "name": "Intel"
+        },
+        {
+          "code": "AMD",
+          "name": "Advanced Micro Devices"
+        }
+      ]
+    },
+    {
+      "name": "特殊玻璃與光學材料",
+      "reason": "製造特殊玻璃、陶瓷與光學材料的工業公司。其產品廣泛應用於顯示器、光纖通訊網路及車用與生命科學領域。",
+      "stocks": [
+        {
+          "code": "GLW",
+          "name": "Corning Inc."
+        }
+      ]
     }
   ],
-  "theme_status": "timeout"
+  "theme_status": "ok"
 }
