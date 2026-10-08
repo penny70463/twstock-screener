@@ -40,6 +40,9 @@ class Settings:
     )
     # 3.8-flash 在 2026-10-06 實測回 503；3.5-flash 18.7 秒回完同一批。
     gemini_model: str = os.getenv("GEMINI_MODEL") or "gemini-3.5-flash"
+    # 本機 agy。排程用絕對路徑，cron 的 PATH 不含 ~/.local/bin。
+    antigravity_bin: str = os.getenv("ANTIGRAVITY_BIN") or str(Path.home() / ".local" / "bin" / "agy")
+    antigravity_model: str = os.getenv("ANTIGRAVITY_MODEL") or "gemini-3.1-pro-low"
 
     finmind_token: str = os.getenv("FINMIND_TOKEN", "")
 
@@ -56,6 +59,8 @@ class Settings:
     def theme_model(self) -> str:
         if self.theme_llm == "gemini":
             return self.gemini_model
+        if self.theme_llm == "antigravity":
+            return self.antigravity_model
         return self.nvidia_model
 
     def require_nvidia(self) -> None:
@@ -67,8 +72,14 @@ class Settings:
             if not self.gemini_api_key:
                 raise RuntimeError("THEME_LLM=gemini 但缺少 GEMINI_API_KEY，請在 .env 設定")
             return
+        if self.theme_llm == "antigravity":
+            if not Path(self.antigravity_bin).is_file():
+                raise RuntimeError(f"THEME_LLM=antigravity 但找不到 {self.antigravity_bin}")
+            return
         if self.theme_llm != "nvidia":
-            raise RuntimeError(f"不支援的 THEME_LLM={self.theme_llm}，可用 nvidia 或 gemini")
+            raise RuntimeError(
+                f"不支援的 THEME_LLM={self.theme_llm}，可用 nvidia、gemini 或 antigravity"
+            )
         self.require_nvidia()
 
 

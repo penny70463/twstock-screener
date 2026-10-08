@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 import time
 from pathlib import Path
 
@@ -14,8 +15,10 @@ from config import RESULT_DIR, settings
 from src.prompts import get_prompts
 
 
-def _client() -> OpenAI:
+def _client() -> OpenAI | None:
     settings.require_theme_llm()
+    if settings.theme_llm == "antigravity":
+        return None
     # 免費額度延遲不穩且連跑會被限流。分批呼叫，SDK 不重試（max_retries=0），
     # 重試由 _classify_batch 以批次為單位控制：失敗批次稍後再試一次即放棄，
     # 保住其他批的題材（部分結果勝過全 0；
@@ -324,7 +327,73 @@ def _dump_raw(content: str, bi: int) -> None:
         pass
 
 
-def _call(client: OpenAI, messages: list[dict], json_mode: bool) -> str:
+_AGY_WORKDIR = Path("/tmp/agy-theme-classify")
+_AGY_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "themes": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"},
+                    "reason": {"type": "string"},
+                    "codes": {"type": "array", "items": {"type": "string"}},
+                    "suggested_etfs": {"type": "array", "items": {"type": "string"}},
+                },
+                "required": ["name", "reason", "codes"],
+            },
+        }
+    },
+    "required": ["themes"],
+}
+
+
+def _call_antigravity(messages: list[dict]) -> str:
+    """本機 agy。工作目錄在 /tmp，避免 agent 改到這個 repo。"""
+    _AGY_WORKDIR.mkdir(parents=True, exist_ok=True)
+    schema_path = _AGY_WORKDIR / "schema.json"
+    schema_path.write_text(json.dumps(_AGY_SCHEMA), encoding="utf-8")
+    prompt = (
+        "不要使用任何工具，不要讀寫任何檔案。只做題材分類，只輸出 JSON。\n\n"
+        + "\n\n".join(f"[{m['role']}]\n{m['content']}" for m in messages)
+    )
+    # 階段二實測 132 秒。240 秒給歸併留餘裕，逾時由 subprocess 切斷。
+    proc = subprocess.run(
+        [
+            settings.antigravity_bin,
+            "--print", prompt,
+            "--output-format", "json",
+            "--json-schema", str(schema_path),
+            "--model", settings.theme_model,
+            "--disable-slash-commands",
+            "--sandbox",
+            "--print-timeout", "240s",
+        ],
+        cwd=_AGY_WORKDIR,
+        capture_output=True,
+        text=True,
+        timeout=260,
+    )
+    if proc.returncode != 0:
+        err = (proc.stderr or proc.stdout or "")[-800:]
+        raise RuntimeError(f"agy exit {proc.returncode}: {err}")
+    data = json.loads(proc.stdout)
+    usage = data.get("usage") or {}
+    print(
+        f"    agy status={data.get('status')} "
+        f"in={usage.get('input_tokens')} out={usage.get('output_tokens')}",
+        flush=True,
+    )
+    structured = data.get("structured_output")
+    if isinstance(structured, dict) and structured.get("themes"):
+        return json.dumps(structured, ensure_ascii=False)
+    raise RuntimeError(f"agy 沒有題材 JSON，status={data.get('status')}")
+
+
+def _call(client: OpenAI | None, messages: list[dict], json_mode: bool) -> str:
+    if settings.theme_llm == "antigravity":
+        return _call_antigravity(messages)
     kwargs = {
         "model": settings.theme_model,
         "messages": messages,
