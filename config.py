@@ -22,6 +22,26 @@ def _parse_windows(raw: str) -> list[int]:
     return [int(x.strip()) for x in raw.split(",") if x.strip()]
 
 
+# 主模型不在 agy 清單時依序試。名稱整批改掉時，classifier 再依家族前綴對活清單。
+_DEFAULT_AGY_FALLBACKS = [
+    "claude-opus-5-5-medium",
+    "claude-opus-5-5-high",
+    "claude-sonnet-5-5-low",
+    "claude-sonnet-5-5-medium",
+    "claude-sonnet-5-5-high",
+    "gemini-3.8-flash-low",
+    "gemini-3.8-flash-medium",
+    "gpt-oss-120b-medium",
+]
+
+
+def _agy_fallbacks() -> list[str]:
+    raw = os.getenv("ANTIGRAVITY_MODEL_FALLBACKS")
+    if raw is None:
+        return list(_DEFAULT_AGY_FALLBACKS)
+    return [part.strip() for part in raw.split(",") if part.strip()]
+
+
 @dataclass
 class Settings:
     nvidia_api_key: str = os.getenv("NVIDIA_API_KEY", "")
@@ -42,7 +62,8 @@ class Settings:
     gemini_model: str = os.getenv("GEMINI_MODEL") or "gemini-3.5-flash"
     # 本機 agy。排程用絕對路徑，cron 的 PATH 不含 ~/.local/bin。
     antigravity_bin: str = os.getenv("ANTIGRAVITY_BIN") or str(Path.home() / ".local" / "bin" / "agy")
-    antigravity_model: str = os.getenv("ANTIGRAVITY_MODEL") or "gemini-3.1-pro-low"
+    antigravity_model: str = os.getenv("ANTIGRAVITY_MODEL") or "claude-opus-5-5-low"
+    antigravity_model_fallbacks: list[str] = field(default_factory=_agy_fallbacks)
 
     finmind_token: str = os.getenv("FINMIND_TOKEN", "")
 

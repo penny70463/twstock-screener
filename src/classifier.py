@@ -349,7 +349,75 @@ _AGY_SCHEMA = {
 }
 
 
-def _call_antigravity(messages: list[dict]) -> str:
+# 精確名稱都不在活清單時，依這個順序對前綴。同一家族先低 effort。
+_AGY_FAMILY = (
+    ("claude-opus", ("-low", "-medium", "-high")),
+    ("claude-sonnet", ("-low", "-medium", "-high")),
+    ("gemini", ("-low", "-medium", "-high")),
+    ("gpt-oss", ("-medium", "-low", "-high")),
+)
+# 這次行程已改用的模型。主模型被拒後只查一次清單，後面的批次沿用。
+_agy_model_override: str | None = None
+
+
+def parse_agy_model_ids(text: str) -> list[str]:
+    """agy models 的 stdout：`id\\t顯示名`。沒有 tab 的說明行略過。"""
+    ids: list[str] = []
+    for line in text.splitlines():
+        if "\t" not in line:
+            continue
+        model_id = line.split("\t", 1)[0].strip()
+        if model_id and " " not in model_id:
+            ids.append(model_id)
+    return ids
+
+
+def pick_agy_model(primary: str, fallbacks: list[str], live: list[str]) -> str:
+    """先精確比對主模型與備援，再依家族前綴對活清單，最後用清單第一個。"""
+    if not live:
+        raise RuntimeError("agy models 清單是空的")
+    ordered: list[str] = []
+    seen: set[str] = set()
+    for cand in (primary, *fallbacks):
+        if cand and cand not in seen:
+            seen.add(cand)
+            ordered.append(cand)
+    live_set = set(live)
+    for cand in ordered:
+        if cand in live_set:
+            return cand
+    for prefix, suffixes in _AGY_FAMILY:
+        family = [model_id for model_id in live if model_id.startswith(prefix)]
+        if not family:
+            continue
+        for suffix in suffixes:
+            for model_id in family:
+                if model_id.endswith(suffix):
+                    return model_id
+        return family[0]
+    return live[0]
+
+
+def _is_unknown_agy_model(exc: BaseException) -> bool:
+    msg = str(exc).lower()
+    return "not recognized" in msg or "invalid model" in msg
+
+
+def _list_agy_models() -> list[str]:
+    proc = subprocess.run(
+        [settings.antigravity_bin, "models"],
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    text = f"{proc.stdout or ''}\n{proc.stderr or ''}"
+    ids = parse_agy_model_ids(text)
+    if proc.returncode != 0 and not ids:
+        raise RuntimeError(f"agy models exit {proc.returncode}: {text[-400:]}")
+    return ids
+
+
+def _run_agy(messages: list[dict], model: str) -> str:
     """本機 agy。工作目錄在 /tmp，避免 agent 改到這個 repo。"""
     _AGY_WORKDIR.mkdir(parents=True, exist_ok=True)
     schema_path = _AGY_WORKDIR / "schema.json"
@@ -365,7 +433,7 @@ def _call_antigravity(messages: list[dict]) -> str:
             "--print", prompt,
             "--output-format", "json",
             "--json-schema", str(schema_path),
-            "--model", settings.theme_model,
+            "--model", model,
             "--disable-slash-commands",
             "--sandbox",
             "--print-timeout", "240s",
@@ -381,7 +449,7 @@ def _call_antigravity(messages: list[dict]) -> str:
     data = json.loads(proc.stdout)
     usage = data.get("usage") or {}
     print(
-        f"    agy status={data.get('status')} "
+        f"    agy status={data.get('status')} model={model} "
         f"in={usage.get('input_tokens')} out={usage.get('output_tokens')}",
         flush=True,
     )
@@ -389,6 +457,27 @@ def _call_antigravity(messages: list[dict]) -> str:
     if isinstance(structured, dict) and structured.get("themes"):
         return json.dumps(structured, ensure_ascii=False)
     raise RuntimeError(f"agy 沒有題材 JSON，status={data.get('status')}")
+
+
+def _call_antigravity(messages: list[dict]) -> str:
+    global _agy_model_override
+    model = _agy_model_override or settings.theme_model
+    try:
+        return _run_agy(messages, model)
+    except RuntimeError as exc:
+        if _agy_model_override is not None or not _is_unknown_agy_model(exc):
+            raise
+        live = _list_agy_models()
+        picked = pick_agy_model(
+            settings.antigravity_model,
+            settings.antigravity_model_fallbacks,
+            live,
+        )
+        if picked == model:
+            raise
+        print(f"  ! 模型 {model} 不在 agy 清單，改用 {picked}", flush=True)
+        _agy_model_override = picked
+        return _run_agy(messages, picked)
 
 
 def _call(client: OpenAI | None, messages: list[dict], json_mode: bool) -> str:
