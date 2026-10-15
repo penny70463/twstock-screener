@@ -356,8 +356,9 @@ _AGY_FAMILY = (
     ("gemini", ("-low", "-medium", "-high")),
     ("gpt-oss", ("-medium", "-low", "-high")),
 )
-# 這次行程已改用的模型。主模型被拒後只查一次清單，後面的批次沿用。
+# 這次行程已改用的模型。主模型被拒或非 Gemini 額度用完後只查一次清單，後面的批次沿用。
 _agy_model_override: str | None = None
+_agy_quota_switched = False
 
 
 def parse_agy_model_ids(text: str) -> list[str]:
@@ -401,6 +402,26 @@ def pick_agy_model(primary: str, fallbacks: list[str], live: list[str]) -> str:
 def _is_unknown_agy_model(exc: BaseException) -> bool:
     msg = str(exc).lower()
     return "not recognized" in msg or "invalid model" in msg
+
+
+def _is_quota_exhausted(exc: BaseException) -> bool:
+    """agy 額度用完。名稱還在清單裡，所以不能走「模型不認識」那條。"""
+    msg = str(exc).lower().replace("-", "_")
+    return (
+        "individual quota reached" in msg
+        or "model_capacity_exhausted" in msg
+        or "out of credits" in msg
+        or "resource_exhausted" in msg
+    )
+
+
+def _pick_gemini_model(fallbacks: list[str], live: list[str]) -> str | None:
+    """非 Gemini 額度用完時，只在活清單的 Gemini 裡挑。沒有 Gemini Pro 這個 id。"""
+    gemini = [model_id for model_id in live if model_id.startswith("gemini")]
+    if not gemini:
+        return None
+    prefs = [model_id for model_id in fallbacks if model_id.startswith("gemini")]
+    return pick_agy_model("gemini-3.8-flash-low", prefs, gemini)
 
 
 def _list_agy_models() -> list[str]:
@@ -456,17 +477,13 @@ def _run_agy(messages: list[dict], model: str) -> str:
     structured = data.get("structured_output")
     if isinstance(structured, dict) and structured.get("themes"):
         return json.dumps(structured, ensure_ascii=False)
-    raise RuntimeError(f"agy 沒有題材 JSON，status={data.get('status')}")
+    snippet = (proc.stdout or "")[-400:]
+    raise RuntimeError(f"agy 沒有題材 JSON，status={data.get('status')} {snippet}")
 
 
-def _call_antigravity(messages: list[dict]) -> str:
-    global _agy_model_override
-    model = _agy_model_override or settings.theme_model
-    try:
-        return _run_agy(messages, model)
-    except RuntimeError as exc:
-        if _agy_model_override is not None or not _is_unknown_agy_model(exc):
-            raise
+def _replacement_model(model: str, exc: BaseException) -> tuple[str, str] | None:
+    """回傳 (新模型, 原因)。不該換就回 None。"""
+    if _is_unknown_agy_model(exc) and _agy_model_override is None:
         live = _list_agy_models()
         picked = pick_agy_model(
             settings.antigravity_model,
@@ -474,9 +491,34 @@ def _call_antigravity(messages: list[dict]) -> str:
             live,
         )
         if picked == model:
+            return None
+        return picked, f"模型 {model} 不在 agy 清單，改用 {picked}"
+    if (
+        _is_quota_exhausted(exc)
+        and not _agy_quota_switched
+        and not model.startswith("gemini")
+    ):
+        picked = _pick_gemini_model(settings.antigravity_model_fallbacks, _list_agy_models())
+        if not picked or picked == model:
+            return None
+        return picked, f"模型 {model} 額度用完，改用 {picked}"
+    return None
+
+
+def _call_antigravity(messages: list[dict]) -> str:
+    global _agy_model_override, _agy_quota_switched
+    model = _agy_model_override or settings.theme_model
+    try:
+        return _run_agy(messages, model)
+    except RuntimeError as exc:
+        replacement = _replacement_model(model, exc)
+        if replacement is None:
             raise
-        print(f"  ! 模型 {model} 不在 agy 清單，改用 {picked}", flush=True)
+        picked, reason = replacement
+        print(f"  ! {reason}", flush=True)
         _agy_model_override = picked
+        if _is_quota_exhausted(exc):
+            _agy_quota_switched = True
         return _run_agy(messages, picked)
 
 

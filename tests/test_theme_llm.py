@@ -37,8 +37,60 @@ def test_pick_agy_model_uses_fallback_then_family():
     ) == "claude-opus-5-6-low"
 
 
+def test_antigravity_quota_switches_to_gemini_not_claude(monkeypatch, tmp_path):
+    monkeypatch.setattr(classifier, "_agy_model_override", None)
+    monkeypatch.setattr(classifier, "_agy_quota_switched", False)
+    monkeypatch.setattr(classifier.settings, "theme_llm", "antigravity")
+    monkeypatch.setattr(classifier.settings, "antigravity_bin", "/tmp/agy")
+    monkeypatch.setattr(classifier.settings, "antigravity_model", "claude-opus-5-5-low")
+    monkeypatch.setattr(
+        classifier.settings,
+        "antigravity_model_fallbacks",
+        ["claude-sonnet-5-5-low", "gemini-3.8-flash-low", "gemini-3.8-flash-medium"],
+    )
+    monkeypatch.setattr(classifier, "_AGY_WORKDIR", tmp_path)
+    calls: list[list[str]] = []
+
+    class Proc:
+        def __init__(self, code: int, stdout: str, stderr: str = ""):
+            self.returncode = code
+            self.stdout = stdout
+            self.stderr = stderr
+
+    ok = json.dumps({
+        "status": "SUCCESS",
+        "structured_output": {"themes": [{"name": "矽晶圓", "reason": "晶圓", "codes": ["3532"]}]},
+        "usage": {"input_tokens": 10, "output_tokens": 20},
+    })
+    listing = (
+        "Fetching available models...\n"
+        "claude-opus-5-5-low\tClaude Opus 5.5 (Low)\n"
+        "claude-sonnet-5-5-low\tClaude Sonnet 5.5 (Low)\n"
+        "gemini-3.8-flash-high\tGemini 3.8 Flash (High)\n"
+        "gemini-3.8-flash-low\tGemini 3.8 Flash (Low)\n"
+    )
+
+    def fake_run(cmd, **kwargs):
+        calls.append(list(cmd))
+        if cmd[1] == "models":
+            return Proc(0, listing)
+        model = cmd[cmd.index("--model") + 1]
+        if model.startswith("claude"):
+            return Proc(1, "", "error: MODEL_CAPACITY_EXHAUSTED individual quota reached")
+        return Proc(0, ok)
+
+    monkeypatch.setattr(classifier.subprocess, "run", fake_run)
+    messages = [{"role": "user", "content": "[]"}]
+    data = json.loads(classifier._call(None, messages, json_mode=True))
+    assert data["themes"][0]["codes"] == ["3532"]
+    model_calls = [cmd[cmd.index("--model") + 1] for cmd in calls if "--model" in cmd]
+    assert model_calls == ["claude-opus-5-5-low", "gemini-3.8-flash-low"]
+    assert sum(1 for cmd in calls if cmd[1] == "models") == 1
+
+
 def test_antigravity_unknown_model_switches_once(monkeypatch, tmp_path):
     monkeypatch.setattr(classifier, "_agy_model_override", None)
+    monkeypatch.setattr(classifier, "_agy_quota_switched", False)
     monkeypatch.setattr(classifier.settings, "theme_llm", "antigravity")
     monkeypatch.setattr(classifier.settings, "antigravity_bin", "/tmp/agy")
     monkeypatch.setattr(classifier.settings, "antigravity_model", "gemini-3.1-pro-low")
@@ -84,6 +136,7 @@ def test_antigravity_unknown_model_switches_once(monkeypatch, tmp_path):
 
 def test_antigravity_call_reads_structured_output(monkeypatch, tmp_path):
     monkeypatch.setattr(classifier, "_agy_model_override", None)
+    monkeypatch.setattr(classifier, "_agy_quota_switched", False)
     monkeypatch.setattr(classifier.settings, "theme_llm", "antigravity")
     monkeypatch.setattr(classifier.settings, "antigravity_bin", "/tmp/agy")
     monkeypatch.setattr(classifier.settings, "antigravity_model", "claude-opus-5-5-low")
