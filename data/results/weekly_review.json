@@ -1,691 +1,880 @@
 {
-  "review_date": "2026-10-10",
-  "generated_at": "2026-10-10T15:56:46+08:00",
+  "review_date": "2026-10-17",
+  "generated_at": "2026-10-17T14:25:24+08:00",
   "markets": [
     {
       "market": "TW",
-      "select_date": "本週 (10-05 ~ 10-08)",
-      "review_date": "2026-10-10",
-      "total": 62,
-      "win_count": 17,
-      "win_rate": 27.4,
-      "avg_return": -0.5,
+      "select_date": "本週 (10-12 ~ 10-16)",
+      "review_date": "2026-10-17",
+      "total": 83,
+      "win_count": 32,
+      "win_rate": 38.6,
+      "avg_return": -0.23,
       "segments": {
         "top3": {
-          "total": 8,
-          "win_count": 4,
-          "win_rate": 50.0,
-          "avg_return": 1.31
+          "total": 11,
+          "win_count": 3,
+          "win_rate": 27.3,
+          "avg_return": -0.84
         },
         "top10": {
-          "total": 27,
-          "win_count": 9,
-          "win_rate": 33.3,
-          "avg_return": 0.7
-        },
-        "all": {
-          "total": 62,
-          "win_count": 17,
-          "win_rate": 27.4,
-          "avg_return": -0.5
-        }
-      },
-      "capped_stats": {
-        "capped": {
-          "total": 28,
-          "win_count": 11,
-          "win_rate": 39.3,
-          "avg_return": -0.46
-        },
-        "uncapped": {
-          "total": 34,
-          "win_count": 6,
-          "win_rate": 17.6,
-          "avg_return": -0.54
-        }
-      },
-      "benchmark": {
-        "universe_n": 453,
-        "universe_up": 0,
-        "universe_hit_rate": 0.0,
-        "window": [
-          "2026-10-05",
-          "2026-10-08"
-        ],
-        "source": "cache",
-        "index": "0050",
-        "index_return": 0.0
-      },
-      "lift_top3": 50.0,
-      "top3": [
-        {
-          "name": "百一",
-          "ret": 10.82
-        },
-        {
-          "name": "其陽",
-          "ret": 9.85
-        },
-        {
-          "name": "南亞",
-          "ret": 8.39
-        }
-      ],
-      "bottom3": [
-        {
-          "name": "松川精密",
-          "ret": -8.27
-        },
-        {
-          "name": "聯發科",
-          "ret": -9.2
-        },
-        {
-          "name": "鼎元",
-          "ret": -9.65
-        }
-      ],
-      "details": [
-        {
-          "code": "1303.TW",
-          "name": "南亞",
-          "base_price": 286.0,
-          "current_price": 310.0,
-          "return_pct": 8.39,
-          "first_rank": 1,
-          "capped": false
-        },
-        {
-          "code": "3498.TWO",
-          "name": "陽程",
-          "base_price": 236.5,
-          "current_price": 225.5,
-          "return_pct": -4.65,
-          "first_rank": 2,
-          "capped": false
-        },
-        {
-          "code": "6187.TWO",
-          "name": "萬潤",
-          "base_price": 1490.0,
-          "current_price": 1525.0,
-          "return_pct": 2.35,
-          "first_rank": 3,
-          "capped": false
-        },
-        {
-          "code": "6419.TWO",
-          "name": "京晨科",
-          "base_price": 171.5,
-          "current_price": 158.5,
-          "return_pct": -7.58,
-          "first_rank": 4,
-          "capped": false
-        },
-        {
-          "code": "00631L.TW",
-          "name": "元大台灣50正2",
-          "base_price": 41.54,
-          "current_price": 40.9,
-          "return_pct": -1.54,
-          "first_rank": 5,
-          "capped": false
-        },
-        {
-          "code": "6716.TWO",
-          "name": "應廣",
-          "base_price": 133.0,
-          "current_price": 138.5,
-          "return_pct": 4.14,
-          "first_rank": 6,
-          "capped": true
-        },
-        {
-          "code": "8111.TWO",
-          "name": "立碁",
-          "base_price": 94.3,
-          "current_price": 93.7,
-          "return_pct": -0.64,
-          "first_rank": 7,
-          "capped": true
-        },
-        {
-          "code": "00675L.TW",
-          "name": "富邦臺灣加權正2",
-          "base_price": 364.45,
-          "current_price": 357.75,
-          "return_pct": -1.84,
-          "first_rank": 8,
-          "capped": false
-        },
-        {
-          "code": "6196.TW",
-          "name": "帆宣",
-          "base_price": 679.0,
-          "current_price": 674.0,
-          "return_pct": -0.74,
-          "first_rank": 9,
-          "capped": true
-        },
-        {
-          "code": "00685L.TW",
-          "name": "群益臺灣加權正2",
-          "base_price": 13.76,
-          "current_price": 13.53,
-          "return_pct": -1.67,
-          "first_rank": 10,
-          "capped": false
-        },
-        {
-          "code": "4927.TW",
-          "name": "泰鼎-KY",
-          "base_price": 52.9,
-          "current_price": 54.2,
-          "return_pct": 2.46,
-          "first_rank": 11,
-          "capped": true
-        },
-        {
-          "code": "2426.TW",
-          "name": "鼎元",
-          "base_price": 114.0,
-          "current_price": 103.0,
-          "return_pct": -9.65,
-          "first_rank": 12,
-          "capped": true
-        },
-        {
-          "code": "00663L.TW",
-          "name": "國泰臺灣加權正2",
-          "base_price": 120.05,
-          "current_price": 118.1,
-          "return_pct": -1.62,
-          "first_rank": 13,
-          "capped": false
-        },
-        {
-          "code": "7788.TW",
-          "name": "松川精密",
-          "base_price": 332.5,
-          "current_price": 305.0,
-          "return_pct": -8.27,
-          "first_rank": 14,
-          "capped": true
-        },
-        {
-          "code": "00400A.TW",
-          "name": "主動國泰動能高息",
-          "base_price": 16.52,
-          "current_price": 16.15,
-          "return_pct": -2.24,
-          "first_rank": 15,
-          "capped": false
-        },
-        {
-          "code": "2302.TW",
-          "name": "麗正",
-          "base_price": 49.85,
-          "current_price": 50.1,
-          "return_pct": 0.5,
-          "first_rank": 16,
-          "capped": true
-        },
-        {
-          "code": "6691.TW",
-          "name": "洋基工程",
-          "base_price": 794.0,
-          "current_price": 789.0,
-          "return_pct": -0.63,
-          "first_rank": 17,
-          "capped": true
-        },
-        {
-          "code": "00980A.TW",
-          "name": "主動野村臺灣優選",
-          "base_price": 26.96,
-          "current_price": 26.47,
-          "return_pct": -1.82,
-          "first_rank": 18,
-          "capped": false
-        },
-        {
-          "code": "5434.TW",
-          "name": "崇越",
-          "base_price": 620.0,
-          "current_price": 596.0,
-          "return_pct": -3.87,
-          "first_rank": 19,
-          "capped": true
-        },
-        {
-          "code": "00982A.TW",
-          "name": "主動群益台灣強棒",
-          "base_price": 24.67,
-          "current_price": 24.25,
-          "return_pct": -1.7,
-          "first_rank": 20,
-          "capped": false
-        },
-        {
-          "code": "3543.TW",
-          "name": "州巧",
-          "base_price": 54.0,
-          "current_price": 56.1,
-          "return_pct": 3.89,
-          "first_rank": 21,
-          "capped": true
-        },
-        {
-          "code": "6531.TW",
-          "name": "愛普*",
-          "base_price": 1055.0,
-          "current_price": 980.0,
-          "return_pct": -7.11,
-          "first_rank": 22,
-          "capped": true
-        },
-        {
-          "code": "00881.TW",
-          "name": "國泰台灣科技龍頭",
-          "base_price": 54.45,
-          "current_price": 53.3,
-          "return_pct": -2.11,
-          "first_rank": 23,
-          "capped": false
-        },
-        {
-          "code": "2455.TW",
-          "name": "全新",
-          "base_price": 606.0,
-          "current_price": 558.0,
-          "return_pct": -7.92,
-          "first_rank": 24,
-          "capped": true
-        },
-        {
-          "code": "00922.TW",
-          "name": "國泰台灣領袖50",
-          "base_price": 45.11,
-          "current_price": 44.64,
-          "return_pct": -1.04,
-          "first_rank": 25,
-          "capped": false
-        },
-        {
-          "code": "2454.TW",
-          "name": "聯發科",
-          "base_price": 5165.0,
-          "current_price": 4690.0,
-          "return_pct": -9.2,
-          "first_rank": 26,
-          "capped": true
-        },
-        {
-          "code": "3017.TW",
-          "name": "奇鋐",
-          "base_price": 3585.0,
-          "current_price": 3440.0,
-          "return_pct": -4.04,
-          "first_rank": 27,
-          "capped": true
-        },
-        {
-          "code": "00923.TW",
-          "name": "群益台ESG低碳50",
-          "base_price": 42.97,
-          "current_price": 42.37,
-          "return_pct": -1.4,
-          "first_rank": 28,
-          "capped": false
-        },
-        {
-          "code": "3711.TW",
-          "name": "日月光投控",
-          "base_price": 742.0,
-          "current_price": 744.0,
-          "return_pct": 0.27,
-          "first_rank": 29,
-          "capped": true
-        },
-        {
-          "code": "006208.TW",
-          "name": "富邦台50",
-          "base_price": 265.35,
-          "current_price": 263.4,
-          "return_pct": -0.73,
-          "first_rank": 30,
-          "capped": false
-        },
-        {
-          "code": "6257.TW",
-          "name": "矽格",
-          "base_price": 286.0,
-          "current_price": 283.0,
-          "return_pct": -1.05,
-          "first_rank": 1,
-          "capped": false
-        },
-        {
-          "code": "6152.TW",
-          "name": "百一",
-          "base_price": 18.95,
-          "current_price": 21.0,
-          "return_pct": 10.82,
-          "first_rank": 4,
-          "capped": true
-        },
-        {
-          "code": "009802.TW",
-          "name": "富邦旗艦50",
-          "base_price": 20.61,
-          "current_price": 20.32,
-          "return_pct": -1.41,
-          "first_rank": 5,
-          "capped": false
-        },
-        {
-          "code": "6278.TW",
-          "name": "台表科",
-          "base_price": 234.0,
-          "current_price": 248.0,
-          "return_pct": 5.98,
-          "first_rank": 7,
-          "capped": true
-        },
-        {
-          "code": "3147.TWO",
-          "name": "大綜",
-          "base_price": 292.0,
-          "current_price": 308.0,
-          "return_pct": 5.48,
-          "first_rank": 9,
-          "capped": true
-        },
-        {
-          "code": "3044.TW",
-          "name": "健鼎",
-          "base_price": 579.0,
-          "current_price": 582.0,
-          "return_pct": 0.52,
-          "first_rank": 11,
-          "capped": true
-        },
-        {
-          "code": "00401A.TW",
-          "name": "主動摩根台灣鑫收",
-          "base_price": 14.67,
-          "current_price": 14.53,
-          "return_pct": -0.95,
-          "first_rank": 13,
-          "capped": false
-        },
-        {
-          "code": "2476.TW",
-          "name": "鉅祥",
-          "base_price": 131.5,
-          "current_price": 130.5,
-          "return_pct": -0.76,
-          "first_rank": 14,
-          "capped": true
-        },
-        {
-          "code": "2404.TW",
-          "name": "漢唐",
-          "base_price": 1335.0,
-          "current_price": 1305.0,
-          "return_pct": -2.25,
-          "first_rank": 15,
-          "capped": true
-        },
-        {
-          "code": "2357.TW",
-          "name": "華碩",
-          "base_price": 1000.0,
-          "current_price": 996.0,
-          "return_pct": -0.4,
-          "first_rank": 16,
-          "capped": true
-        },
-        {
-          "code": "6944.TW",
-          "name": "兆聯實業",
-          "base_price": 908.0,
-          "current_price": 860.0,
-          "return_pct": -5.29,
-          "first_rank": 1,
-          "capped": false
-        },
-        {
-          "code": "1301.TW",
-          "name": "台塑",
-          "base_price": 75.4,
-          "current_price": 81.3,
-          "return_pct": 7.82,
-          "first_rank": 2,
-          "capped": false
-        },
-        {
-          "code": "6811.TWO",
-          "name": "宏碁資訊",
-          "base_price": 273.0,
-          "current_price": 281.0,
-          "return_pct": 2.93,
-          "first_rank": 3,
-          "capped": false
-        },
-        {
-          "code": "3532.TW",
-          "name": "台勝科",
-          "base_price": 513.0,
-          "current_price": 509.0,
-          "return_pct": -0.78,
-          "first_rank": 4,
-          "capped": false
-        },
-        {
-          "code": "3234.TWO",
-          "name": "光環",
-          "base_price": 191.0,
-          "current_price": 183.0,
-          "return_pct": -4.19,
-          "first_rank": 5,
-          "capped": false
-        },
-        {
-          "code": "1326.TW",
-          "name": "台化",
-          "base_price": 75.8,
-          "current_price": 77.6,
-          "return_pct": 2.37,
-          "first_rank": 10,
-          "capped": false
-        },
-        {
-          "code": "1815.TWO",
-          "name": "富喬",
-          "base_price": 132.5,
-          "current_price": 135.0,
-          "return_pct": 1.89,
-          "first_rank": 11,
-          "capped": true
-        },
-        {
-          "code": "1714.TW",
-          "name": "和桐",
-          "base_price": 19.65,
-          "current_price": 19.95,
-          "return_pct": 1.53,
-          "first_rank": 13,
-          "capped": false
-        },
-        {
-          "code": "6209.TW",
-          "name": "今國光",
-          "base_price": 90.9,
-          "current_price": 90.1,
-          "return_pct": -0.88,
-          "first_rank": 14,
-          "capped": true
-        },
-        {
-          "code": "3189.TW",
-          "name": "景碩",
-          "base_price": 1100.0,
-          "current_price": 1075.0,
-          "return_pct": -2.27,
-          "first_rank": 15,
-          "capped": true
-        },
-        {
-          "code": "3564.TWO",
-          "name": "其陽",
-          "base_price": 60.9,
-          "current_price": 66.9,
-          "return_pct": 9.85,
-          "first_rank": 18,
-          "capped": true
-        },
-        {
-          "code": "5230.TWO",
-          "name": "雷笛克光學",
-          "base_price": 25.0,
-          "current_price": 25.0,
-          "return_pct": 0.0,
-          "first_rank": 1,
-          "capped": false
-        },
-        {
-          "code": "4167.TWO",
-          "name": "松瑞藥",
-          "base_price": 22.0,
-          "current_price": 22.0,
-          "return_pct": 0.0,
-          "first_rank": 4,
-          "capped": false
-        },
-        {
-          "code": "6834.TW",
-          "name": "天二科技",
-          "base_price": 132.0,
-          "current_price": 132.0,
-          "return_pct": 0.0,
-          "first_rank": 5,
-          "capped": false
-        },
-        {
-          "code": "3026.TW",
-          "name": "禾伸堂",
-          "base_price": 877.0,
-          "current_price": 877.0,
-          "return_pct": 0.0,
-          "first_rank": 6,
-          "capped": false
-        },
-        {
-          "code": "6505.TW",
-          "name": "台塑化",
-          "base_price": 110.5,
-          "current_price": 110.5,
-          "return_pct": 0.0,
-          "first_rank": 8,
-          "capped": false
-        },
-        {
-          "code": "1440.TW",
-          "name": "南紡",
-          "base_price": 14.35,
-          "current_price": 14.35,
-          "return_pct": 0.0,
-          "first_rank": 10,
-          "capped": false
-        },
-        {
-          "code": "6197.TW",
-          "name": "佳必琪",
-          "base_price": 381.5,
-          "current_price": 381.5,
-          "return_pct": 0.0,
-          "first_rank": 11,
-          "capped": false
-        },
-        {
-          "code": "3693.TWO",
-          "name": "營邦",
-          "base_price": 736.0,
-          "current_price": 736.0,
-          "return_pct": 0.0,
-          "first_rank": 12,
-          "capped": false
-        },
-        {
-          "code": "6668.TW",
-          "name": "中揚光",
-          "base_price": 51.1,
-          "current_price": 51.1,
-          "return_pct": -0.0,
-          "first_rank": 17,
-          "capped": true
-        },
-        {
-          "code": "2103.TW",
-          "name": "台橡",
-          "base_price": 29.2,
-          "current_price": 29.2,
-          "return_pct": 0.0,
-          "first_rank": 18,
-          "capped": false
-        },
-        {
-          "code": "8213.TW",
-          "name": "志超",
-          "base_price": 38.35,
-          "current_price": 38.35,
-          "return_pct": -0.0,
-          "first_rank": 19,
-          "capped": true
-        }
-      ]
-    },
-    {
-      "market": "US",
-      "select_date": "本週 (10-05 ~ 10-07)",
-      "review_date": "2026-10-10",
-      "total": 36,
-      "win_count": 18,
-      "win_rate": 50.0,
-      "avg_return": 0.01,
-      "segments": {
-        "top3": {
-          "total": 3,
-          "win_count": 1,
-          "win_rate": 33.3,
-          "avg_return": -2.34
-        },
-        "top10": {
-          "total": 10,
-          "win_count": 6,
-          "win_rate": 60.0,
-          "avg_return": 0.76
-        },
-        "all": {
           "total": 36,
-          "win_count": 18,
-          "win_rate": 50.0,
-          "avg_return": 0.01
+          "win_count": 14,
+          "win_rate": 38.9,
+          "avg_return": -0.18
+        },
+        "all": {
+          "total": 83,
+          "win_count": 32,
+          "win_rate": 38.6,
+          "avg_return": -0.23
         }
       },
       "capped_stats": {
         "capped": {
           "total": 7,
-          "win_count": 2,
-          "win_rate": 28.6,
-          "avg_return": -3.06
+          "win_count": 3,
+          "win_rate": 42.9,
+          "avg_return": 1.64
         },
         "uncapped": {
-          "total": 29,
-          "win_count": 16,
-          "win_rate": 55.2,
-          "avg_return": 0.75
+          "total": 76,
+          "win_count": 29,
+          "win_rate": 38.2,
+          "avg_return": -0.4
+        }
+      },
+      "benchmark": {
+        "universe_n": 465,
+        "universe_up": 0,
+        "universe_hit_rate": 0.0,
+        "window": [
+          "2026-10-12",
+          "2026-10-16"
+        ],
+        "source": "cache",
+        "index": "0050",
+        "index_return": 0.0
+      },
+      "lift_top3": 27.3,
+      "top3": [
+        {
+          "name": "中揚光",
+          "ret": 24.18
+        },
+        {
+          "name": "律勝",
+          "ret": 20.98
+        },
+        {
+          "name": "雷笛克光學",
+          "ret": 10.98
+        }
+      ],
+      "bottom3": [
+        {
+          "name": "希華",
+          "ret": -9.29
+        },
+        {
+          "name": "佳必琪",
+          "ret": -10.63
+        },
+        {
+          "name": "萬潤",
+          "ret": -15.82
+        }
+      ],
+      "details": [
+        {
+          "code": "3498.TWO",
+          "name": "陽程",
+          "base_price": 248.0,
+          "current_price": 237.5,
+          "return_pct": -4.23,
+          "first_rank": 1,
+          "capped": false
+        },
+        {
+          "code": "6548.TWO",
+          "name": "長科*",
+          "base_price": 85.0,
+          "current_price": 83.4,
+          "return_pct": -1.88,
+          "first_rank": 2,
+          "capped": false
+        },
+        {
+          "code": "2603.TW",
+          "name": "長榮",
+          "base_price": 255.5,
+          "current_price": 265.5,
+          "return_pct": 3.91,
+          "first_rank": 3,
+          "capped": false
+        },
+        {
+          "code": "4938.TW",
+          "name": "和碩",
+          "base_price": 98.6,
+          "current_price": 102.0,
+          "return_pct": 3.45,
+          "first_rank": 4,
+          "capped": true
+        },
+        {
+          "code": "2609.TW",
+          "name": "陽明",
+          "base_price": 63.6,
+          "current_price": 64.7,
+          "return_pct": 1.73,
+          "first_rank": 5,
+          "capped": false
+        },
+        {
+          "code": "6187.TWO",
+          "name": "萬潤",
+          "base_price": 1675.0,
+          "current_price": 1410.0,
+          "return_pct": -15.82,
+          "first_rank": 6,
+          "capped": true
+        },
+        {
+          "code": "6668.TW",
+          "name": "中揚光",
+          "base_price": 55.0,
+          "current_price": 68.3,
+          "return_pct": 24.18,
+          "first_rank": 7,
+          "capped": true
+        },
+        {
+          "code": "1312.TW",
+          "name": "國喬",
+          "base_price": 16.05,
+          "current_price": 16.15,
+          "return_pct": 0.62,
+          "first_rank": 8,
+          "capped": false
+        },
+        {
+          "code": "4927.TW",
+          "name": "泰鼎-KY",
+          "base_price": 57.9,
+          "current_price": 56.0,
+          "return_pct": -3.28,
+          "first_rank": 9,
+          "capped": true
+        },
+        {
+          "code": "1101.TW",
+          "name": "台泥",
+          "base_price": 27.0,
+          "current_price": 27.3,
+          "return_pct": 1.11,
+          "first_rank": 10,
+          "capped": false
+        },
+        {
+          "code": "3264.TWO",
+          "name": "欣銓",
+          "base_price": 272.5,
+          "current_price": 258.5,
+          "return_pct": -5.14,
+          "first_rank": 11,
+          "capped": true
+        },
+        {
+          "code": "6122.TWO",
+          "name": "擎邦",
+          "base_price": 65.3,
+          "current_price": 61.6,
+          "return_pct": -5.67,
+          "first_rank": 12,
+          "capped": false
+        },
+        {
+          "code": "5269.TW",
+          "name": "祥碩",
+          "base_price": 1540.0,
+          "current_price": 1490.0,
+          "return_pct": -3.25,
+          "first_rank": 13,
+          "capped": false
+        },
+        {
+          "code": "1605.TW",
+          "name": "華新",
+          "base_price": 40.15,
+          "current_price": 38.5,
+          "return_pct": -4.11,
+          "first_rank": 14,
+          "capped": false
+        },
+        {
+          "code": "2347.TW",
+          "name": "聯強",
+          "base_price": 98.9,
+          "current_price": 103.0,
+          "return_pct": 4.15,
+          "first_rank": 15,
+          "capped": false
+        },
+        {
+          "code": "6197.TW",
+          "name": "佳必琪",
+          "base_price": 390.5,
+          "current_price": 349.0,
+          "return_pct": -10.63,
+          "first_rank": 16,
+          "capped": false
+        },
+        {
+          "code": "8213.TW",
+          "name": "志超",
+          "base_price": 39.15,
+          "current_price": 38.75,
+          "return_pct": -1.02,
+          "first_rank": 17,
+          "capped": false
+        },
+        {
+          "code": "00715L.TW",
+          "name": "期街口布蘭特正2",
+          "base_price": 72.5,
+          "current_price": 75.3,
+          "return_pct": 3.86,
+          "first_rank": 18,
+          "capped": false
+        },
+        {
+          "code": "1714.TW",
+          "name": "和桐",
+          "base_price": 20.2,
+          "current_price": 19.25,
+          "return_pct": -4.7,
+          "first_rank": 19,
+          "capped": false
+        },
+        {
+          "code": "8996.TW",
+          "name": "高力",
+          "base_price": 1720.0,
+          "current_price": 1570.0,
+          "return_pct": -8.72,
+          "first_rank": 20,
+          "capped": false
+        },
+        {
+          "code": "6214.TW",
+          "name": "精誠",
+          "base_price": 193.0,
+          "current_price": 197.5,
+          "return_pct": 2.33,
+          "first_rank": 21,
+          "capped": false
+        },
+        {
+          "code": "5230.TWO",
+          "name": "雷笛克光學",
+          "base_price": 25.05,
+          "current_price": 27.8,
+          "return_pct": 10.98,
+          "first_rank": 22,
+          "capped": false
+        },
+        {
+          "code": "2480.TW",
+          "name": "敦陽科",
+          "base_price": 192.5,
+          "current_price": 187.0,
+          "return_pct": -2.86,
+          "first_rank": 1,
+          "capped": false
+        },
+        {
+          "code": "8050.TWO",
+          "name": "廣積",
+          "base_price": 66.7,
+          "current_price": 65.4,
+          "return_pct": -1.95,
+          "first_rank": 2,
+          "capped": false
+        },
+        {
+          "code": "3406.TW",
+          "name": "玉晶光",
+          "base_price": 1175.0,
+          "current_price": 1085.0,
+          "return_pct": -7.66,
+          "first_rank": 4,
+          "capped": false
+        },
+        {
+          "code": "6505.TW",
+          "name": "台塑化",
+          "base_price": 119.0,
+          "current_price": 122.5,
+          "return_pct": 2.94,
+          "first_rank": 5,
+          "capped": false
+        },
+        {
+          "code": "1808.TW",
+          "name": "潤隆",
+          "base_price": 35.5,
+          "current_price": 34.55,
+          "return_pct": -2.68,
+          "first_rank": 6,
+          "capped": false
+        },
+        {
+          "code": "1710.TW",
+          "name": "東聯",
+          "base_price": 19.5,
+          "current_price": 18.05,
+          "return_pct": -7.44,
+          "first_rank": 7,
+          "capped": false
+        },
+        {
+          "code": "6438.TW",
+          "name": "迅得",
+          "base_price": 176.5,
+          "current_price": 170.5,
+          "return_pct": -3.4,
+          "first_rank": 8,
+          "capped": false
+        },
+        {
+          "code": "2880.TW",
+          "name": "華南金",
+          "base_price": 49.35,
+          "current_price": 48.9,
+          "return_pct": -0.91,
+          "first_rank": 11,
+          "capped": false
+        },
+        {
+          "code": "4167.TWO",
+          "name": "松瑞藥",
+          "base_price": 22.4,
+          "current_price": 21.8,
+          "return_pct": -2.68,
+          "first_rank": 12,
+          "capped": false
+        },
+        {
+          "code": "5876.TW",
+          "name": "上海商銀",
+          "base_price": 51.9,
+          "current_price": 54.3,
+          "return_pct": 4.62,
+          "first_rank": 14,
+          "capped": false
+        },
+        {
+          "code": "6811.TWO",
+          "name": "宏碁資訊",
+          "base_price": 283.5,
+          "current_price": 280.5,
+          "return_pct": -1.06,
+          "first_rank": 15,
+          "capped": false
+        },
+        {
+          "code": "2851.TW",
+          "name": "中再保",
+          "base_price": 49.3,
+          "current_price": 49.05,
+          "return_pct": -0.51,
+          "first_rank": 16,
+          "capped": false
+        },
+        {
+          "code": "2891.TW",
+          "name": "中信金",
+          "base_price": 71.6,
+          "current_price": 73.6,
+          "return_pct": 2.79,
+          "first_rank": 17,
+          "capped": false
+        },
+        {
+          "code": "3580.TWO",
+          "name": "友威科",
+          "base_price": 115.0,
+          "current_price": 121.5,
+          "return_pct": 5.65,
+          "first_rank": 18,
+          "capped": false
+        },
+        {
+          "code": "3717.TW",
+          "name": "聯嘉投控",
+          "base_price": 29.45,
+          "current_price": 28.0,
+          "return_pct": -4.92,
+          "first_rank": 20,
+          "capped": false
+        },
+        {
+          "code": "1326.TW",
+          "name": "台化",
+          "base_price": 77.8,
+          "current_price": 78.7,
+          "return_pct": 1.16,
+          "first_rank": 23,
+          "capped": false
+        },
+        {
+          "code": "2027.TW",
+          "name": "大成鋼",
+          "base_price": 48.8,
+          "current_price": 50.9,
+          "return_pct": 4.3,
+          "first_rank": 24,
+          "capped": false
+        },
+        {
+          "code": "2637.TW",
+          "name": "慧洋-KY",
+          "base_price": 103.0,
+          "current_price": 101.5,
+          "return_pct": -1.46,
+          "first_rank": 25,
+          "capped": false
+        },
+        {
+          "code": "00713.TW",
+          "name": "元大台灣高息低波",
+          "base_price": 64.2,
+          "current_price": 65.5,
+          "return_pct": 2.02,
+          "first_rank": 26,
+          "capped": false
+        },
+        {
+          "code": "2615.TW",
+          "name": "萬海",
+          "base_price": 121.5,
+          "current_price": 122.5,
+          "return_pct": 0.82,
+          "first_rank": 27,
+          "capped": false
+        },
+        {
+          "code": "1301.TW",
+          "name": "台塑",
+          "base_price": 80.9,
+          "current_price": 82.1,
+          "return_pct": 1.48,
+          "first_rank": 28,
+          "capped": false
+        },
+        {
+          "code": "00918.TW",
+          "name": "大華優利高填息30",
+          "base_price": 34.36,
+          "current_price": 34.15,
+          "return_pct": -0.61,
+          "first_rank": 29,
+          "capped": false
+        },
+        {
+          "code": "6021.TWO",
+          "name": "美好證",
+          "base_price": 57.5,
+          "current_price": 55.8,
+          "return_pct": -2.96,
+          "first_rank": 1,
+          "capped": false
+        },
+        {
+          "code": "3354.TWO",
+          "name": "律勝",
+          "base_price": 34.55,
+          "current_price": 41.8,
+          "return_pct": 20.98,
+          "first_rank": 4,
+          "capped": false
+        },
+        {
+          "code": "6894.TWO",
+          "name": "衛司特",
+          "base_price": 401.5,
+          "current_price": 377.0,
+          "return_pct": -6.1,
+          "first_rank": 5,
+          "capped": false
+        },
+        {
+          "code": "6532.TWO",
+          "name": "瑞耘",
+          "base_price": 125.5,
+          "current_price": 123.0,
+          "return_pct": -1.99,
+          "first_rank": 6,
+          "capped": false
+        },
+        {
+          "code": "2484.TW",
+          "name": "希華",
+          "base_price": 91.5,
+          "current_price": 83.0,
+          "return_pct": -9.29,
+          "first_rank": 8,
+          "capped": false
+        },
+        {
+          "code": "1409.TW",
+          "name": "新纖",
+          "base_price": 27.3,
+          "current_price": 25.75,
+          "return_pct": -5.68,
+          "first_rank": 9,
+          "capped": false
+        },
+        {
+          "code": "5432.TWO",
+          "name": "新門",
+          "base_price": 199.5,
+          "current_price": 203.5,
+          "return_pct": 2.01,
+          "first_rank": 11,
+          "capped": false
+        },
+        {
+          "code": "1313.TW",
+          "name": "聯成",
+          "base_price": 13.6,
+          "current_price": 13.05,
+          "return_pct": -4.04,
+          "first_rank": 12,
+          "capped": false
+        },
+        {
+          "code": "3617.TW",
+          "name": "碩天",
+          "base_price": 269.0,
+          "current_price": 264.5,
+          "return_pct": -1.67,
+          "first_rank": 14,
+          "capped": false
+        },
+        {
+          "code": "2855.TW",
+          "name": "統一證",
+          "base_price": 60.2,
+          "current_price": 58.3,
+          "return_pct": -3.16,
+          "first_rank": 18,
+          "capped": false
+        },
+        {
+          "code": "3034.TW",
+          "name": "聯詠",
+          "base_price": 560.0,
+          "current_price": 577.0,
+          "return_pct": 3.04,
+          "first_rank": 20,
+          "capped": false
+        },
+        {
+          "code": "3147.TWO",
+          "name": "大綜",
+          "base_price": 300.5,
+          "current_price": 291.0,
+          "return_pct": -3.16,
+          "first_rank": 22,
+          "capped": false
+        },
+        {
+          "code": "2885.TW",
+          "name": "元大金",
+          "base_price": 72.2,
+          "current_price": 72.9,
+          "return_pct": 0.97,
+          "first_rank": 24,
+          "capped": false
+        },
+        {
+          "code": "2006.TW",
+          "name": "東和鋼鐵",
+          "base_price": 89.5,
+          "current_price": 92.1,
+          "return_pct": 2.91,
+          "first_rank": 27,
+          "capped": false
+        },
+        {
+          "code": "3706.TW",
+          "name": "神達",
+          "base_price": 84.2,
+          "current_price": 81.4,
+          "return_pct": -3.33,
+          "first_rank": 28,
+          "capped": false
+        },
+        {
+          "code": "00915.TW",
+          "name": "凱基優選高股息30",
+          "base_price": 33.51,
+          "current_price": 33.45,
+          "return_pct": -0.18,
+          "first_rank": 29,
+          "capped": false
+        },
+        {
+          "code": "3029.TW",
+          "name": "零壹",
+          "base_price": 121.5,
+          "current_price": 120.5,
+          "return_pct": -0.82,
+          "first_rank": 30,
+          "capped": false
+        },
+        {
+          "code": "6885.TW",
+          "name": "全福生技",
+          "base_price": 33.5,
+          "current_price": 33.6,
+          "return_pct": 0.3,
+          "first_rank": 2,
+          "capped": false
+        },
+        {
+          "code": "4904.TW",
+          "name": "遠傳",
+          "base_price": 113.0,
+          "current_price": 113.5,
+          "return_pct": 0.44,
+          "first_rank": 3,
+          "capped": false
+        },
+        {
+          "code": "3045.TW",
+          "name": "台灣大",
+          "base_price": 131.0,
+          "current_price": 130.5,
+          "return_pct": -0.38,
+          "first_rank": 4,
+          "capped": false
+        },
+        {
+          "code": "6209.TW",
+          "name": "今國光",
+          "base_price": 93.0,
+          "current_price": 100.5,
+          "return_pct": 8.06,
+          "first_rank": 6,
+          "capped": true
+        },
+        {
+          "code": "2884.TW",
+          "name": "玉山金",
+          "base_price": 48.8,
+          "current_price": 49.15,
+          "return_pct": 0.72,
+          "first_rank": 7,
+          "capped": false
+        },
+        {
+          "code": "2886.TW",
+          "name": "兆豐金",
+          "base_price": 52.5,
+          "current_price": 53.7,
+          "return_pct": 2.29,
+          "first_rank": 8,
+          "capped": false
+        },
+        {
+          "code": "2412.TW",
+          "name": "中華電",
+          "base_price": 152.5,
+          "current_price": 153.0,
+          "return_pct": 0.33,
+          "first_rank": 9,
+          "capped": false
+        },
+        {
+          "code": "2892.TW",
+          "name": "第一金",
+          "base_price": 41.6,
+          "current_price": 41.5,
+          "return_pct": -0.24,
+          "first_rank": 11,
+          "capped": false
+        },
+        {
+          "code": "4961.TW",
+          "name": "天鈺",
+          "base_price": 186.5,
+          "current_price": 190.0,
+          "return_pct": 1.88,
+          "first_rank": 13,
+          "capped": false
+        },
+        {
+          "code": "6108.TW",
+          "name": "競國",
+          "base_price": 29.2,
+          "current_price": 30.85,
+          "return_pct": 5.65,
+          "first_rank": 15,
+          "capped": false
+        },
+        {
+          "code": "6620.TWO",
+          "name": "漢達",
+          "base_price": 143.5,
+          "current_price": 143.5,
+          "return_pct": 0.0,
+          "first_rank": 1,
+          "capped": false
+        },
+        {
+          "code": "6148.TWO",
+          "name": "驊宏資",
+          "base_price": 41.95,
+          "current_price": 41.95,
+          "return_pct": 0.0,
+          "first_rank": 2,
+          "capped": false
+        },
+        {
+          "code": "2468.TW",
+          "name": "華經",
+          "base_price": 51.1,
+          "current_price": 51.1,
+          "return_pct": -0.0,
+          "first_rank": 3,
+          "capped": false
+        },
+        {
+          "code": "1815.TWO",
+          "name": "富喬",
+          "base_price": 140.0,
+          "current_price": 140.0,
+          "return_pct": 0.0,
+          "first_rank": 4,
+          "capped": false
+        },
+        {
+          "code": "6782.TW",
+          "name": "視陽",
+          "base_price": 259.5,
+          "current_price": 259.5,
+          "return_pct": 0.0,
+          "first_rank": 5,
+          "capped": false
+        },
+        {
+          "code": "6221.TWO",
+          "name": "晉泰",
+          "base_price": 36.05,
+          "current_price": 36.05,
+          "return_pct": -0.0,
+          "first_rank": 7,
+          "capped": true
+        },
+        {
+          "code": "5880.TW",
+          "name": "合庫金",
+          "base_price": 28.15,
+          "current_price": 28.15,
+          "return_pct": -0.0,
+          "first_rank": 13,
+          "capped": false
+        },
+        {
+          "code": "2882.TW",
+          "name": "國泰金",
+          "base_price": 116.0,
+          "current_price": 116.0,
+          "return_pct": 0.0,
+          "first_rank": 15,
+          "capped": false
+        },
+        {
+          "code": "2881.TW",
+          "name": "富邦金",
+          "base_price": 161.5,
+          "current_price": 161.5,
+          "return_pct": 0.0,
+          "first_rank": 19,
+          "capped": false
+        },
+        {
+          "code": "2801.TW",
+          "name": "彰銀",
+          "base_price": 29.5,
+          "current_price": 29.5,
+          "return_pct": 0.0,
+          "first_rank": 20,
+          "capped": false
+        },
+        {
+          "code": "00919.TW",
+          "name": "群益台灣精選高息",
+          "base_price": 32.74,
+          "current_price": 32.38,
+          "return_pct": -1.1,
+          "first_rank": 21,
+          "capped": false
+        },
+        {
+          "code": "2323.TW",
+          "name": "中環",
+          "base_price": 11.85,
+          "current_price": 11.85,
+          "return_pct": 0.0,
+          "first_rank": 25,
+          "capped": false
+        }
+      ]
+    },
+    {
+      "market": "US",
+      "select_date": "本週 (10-12 ~ 10-15)",
+      "review_date": "2026-10-17",
+      "total": 37,
+      "win_count": 21,
+      "win_rate": 56.8,
+      "avg_return": -3.36,
+      "segments": {
+        "top3": {
+          "total": 3,
+          "win_count": 1,
+          "win_rate": 33.3,
+          "avg_return": -7.26
+        },
+        "top10": {
+          "total": 10,
+          "win_count": 5,
+          "win_rate": 50.0,
+          "avg_return": -4.78
+        },
+        "all": {
+          "total": 37,
+          "win_count": 21,
+          "win_rate": 56.8,
+          "avg_return": -3.36
+        }
+      },
+      "capped_stats": {
+        "capped": {
+          "total": 4,
+          "win_count": 0,
+          "win_rate": 0.0,
+          "avg_return": -16.3
+        },
+        "uncapped": {
+          "total": 33,
+          "win_count": 21,
+          "win_rate": 63.6,
+          "avg_return": -1.79
         }
       },
       "benchmark": {
@@ -693,8 +882,8 @@
         "universe_up": 0,
         "universe_hit_rate": 0.0,
         "window": [
-          "2026-10-05",
-          "2026-10-07"
+          "2026-10-12",
+          "2026-10-15"
         ],
         "source": "cache",
         "index": "SPY",
@@ -703,355 +892,364 @@
       "lift_top3": 33.3,
       "top3": [
         {
-          "name": "Moderna",
-          "ret": 10.72
+          "name": "Viatris",
+          "ret": 6.39
         },
         {
-          "name": "Hewlett Packard Enterprise",
-          "ret": 7.46
+          "name": "Host Hotels & Resorts",
+          "ret": 5.41
         },
         {
-          "name": "Dell Technologies",
-          "ret": 6.11
+          "name": "APA Corporation",
+          "ret": 4.93
         }
       ],
       "bottom3": [
         {
-          "name": "Intel",
-          "ret": -9.89
+          "name": "Lumentum",
+          "ret": -17.21
         },
         {
-          "name": "Western Digital",
-          "ret": -10.04
+          "name": "Hewlett Packard Enterprise",
+          "ret": -21.61
         },
         {
-          "name": "Seagate Technology",
-          "ret": -11.73
+          "name": "Dell Technologies",
+          "ret": -21.68
         }
       ],
       "details": [
         {
           "code": "SNDK",
           "name": "Sandisk",
-          "base_price": 1704.16,
-          "current_price": 1581.82,
-          "return_pct": -7.18,
+          "base_price": 1487.33,
+          "current_price": 1299.3,
+          "return_pct": -12.64,
           "first_rank": 1,
           "capped": false
         },
         {
           "code": "VLO",
           "name": "Valero Energy",
-          "base_price": 419.33,
-          "current_price": 433.75,
-          "return_pct": 3.44,
+          "base_price": 436.0,
+          "current_price": 444.71,
+          "return_pct": 2.0,
           "first_rank": 2,
           "capped": false
         },
         {
           "code": "MU",
           "name": "Micron Technology",
-          "base_price": 1063.96,
-          "current_price": 1029.0,
-          "return_pct": -3.29,
+          "base_price": 989.04,
+          "current_price": 878.84,
+          "return_pct": -11.14,
           "first_rank": 3,
           "capped": true
         },
         {
           "code": "PSX",
           "name": "Phillips 66",
-          "base_price": 269.72,
-          "current_price": 278.18,
-          "return_pct": 3.14,
+          "base_price": 281.47,
+          "current_price": 293.17,
+          "return_pct": 4.16,
           "first_rank": 4,
           "capped": false
         },
         {
-          "code": "TGT",
-          "name": "Target Corporation",
-          "base_price": 152.99,
-          "current_price": 153.64,
-          "return_pct": 0.42,
+          "code": "NUE",
+          "name": "Nucor",
+          "base_price": 251.83,
+          "current_price": 256.29,
+          "return_pct": 1.77,
           "first_rank": 5,
           "capped": false
         },
         {
           "code": "LITE",
           "name": "Lumentum",
-          "base_price": 1091.67,
-          "current_price": 1103.35,
-          "return_pct": 1.07,
+          "base_price": 995.41,
+          "current_price": 824.13,
+          "return_pct": -17.21,
           "first_rank": 6,
           "capped": true
         },
         {
           "code": "MPC",
           "name": "Marathon Petroleum",
-          "base_price": 433.47,
-          "current_price": 455.03,
-          "return_pct": 4.97,
+          "base_price": 458.81,
+          "current_price": 478.07,
+          "return_pct": 4.2,
           "first_rank": 7,
           "capped": false
         },
         {
-          "code": "DELL",
-          "name": "Dell Technologies",
-          "base_price": 552.29,
-          "current_price": 586.06,
-          "return_pct": 6.11,
+          "code": "STX",
+          "name": "Seagate Technology",
+          "base_price": 753.25,
+          "current_price": 639.01,
+          "return_pct": -15.17,
           "first_rank": 8,
           "capped": true
         },
         {
           "code": "TRGP",
           "name": "Targa Resources",
-          "base_price": 287.4,
-          "current_price": 286.7,
-          "return_pct": -0.24,
+          "base_price": 290.54,
+          "current_price": 294.9,
+          "return_pct": 1.5,
           "first_rank": 9,
           "capped": false
         },
         {
           "code": "STT",
           "name": "State Street Corporation",
-          "base_price": 176.37,
-          "current_price": 174.96,
-          "return_pct": -0.8,
+          "base_price": 174.93,
+          "current_price": 165.72,
+          "return_pct": -5.26,
           "first_rank": 10,
           "capped": false
         },
         {
-          "code": "WDC",
-          "name": "Western Digital",
-          "base_price": 441.64,
-          "current_price": 397.28,
-          "return_pct": -10.04,
+          "code": "DELL",
+          "name": "Dell Technologies",
+          "base_price": 576.76,
+          "current_price": 451.71,
+          "return_pct": -21.68,
           "first_rank": 11,
           "capped": true
         },
         {
-          "code": "NUE",
-          "name": "Nucor",
-          "base_price": 251.41,
-          "current_price": 250.33,
-          "return_pct": -0.43,
+          "code": "TGT",
+          "name": "Target Corporation",
+          "base_price": 153.62,
+          "current_price": 154.26,
+          "return_pct": 0.42,
           "first_rank": 12,
-          "capped": false
-        },
-        {
-          "code": "STX",
-          "name": "Seagate Technology",
-          "base_price": 887.09,
-          "current_price": 783.0,
-          "return_pct": -11.73,
-          "first_rank": 13,
-          "capped": true
-        },
-        {
-          "code": "JNJ",
-          "name": "Johnson & Johnson",
-          "base_price": 252.93,
-          "current_price": 261.44,
-          "return_pct": 3.36,
-          "first_rank": 14,
           "capped": false
         },
         {
           "code": "BNY",
           "name": "BNY Mellon",
-          "base_price": 143.75,
-          "current_price": 142.71,
-          "return_pct": -0.72,
-          "first_rank": 15,
+          "base_price": 142.85,
+          "current_price": 143.3,
+          "return_pct": 0.32,
+          "first_rank": 13,
+          "capped": false
+        },
+        {
+          "code": "HPE",
+          "name": "Hewlett Packard Enterprise",
+          "base_price": 70.33,
+          "current_price": 55.13,
+          "return_pct": -21.61,
+          "first_rank": 14,
           "capped": false
         },
         {
           "code": "MRK",
           "name": "Merck & Co.",
-          "base_price": 139.54,
-          "current_price": 145.6,
-          "return_pct": 4.34,
-          "first_rank": 16,
-          "capped": false
-        },
-        {
-          "code": "AMD",
-          "name": "Advanced Micro Devices",
-          "base_price": 631.75,
-          "current_price": 608.1,
-          "return_pct": -3.74,
-          "first_rank": 17,
+          "base_price": 145.45,
+          "current_price": 145.95,
+          "return_pct": 0.34,
+          "first_rank": 15,
           "capped": false
         },
         {
           "code": "VTRS",
           "name": "Viatris",
-          "base_price": 17.62,
-          "current_price": 17.64,
-          "return_pct": 0.11,
+          "base_price": 17.54,
+          "current_price": 18.66,
+          "return_pct": 6.39,
+          "first_rank": 16,
+          "capped": false
+        },
+        {
+          "code": "INTC",
+          "name": "Intel",
+          "base_price": 101.35,
+          "current_price": 89.85,
+          "return_pct": -11.35,
+          "first_rank": 17,
+          "capped": false
+        },
+        {
+          "code": "JNJ",
+          "name": "Johnson & Johnson",
+          "base_price": 263.73,
+          "current_price": 255.56,
+          "return_pct": -3.1,
           "first_rank": 18,
           "capped": false
         },
         {
           "code": "MRNA",
           "name": "Moderna",
-          "base_price": 203.21,
-          "current_price": 225.0,
-          "return_pct": 10.72,
+          "base_price": 213.74,
+          "current_price": 218.01,
+          "return_pct": 2.0,
           "first_rank": 19,
           "capped": false
         },
         {
-          "code": "HPE",
-          "name": "Hewlett Packard Enterprise",
-          "base_price": 68.36,
-          "current_price": 73.46,
-          "return_pct": 7.46,
+          "code": "KEYS",
+          "name": "Keysight Technologies",
+          "base_price": 377.7,
+          "current_price": 331.21,
+          "return_pct": -12.31,
           "first_rank": 20,
           "capped": false
         },
         {
-          "code": "BMY",
-          "name": "Bristol Myers Squibb",
-          "base_price": 58.81,
-          "current_price": 59.12,
-          "return_pct": 0.53,
+          "code": "EXPD",
+          "name": "Expeditors International",
+          "base_price": 193.41,
+          "current_price": 195.91,
+          "return_pct": 1.29,
           "first_rank": 21,
           "capped": false
         },
         {
           "code": "APA",
           "name": "APA Corporation",
-          "base_price": 43.85,
-          "current_price": 45.88,
-          "return_pct": 4.63,
+          "base_price": 46.84,
+          "current_price": 49.15,
+          "return_pct": 4.93,
           "first_rank": 22,
-          "capped": false
-        },
-        {
-          "code": "PFG",
-          "name": "Principal Financial Group",
-          "base_price": 111.03,
-          "current_price": 107.24,
-          "return_pct": -3.41,
-          "first_rank": 23,
-          "capped": false
-        },
-        {
-          "code": "SLB",
-          "name": "Schlumberger",
-          "base_price": 50.28,
-          "current_price": 48.95,
-          "return_pct": -2.65,
-          "first_rank": 24,
-          "capped": false
-        },
-        {
-          "code": "KO",
-          "name": "Coca-Cola Company (The)",
-          "base_price": 86.51,
-          "current_price": 88.05,
-          "return_pct": 1.78,
-          "first_rank": 25,
-          "capped": false
-        },
-        {
-          "code": "CAH",
-          "name": "Cardinal Health",
-          "base_price": 233.12,
-          "current_price": 237.57,
-          "return_pct": 1.91,
-          "first_rank": 26,
-          "capped": false
-        },
-        {
-          "code": "STLD",
-          "name": "Steel Dynamics",
-          "base_price": 241.04,
-          "current_price": 238.38,
-          "return_pct": -1.1,
-          "first_rank": 27,
-          "capped": false
-        },
-        {
-          "code": "XOM",
-          "name": "ExxonMobil",
-          "base_price": 164.0,
-          "current_price": 168.94,
-          "return_pct": 3.01,
-          "first_rank": 28,
-          "capped": false
-        },
-        {
-          "code": "FTNT",
-          "name": "Fortinet",
-          "base_price": 184.13,
-          "current_price": 194.75,
-          "return_pct": 5.77,
-          "first_rank": 29,
-          "capped": false
-        },
-        {
-          "code": "INTC",
-          "name": "Intel",
-          "base_price": 116.19,
-          "current_price": 104.7,
-          "return_pct": -9.89,
-          "first_rank": 30,
-          "capped": false
-        },
-        {
-          "code": "MRVL",
-          "name": "Marvell Technology",
-          "base_price": 287.01,
-          "current_price": 275.28,
-          "return_pct": -4.09,
-          "first_rank": 22,
-          "capped": false
-        },
-        {
-          "code": "ROST",
-          "name": "Ross Stores",
-          "base_price": 224.21,
-          "current_price": 222.41,
-          "return_pct": -0.8,
-          "first_rank": 24,
-          "capped": false
-        },
-        {
-          "code": "KEYS",
-          "name": "Keysight Technologies",
-          "base_price": 388.03,
-          "current_price": 382.75,
-          "return_pct": -1.36,
-          "first_rank": 26,
-          "capped": true
-        },
-        {
-          "code": "BEN",
-          "name": "Franklin Resources",
-          "base_price": 32.44,
-          "current_price": 32.0,
-          "return_pct": -1.36,
-          "first_rank": 30,
           "capped": false
         },
         {
           "code": "TER",
           "name": "Teradyne",
-          "base_price": 411.78,
-          "current_price": 402.68,
-          "return_pct": -2.21,
-          "first_rank": 26,
-          "capped": true
+          "base_price": 383.85,
+          "current_price": 325.0,
+          "return_pct": -15.33,
+          "first_rank": 23,
+          "capped": false
         },
         {
-          "code": "FCX",
-          "name": "Freeport-McMoRan",
-          "base_price": 71.86,
-          "current_price": 73.69,
-          "return_pct": 2.55,
+          "code": "ROST",
+          "name": "Ross Stores",
+          "base_price": 225.84,
+          "current_price": 236.89,
+          "return_pct": 4.89,
+          "first_rank": 24,
+          "capped": false
+        },
+        {
+          "code": "MRVL",
+          "name": "Marvell Technology",
+          "base_price": 265.86,
+          "current_price": 227.83,
+          "return_pct": -14.3,
+          "first_rank": 25,
+          "capped": false
+        },
+        {
+          "code": "PFG",
+          "name": "Principal Financial Group",
+          "base_price": 107.84,
+          "current_price": 108.81,
+          "return_pct": 0.9,
+          "first_rank": 26,
+          "capped": false
+        },
+        {
+          "code": "XOM",
+          "name": "ExxonMobil",
+          "base_price": 172.15,
+          "current_price": 178.98,
+          "return_pct": 3.97,
+          "first_rank": 27,
+          "capped": false
+        },
+        {
+          "code": "CVX",
+          "name": "Chevron Corporation",
+          "base_price": 215.0,
+          "current_price": 224.99,
+          "return_pct": 4.65,
+          "first_rank": 28,
+          "capped": false
+        },
+        {
+          "code": "NTRS",
+          "name": "Northern Trust",
+          "base_price": 169.21,
+          "current_price": 165.54,
+          "return_pct": -2.17,
           "first_rank": 29,
+          "capped": false
+        },
+        {
+          "code": "HST",
+          "name": "Host Hotels & Resorts",
+          "base_price": 22.74,
+          "current_price": 23.97,
+          "return_pct": 5.41,
+          "first_rank": 30,
+          "capped": false
+        },
+        {
+          "code": "FTNT",
+          "name": "Fortinet",
+          "base_price": 190.76,
+          "current_price": 169.13,
+          "return_pct": -11.34,
+          "first_rank": 16,
+          "capped": false
+        },
+        {
+          "code": "TRV",
+          "name": "Travelers Companies (The)",
+          "base_price": 373.28,
+          "current_price": 389.54,
+          "return_pct": 4.36,
+          "first_rank": 28,
+          "capped": false
+        },
+        {
+          "code": "CNC",
+          "name": "Centene Corporation",
+          "base_price": 68.86,
+          "current_price": 69.16,
+          "return_pct": 0.44,
+          "first_rank": 30,
+          "capped": false
+        },
+        {
+          "code": "COP",
+          "name": "ConocoPhillips",
+          "base_price": 142.34,
+          "current_price": 146.51,
+          "return_pct": 2.93,
+          "first_rank": 24,
+          "capped": false
+        },
+        {
+          "code": "AMD",
+          "name": "Advanced Micro Devices",
+          "base_price": 570.82,
+          "current_price": 528.75,
+          "return_pct": -7.37,
+          "first_rank": 29,
+          "capped": false
+        },
+        {
+          "code": "KO",
+          "name": "Coca-Cola Company (The)",
+          "base_price": 91.78,
+          "current_price": 93.9,
+          "return_pct": 2.31,
+          "first_rank": 30,
+          "capped": false
+        },
+        {
+          "code": "BMY",
+          "name": "Bristol Myers Squibb",
+          "base_price": 60.57,
+          "current_price": 59.75,
+          "return_pct": -1.35,
+          "first_rank": 30,
           "capped": false
         }
       ]
