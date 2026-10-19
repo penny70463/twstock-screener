@@ -75,10 +75,8 @@ ACTION_COPY = {
 
 SIGNAL_ZH = {"green": "綠燈", "yellow": "黃燈", "red": "紅燈"}
 
-# 紅燈 + 這些動作 = 與「破線停損」相反，文案必須覆蓋
-OVERRIDE_STOP_ACTIONS = {ACTION_BUY_DIP, ACTION_WAIT, ACTION_DCA, ACTION_HOLD_DCA}
-
 # 核心部位：同一顆總經燈，各看自己的價燈做 2×2。SMH 不在此列。
+# 0050／VOO 的買賣句只出在這裡。價燈轉換只報均線事實，不再另寫佈局／停損。
 MACRO_CORE_ETFS = ("0050.TW", "VOO")
 MACRO_LABELS = {"0050.TW": "0050", "VOO": "VOO"}
 
@@ -285,7 +283,7 @@ def evaluate(series: dict[str, list[tuple[date, float]]], etf_signal: str) -> di
 
 def format_alert(result: dict[str, Any], old_macro: dict[str, Any],
                  code: str = "0050.TW") -> str:
-    """LINE 用：動作句在前；紅燈且非停損動作時覆蓋破線文案。"""
+    """LINE 用：0050／VOO 的買賣指令只出這一句。"""
     regime = result["regime"]
     action = result["action"]
     signal = result["signal"]
@@ -305,8 +303,6 @@ def format_alert(result: dict[str, Any], old_macro: dict[str, Any],
         f"📊【{label}｜{ACTION_TITLE[action]}】{head}（{reasons}）。"
         f"{light}：{ACTION_COPY[action]}"
     ]
-    if signal == "red" and action in OVERRIDE_STOP_ACTIONS:
-        lines.append(f"此則覆蓋 {label} 停損建議。")
     return "\n".join(lines)
 
 

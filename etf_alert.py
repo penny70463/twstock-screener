@@ -89,7 +89,44 @@ def _check_exposure(market_label: str, market_key: str, market_state: dict,
 # ---------------------------------------------------------------------------
 # ETF 燈號檢查
 # ---------------------------------------------------------------------------
-# 定義所有有意義的狀態轉換及其對應的文案
+def core_price_alert(old_signal: str, curr_signal: str, code: str, name: str,
+                      price, ma50, ma200) -> str | None:
+    """0050／VOO 價燈只報均線事實，不含佈局、加碼、停損。"""
+    facts = {
+        ("green", "yellow"): (
+            "🟡", "跌破季線",
+            f"{code} ({name}) 收盤在 50 日均線之下。最新價 ${price}（50日 ${ma50}）",
+        ),
+        ("yellow", "green"): (
+            "🟢", "站回季線",
+            f"{code} ({name}) 收盤站上 50 日均線。最新價 ${price}（50日 ${ma50}）",
+        ),
+        ("red", "yellow"): (
+            "🟡", "站回年線",
+            f"{code} ({name}) 收盤站上 200 日均線，仍在 50 日均線之下。"
+            f"最新價 ${price}（50日 ${ma50}，200日 ${ma200}）",
+        ),
+        ("red", "green"): (
+            "🟢", "站上年線與季線",
+            f"{code} ({name}) 收盤站上 50 日與 200 日均線。最新價 ${price}（50日 ${ma50}）",
+        ),
+        ("green", "red"): (
+            "🔴", "跌破年線",
+            f"{code} ({name}) 收盤在 200 日均線之下。最新價 ${price}（200日 ${ma200}）",
+        ),
+        ("yellow", "red"): (
+            "🔴", "跌破年線",
+            f"{code} ({name}) 收盤在 200 日均線之下。最新價 ${price}（200日 ${ma200}）",
+        ),
+    }
+    row = facts.get((old_signal, curr_signal))
+    if row is None:
+        return None
+    emoji, title, body = row
+    return f"{emoji}【核心部位｜{title}】{body}"
+
+
+# 衛星部位仍用買賣文案。0050／VOO 走 core_price_alert。
 SIGNAL_TRANSITIONS = {
     ("green", "yellow"): {
         "emoji": "🟡",
@@ -169,12 +206,21 @@ def _check_etf_signals(old_state: dict, new_state: dict, alerts: list) -> None:
         if old_signal == curr_signal:
             continue
 
+        name = etf.get("name")
+        price = etf.get("price")
+        ma50 = etf.get("ma50")
+        ma200 = etf.get("ma200")
+        # 0050／VOO 的買或不買只由總經 × 燈號決定，價燈不另下指令
+        if code in ("0050.TW", "VOO"):
+            text = core_price_alert(old_signal, curr_signal, code, name, price, ma50, ma200)
+            if text:
+                alerts.append(text)
+            else:
+                print(f"  [?] {code}：未定義的狀態轉換 {old_signal} → {curr_signal}")
+            continue
+
         transition = SIGNAL_TRANSITIONS.get((old_signal, curr_signal))
         if transition:
-            name = etf.get("name")
-            price = etf.get("price")
-            ma50 = etf.get("ma50")
-            ma200 = etf.get("ma200")
             desc_text = transition["desc"](code, name, price, ma50, ma200)
             alerts.append(f"{transition['emoji']}【{transition['title']}】{desc_text}")
         else:

@@ -151,18 +151,18 @@ def main() -> int:
         if not _check(f"{regime} × {signal} → {expect}", got == expect):
             failed += 1
 
-    print("\n=== 文案：紅燈 + 越跌越買 覆蓋停損 ===")
+    print("\n=== 文案：紅燈 + 總經好 = 越跌越買，不另寫停損 ===")
     r = evaluate(_favorable(), "red")
     text = format_alert(r, {"regime": REGIME_FAVORABLE, "action": ACTION_DCA})
     if not _check("含越跌越買", "越跌越買" in text):
         failed += 1
-    if not _check("含覆蓋停損", "此則覆蓋 0050 停損建議" in text):
+    if not _check("不含覆蓋停損", "覆蓋" not in text and "停損" not in text):
         failed += 1
     voo_text = format_alert(r, {"regime": REGIME_FAVORABLE, "action": ACTION_DCA},
                             code="VOO")
     if not _check("VOO 標題", "【VOO｜越跌越買】" in voo_text):
         failed += 1
-    if not _check("VOO 覆蓋停損", "此則覆蓋 VOO 停損建議" in voo_text):
+    if not _check("VOO 不含覆蓋停損", "覆蓋" not in voo_text and "停損" not in voo_text):
         failed += 1
 
     print("\n=== 文案：總經態改變 ===")
