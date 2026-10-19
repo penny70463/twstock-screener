@@ -133,6 +133,9 @@ def _get_json(url: str, retries: int = 8, **kwargs):
         2. 內容截斷：HTTP 完整但 JSON 被切斷（Unterminated string），
            由 json.loads 拋 JSONDecodeError → 退避整段重抓
            （2026-07-23 排程即因此掛掉——舊版只重試傳輸層，漏了這種）
+        3. 一個 byte 都沒收到就 ReadTimeout：續傳沒有起點，
+           _download_resumable 直接把 Timeout 丟出。必須在這裡接住，
+           否則一次 30 秒超時就拆掉整條排程（2026-10-19 櫃買）
 
     TWSE/TPEX 的 JSON 端點一律走這裡，避免內容截斷直接炸掉呼叫端。"""
     kwargs.setdefault("headers", HEADERS)
@@ -150,6 +153,7 @@ def _get_json(url: str, retries: int = 8, **kwargs):
         except (requests.exceptions.ConnectionError,
                 requests.exceptions.ChunkedEncodingError,
                 requests.exceptions.HTTPError,
+                requests.exceptions.Timeout,  # ReadTimeout 不是 ConnectionError
                 json.JSONDecodeError) as e:  # requests 的 JSONDecodeError 亦繼承自此
             last_err = e
         time.sleep(min(2 ** attempt * 2, 30))  # 2,4,8,16,30,30,30s
