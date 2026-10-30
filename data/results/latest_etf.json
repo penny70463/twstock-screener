@@ -1,215 +1,215 @@
 {
-  "date": "2026-10-29",
-  "generated_at": "2026-10-29T16:08:04",
+  "date": "2026-10-30",
+  "generated_at": "2026-10-30T16:07:45",
   "etfs": [
     {
       "code": "0050.TW",
       "name": "元大台灣50",
-      "price": 107.25,
+      "price": 104.95,
       "ma50": 108.93,
-      "ma200": 93.6,
+      "ma200": 93.81,
       "signal": "yellow",
       "desc": "回檔買點",
       "entry_price": 108.93,
-      "exit_price": 93.6
+      "exit_price": 93.81
     },
     {
       "code": "0056.TW",
       "name": "元大高股息",
-      "price": 56.9,
-      "ma50": 54.47,
-      "ma200": 44.67,
+      "price": 55.85,
+      "ma50": 54.57,
+      "ma200": 44.79,
       "signal": "green",
       "desc": "多頭續航",
-      "entry_price": 54.47,
-      "exit_price": 44.67
+      "entry_price": 54.57,
+      "exit_price": 44.79
     },
     {
       "code": "VOO",
       "name": "S&P 500",
-      "price": 709.9,
-      "ma50": 704.94,
-      "ma200": 666.88,
+      "price": 707.32,
+      "ma50": 705.05,
+      "ma200": 667.25,
       "signal": "green",
       "desc": "多頭續航",
-      "entry_price": 704.94,
-      "exit_price": 666.88
+      "entry_price": 705.05,
+      "exit_price": 667.25
     },
     {
       "code": "QQQ",
       "name": "Nasdaq 100",
-      "price": 725.61,
-      "ma50": 725.3,
-      "ma200": 678.06,
-      "signal": "green",
-      "desc": "多頭續航",
-      "entry_price": 725.3,
-      "exit_price": 678.06
+      "price": 715.34,
+      "ma50": 725.2,
+      "ma200": 678.5,
+      "signal": "yellow",
+      "desc": "回檔買點",
+      "entry_price": 725.2,
+      "exit_price": 678.5
     },
     {
       "code": "2330.TW",
       "name": "台積電",
-      "price": 2415.0,
-      "ma50": 2437.93,
-      "ma200": 2180.13,
+      "price": 2370.0,
+      "ma50": 2437.87,
+      "ma200": 2184.3,
       "signal": "yellow",
       "desc": "回檔買點",
-      "entry_price": 2437.93,
-      "exit_price": 2180.13
+      "entry_price": 2437.87,
+      "exit_price": 2184.3
     },
     {
       "code": "SMH",
       "name": "半導體 (SMH)",
-      "price": 567.67,
-      "ma50": 573.54,
-      "ma200": 518.86,
+      "price": 561.67,
+      "ma50": 573.4,
+      "ma200": 519.7,
       "signal": "yellow",
       "desc": "波段轉弱",
-      "entry_price": 573.54,
-      "exit_price": 518.86
+      "entry_price": 573.4,
+      "exit_price": 519.7
     },
     {
       "code": "SOXQ",
       "name": "半導體 (SOXQ)",
-      "price": 91.97,
-      "ma50": 93.58,
-      "ma200": 84.64,
+      "price": 90.63,
+      "ma50": 93.51,
+      "ma200": 84.79,
       "signal": "yellow",
       "desc": "波段轉弱",
-      "entry_price": 93.58,
-      "exit_price": 84.64
+      "entry_price": 93.51,
+      "exit_price": 84.79
     },
     {
       "code": "00981A.TW",
       "name": "統一增長",
-      "price": 27.81,
-      "ma50": 29.5,
-      "ma200": 25.21,
+      "price": 26.66,
+      "ma50": 29.45,
+      "ma200": 25.27,
       "signal": "yellow",
       "desc": "波段轉弱",
-      "entry_price": 29.5,
-      "exit_price": 25.21
+      "entry_price": 29.45,
+      "exit_price": 25.27
     },
     {
       "code": "XLK",
       "name": "科技 (XLK)",
-      "price": 191.0,
-      "ma50": 189.72,
-      "ma200": 169.07,
-      "signal": "green",
-      "desc": "波段強勢",
-      "entry_price": 189.72,
-      "exit_price": 169.07
+      "price": 188.74,
+      "ma50": 189.79,
+      "ma200": 169.28,
+      "signal": "yellow",
+      "desc": "波段轉弱",
+      "entry_price": 189.79,
+      "exit_price": 169.28
     },
     {
       "code": "XLF",
       "name": "金融 (XLF)",
-      "price": 56.13,
-      "ma50": 55.85,
-      "ma200": 53.39,
+      "price": 56.94,
+      "ma50": 55.87,
+      "ma200": 53.41,
       "signal": "green",
       "desc": "波段強勢",
-      "entry_price": 55.85,
-      "exit_price": 53.39
+      "entry_price": 55.87,
+      "exit_price": 53.41
     },
     {
       "code": "XLC",
       "name": "通訊 (XLC)",
-      "price": 103.14,
-      "ma50": 110.81,
-      "ma200": 112.44,
+      "price": 101.21,
+      "ma50": 110.59,
+      "ma200": 112.35,
       "signal": "red",
       "desc": "趨勢破壞",
-      "entry_price": 110.81,
-      "exit_price": 112.44
+      "entry_price": 110.59,
+      "exit_price": 112.35
     },
     {
       "code": "XLV",
       "name": "醫療 (XLV)",
-      "price": 179.72,
-      "ma50": 171.61,
-      "ma200": 157.5,
+      "price": 184.04,
+      "ma50": 171.94,
+      "ma200": 157.67,
       "signal": "green",
       "desc": "波段強勢",
-      "entry_price": 171.61,
-      "exit_price": 157.5
+      "entry_price": 171.94,
+      "exit_price": 157.67
     },
     {
       "code": "XLE",
       "name": "能源 (XLE)",
-      "price": 68.45,
-      "ma50": 64.64,
-      "ma200": 58.04,
+      "price": 68.71,
+      "ma50": 64.75,
+      "ma200": 58.15,
       "signal": "green",
       "desc": "波段強勢",
-      "entry_price": 64.64,
-      "exit_price": 58.04
+      "entry_price": 64.75,
+      "exit_price": 58.15
     },
     {
       "code": "XLY",
       "name": "非必須消費 (XLY)",
-      "price": 115.33,
-      "ma50": 113.14,
-      "ma200": 115.19,
+      "price": 116.2,
+      "ma50": 113.15,
+      "ma200": 115.16,
       "signal": "green",
       "desc": "波段強勢",
-      "entry_price": 113.14,
-      "exit_price": 115.19
+      "entry_price": 113.15,
+      "exit_price": 115.16
     },
     {
       "code": "XLP",
       "name": "必需消費 (XLP)",
-      "price": 86.84,
-      "ma50": 84.27,
-      "ma200": 83.53,
+      "price": 88.18,
+      "ma50": 84.36,
+      "ma200": 83.57,
       "signal": "green",
       "desc": "波段強勢",
-      "entry_price": 84.27,
-      "exit_price": 83.53
+      "entry_price": 84.36,
+      "exit_price": 83.57
     },
     {
       "code": "XLI",
       "name": "工業 (XLI)",
-      "price": 168.49,
-      "ma50": 170.71,
-      "ma200": 172.55,
+      "price": 170.13,
+      "ma50": 170.56,
+      "ma200": 172.59,
       "signal": "red",
       "desc": "趨勢破壞",
-      "entry_price": 170.71,
-      "exit_price": 172.55
+      "entry_price": 170.56,
+      "exit_price": 172.59
     },
     {
       "code": "XLU",
       "name": "公用事業 (XLU)",
-      "price": 42.49,
-      "ma50": 41.61,
-      "ma200": 43.79,
+      "price": 43.14,
+      "ma50": 41.62,
+      "ma200": 43.8,
       "signal": "red",
       "desc": "趨勢破壞",
-      "entry_price": 41.61,
-      "exit_price": 43.79
+      "entry_price": 41.62,
+      "exit_price": 43.8
     },
     {
       "code": "XLRE",
       "name": "房地產 (XLRE)",
-      "price": 42.13,
-      "ma50": 42.52,
-      "ma200": 42.75,
-      "signal": "red",
-      "desc": "趨勢破壞",
-      "entry_price": 42.52,
-      "exit_price": 42.75
+      "price": 43.06,
+      "ma50": 42.5,
+      "ma200": 42.77,
+      "signal": "green",
+      "desc": "波段強勢",
+      "entry_price": 42.5,
+      "exit_price": 42.77
     },
     {
       "code": "XLB",
       "name": "原物料 (XLB)",
-      "price": 51.86,
-      "ma50": 50.87,
-      "ma200": 50.7,
+      "price": 52.53,
+      "ma50": 50.89,
+      "ma200": 50.72,
       "signal": "green",
       "desc": "波段強勢",
-      "entry_price": 50.87,
-      "exit_price": 50.7
+      "entry_price": 50.89,
+      "exit_price": 50.72
     }
   ]
 }
