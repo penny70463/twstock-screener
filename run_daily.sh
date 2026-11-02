@@ -82,6 +82,16 @@ echo "執行完畢，準備將結果推播到 GitHub..."
 export PIPELINE_COMMIT=1
 git add -f data/results/*.json
 git add -f data/results/screen_*_result_*.csv 2>/dev/null || true
+# 週末覆盤在 GitHub Actions 只看得到已 commit 的 hist_2y。只留檔名最新的一份。
+if compgen -G "src/advisor/cache/hist_2y_*.pkl" > /dev/null; then
+  git add -A -- "src/advisor/cache/hist_2y_*.pkl"
+  latest=$(ls -1 src/advisor/cache/hist_2y_*.pkl | sort | tail -n 1)
+  for f in src/advisor/cache/hist_2y_*.pkl; do
+    if [ "$f" != "$latest" ]; then
+      git rm -f -- "$f"
+    fi
+  done
+fi
 if git diff --cached --quiet; then
   echo "沒有新結果，跳過 Push。"
   exit 0
