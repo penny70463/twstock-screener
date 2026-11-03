@@ -1,0 +1,25 @@
+{
+  "date": "2026-11-03",
+  "generated_at": "2026-11-03T16:05:02+08:00",
+  "params": {
+    "top_n": 200,
+    "advisor_threshold": 80
+  },
+  "market_state": {
+    "label": "空頭",
+    "threshold": 80,
+    "note": "指數跌破季線與半年線，突破假訊號比例大增——建議僅觀察、嚴控部位。",
+    "close": 43308.0,
+    "ma60": 46565.0,
+    "ma120": 45354.0,
+    "exposure": 0.25,
+    "trend_score": 0.6,
+    "breadth": 33.0,
+    "realized_vol": 25.7,
+    "vol_scale": 0.78
+  },
+  "universe": "TW Market",
+  "screened": [],
+  "themes": [],
+  "theme_status": "skipped"
+}
