@@ -1,46 +1,46 @@
 {
   "etfs": {
-    "0050.TW": "red",
+    "0050.TW": "yellow",
     "VOO": "yellow",
-    "2330.TW": "red",
+    "2330.TW": "yellow",
     "SMH": "red",
     "SOXQ": "red",
     "00981A.TW": "red"
   },
   "exposure": {
-    "TW": 0.2,
+    "TW": 0.15000000000000002,
     "US": 0.4
   },
   "kd_0050.TW": {
-    "k": 19.5,
-    "d": 19.8
+    "k": 26.3,
+    "d": 20.1
   },
   "kd_VOO": {
-    "k": 29.2,
-    "d": 37.0
+    "k": 21.7,
+    "d": 31.9
   },
   "kd_SMH": {
-    "k": 15.8,
-    "d": 27.8
+    "k": 15.4,
+    "d": 23.7
   },
   "kd_SOXQ": {
-    "k": 16.5,
-    "d": 28.1
+    "k": 15.7,
+    "d": 24.0
   },
   "kd_2330.TW": {
-    "k": 17.5,
-    "d": 18.0
+    "k": 29.2,
+    "d": 21.7
   },
   "kd_00981A.TW": {
-    "k": 13.8,
-    "d": 15.3
+    "k": 16.6,
+    "d": 14.2
   },
   "macro": {
     "regime": "deteriorating",
     "etfs": {
       "0050.TW": {
         "action": "wait",
-        "signal": "red"
+        "signal": "yellow"
       },
       "VOO": {
         "action": "wait",
