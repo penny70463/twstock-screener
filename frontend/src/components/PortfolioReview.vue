@@ -333,6 +333,20 @@ const totalPortfolioValue = computed(() => {
   return stocksValue + Number(portfolio.value.cash)
 })
 
+const cashPct = computed(() => {
+  const total = totalPortfolioValue.value
+  if (total <= 0) return null
+  return (Number(portfolio.value.cash) / total) * 100
+})
+
+const targetCashPct = computed(() => {
+  const exposure = props.marketState?.exposure
+  if (exposure === undefined || exposure === null) return null
+  return (1 - Number(exposure)) * 100
+})
+
+const formatPct = (n) => `${Math.round(n)}%`
+
 const totalPL = computed(() => {
   return enrichedPositions.value.reduce((sum, p) => sum + p.pl, 0)
 })
@@ -461,6 +475,10 @@ const isSparklineUp = (prices) => {
               @keyup.enter="$event.target.blur()"
             />
           </div>
+          <span v-if="cashPct !== null" class="cash-pct">
+            {{ formatPct(cashPct) }}
+            <template v-if="targetCashPct !== null">｜目標 {{ formatPct(targetCashPct) }}</template>
+          </span>
         </div>
         <div class="summary-item">
           <span class="summary-label">未實現損益</span>
@@ -675,6 +693,12 @@ const isSparklineUp = (prices) => {
 .cash-input::placeholder {
   font-size: 0.85rem;
   font-weight: normal;
+  color: var(--text-muted);
+}
+
+.cash-pct {
+  margin-top: 0.35rem;
+  font-size: 0.8rem;
   color: var(--text-muted);
 }
 
