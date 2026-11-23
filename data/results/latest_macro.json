@@ -9,16 +9,16 @@
       "status": "ok"
     },
     "curve": {
-      "value": 0.28,
-      "date": "2026-11-19",
+      "value": 0.29,
+      "date": "2026-11-20",
       "inverted": false,
       "status": "ok"
     },
     "hy": {
-      "value": 347.0,
-      "date": "2026-11-18",
-      "widen_3m": 72.0,
-      "status": "ok"
+      "value": 352.0,
+      "date": "2026-11-19",
+      "widen_3m": 82.0,
+      "status": "watch"
     },
     "fedfunds": {
       "value": 3.88,
@@ -29,11 +29,11 @@
   },
   "reasons": [
     "Sahm 0.00",
-    "2s10s 0.28%",
-    "HY OAS 347bp",
+    "2s10s 0.29%",
+    "HY OAS 352bp轉差",
     "Fed 3.88%升息中"
   ],
-  "date": "2026-11-20",
+  "date": "2026-11-23",
   "etfs": {
     "0050.TW": {
       "action": "wait",
