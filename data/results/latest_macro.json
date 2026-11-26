@@ -3,21 +3,18 @@
   "regime_zh": "警戒",
   "legs": {
     "sahm": {
-      "value": 0.0,
-      "date": "2026-10-01",
-      "triggered": false,
-      "status": "ok"
+      "status": "missing"
     },
     "curve": {
-      "value": 0.28,
-      "date": "2026-11-24",
+      "value": 0.24,
+      "date": "2026-11-25",
       "inverted": false,
       "status": "ok"
     },
     "hy": {
-      "value": 363.0,
-      "date": "2026-11-23",
-      "widen_3m": 93.0,
+      "value": 372.0,
+      "date": "2026-11-24",
+      "widen_3m": 105.0,
       "status": "watch"
     },
     "fedfunds": {
@@ -28,12 +25,11 @@
     }
   },
   "reasons": [
-    "Sahm 0.00",
-    "2s10s 0.28%",
-    "HY OAS 363bp轉差",
+    "2s10s 0.24%",
+    "HY OAS 372bp轉差",
     "Fed 3.88%升息中"
   ],
-  "date": "2026-11-25",
+  "date": "2026-11-26",
   "etfs": {
     "0050.TW": {
       "action": "wait",
