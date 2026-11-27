@@ -3,7 +3,10 @@
   "regime_zh": "警戒",
   "legs": {
     "sahm": {
-      "status": "missing"
+      "value": 0.0,
+      "date": "2026-10-01",
+      "triggered": false,
+      "status": "ok"
     },
     "curve": {
       "value": 0.24,
@@ -25,11 +28,12 @@
     }
   },
   "reasons": [
+    "Sahm 0.00",
     "2s10s 0.24%",
     "HY OAS 372bp轉差",
     "Fed 3.88%升息中"
   ],
-  "date": "2026-11-26",
+  "date": "2026-11-27",
   "etfs": {
     "0050.TW": {
       "action": "wait",

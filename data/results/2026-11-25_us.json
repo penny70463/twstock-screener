@@ -1,6 +1,6 @@
 {
   "date": "2026-11-25",
-  "generated_at": "2026-11-26T16:10:25+08:00",
+  "generated_at": "2026-11-27T16:07:18+08:00",
   "params": {
     "top_n": 200,
     "advisor_threshold": 80
@@ -3128,16 +3128,6 @@
   ],
   "themes": [
     {
-      "name": "現場娛樂/演唱會票務",
-      "reason": "LYV 經營演唱會主辦與 Ticketmaster 票務平台，受惠於現場娛樂需求與票價上漲。此題材反映體驗型消費支出。",
-      "stocks": [
-        {
-          "code": "LYV",
-          "name": "Live Nation Entertainment"
-        }
-      ]
-    },
-    {
       "name": "生技製藥",
       "reason": "涵蓋大型製藥與生技公司，營收來自專利藥、疫苗與生物製劑。這群股票共同受藥品研發管線、專利到期與藥價政策影響。",
       "stocks": [
@@ -3190,42 +3180,6 @@
       ]
     },
     {
-      "name": "油氣探勘與生產（上游）",
-      "reason": "綜合石油公司與探勘生產商，獲利直接連動原油與天然氣價格。這群股票同屬能源上游。",
-      "stocks": [
-        {
-          "code": "APA",
-          "name": "APA Corporation"
-        },
-        {
-          "code": "COP",
-          "name": "ConocoPhillips"
-        },
-        {
-          "code": "CVX",
-          "name": "Chevron Corporation"
-        },
-        {
-          "code": "XOM",
-          "name": "ExxonMobil"
-        },
-        {
-          "code": "EOG",
-          "name": "EOG Resources"
-        }
-      ]
-    },
-    {
-      "name": "油氣管線與中游設施",
-      "reason": "TRGP 經營天然氣收集、處理與 NGL 運輸設施，收入以收費型合約為主。屬於能源中游，現金流相對穩定。",
-      "stocks": [
-        {
-          "code": "TRGP",
-          "name": "Targa Resources"
-        }
-      ]
-    },
-    {
       "name": "網路資安",
       "reason": "FTNT、PANW、CRWD 提供防火牆、端點防護與雲端安全平台。企業數位化與資安威脅升高，帶動這群公司的需求。",
       "stocks": [
@@ -3254,12 +3208,12 @@
       ]
     },
     {
-      "name": "電商平台",
-      "reason": "EBAY 經營線上交易市集，收入來自商品成交抽成。此題材反映線上零售的發展趨勢。",
+      "name": "油氣管線與中游設施",
+      "reason": "TRGP 經營天然氣收集、處理與 NGL 運輸設施，收入以收費型合約為主。屬於能源中游，現金流相對穩定。",
       "stocks": [
         {
-          "code": "EBAY",
-          "name": "eBay Inc."
+          "code": "TRGP",
+          "name": "Targa Resources"
         }
       ]
     },
@@ -3288,6 +3242,32 @@
       ]
     },
     {
+      "name": "油氣探勘與生產（上游）",
+      "reason": "綜合石油公司與探勘生產商，獲利直接連動原油與天然氣價格。這群股票同屬能源上游。",
+      "stocks": [
+        {
+          "code": "APA",
+          "name": "APA Corporation"
+        },
+        {
+          "code": "COP",
+          "name": "ConocoPhillips"
+        },
+        {
+          "code": "CVX",
+          "name": "Chevron Corporation"
+        },
+        {
+          "code": "XOM",
+          "name": "ExxonMobil"
+        },
+        {
+          "code": "EOG",
+          "name": "EOG Resources"
+        }
+      ]
+    },
+    {
       "name": "鐵路運輸",
       "reason": "CSX、UNP 為美國一級貨運鐵路，運量與工業生產、貿易活動高度相關。",
       "stocks": [
@@ -3298,20 +3278,6 @@
         {
           "code": "UNP",
           "name": "Union Pacific Corporation"
-        }
-      ]
-    },
-    {
-      "name": "物流與快遞運輸",
-      "reason": "FDX 經營快遞與包裹遞送，EXPD 從事貨運承攬與報關。兩者都受全球貿易量與電商包裹需求驅動。",
-      "stocks": [
-        {
-          "code": "FDX",
-          "name": "FedEx"
-        },
-        {
-          "code": "EXPD",
-          "name": "Expeditors International"
         }
       ]
     },
@@ -3334,50 +3300,12 @@
       ]
     },
     {
-      "name": "醫療器材與耗材",
-      "reason": "WST 生產注射藥品包裝元件，BDX 供應針筒、診斷等醫療耗材。兩者都受醫療使用量與生物製劑成長帶動。",
-      "stocks": [
-        {
-          "code": "WST",
-          "name": "West Pharmaceutical Services"
-        },
-        {
-          "code": "BDX",
-          "name": "Becton Dickinson"
-        }
-      ]
-    },
-    {
-      "name": "管理式醫療/健康保險",
-      "reason": "HUM、CNC 經營 Medicare Advantage 與 Medicaid 健保業務，獲利取決於醫療成本率與政府費率。",
-      "stocks": [
-        {
-          "code": "HUM",
-          "name": "Humana"
-        },
-        {
-          "code": "CNC",
-          "name": "Centene Corporation"
-        }
-      ]
-    },
-    {
       "name": "硬碟與企業儲存系統",
       "reason": "NTAP 提供企業級儲存與資料管理解決方案，受惠於資料量成長與混合雲需求。",
       "stocks": [
         {
           "code": "NTAP",
           "name": "NetApp"
-        }
-      ]
-    },
-    {
-      "name": "類比與混合訊號晶片",
-      "reason": "TXN 是類比與嵌入式處理晶片龍頭，主要應用於工業與車用市場，受半導體庫存循環影響。",
-      "stocks": [
-        {
-          "code": "TXN",
-          "name": "Texas Instruments"
         }
       ]
     },
@@ -3408,6 +3336,16 @@
       ]
     },
     {
+      "name": "類比與混合訊號晶片",
+      "reason": "TXN 是類比與嵌入式處理晶片龍頭，主要應用於工業與車用市場，受半導體庫存循環影響。",
+      "stocks": [
+        {
+          "code": "TXN",
+          "name": "Texas Instruments"
+        }
+      ]
+    },
+    {
       "name": "保險",
       "reason": "TRV、EG、AIZ 經營產險、再保與專業保險，MET 主攻壽險。保費定價與投資收益是這群公司的共同獲利來源。",
       "stocks": [
@@ -3430,20 +3368,6 @@
       ]
     },
     {
-      "name": "區域與商業銀行",
-      "reason": "USB、FITB 為美國大型區域銀行，獲利依賴淨利差與放款成長。",
-      "stocks": [
-        {
-          "code": "USB",
-          "name": "U.S. Bancorp"
-        },
-        {
-          "code": "FITB",
-          "name": "Fifth Third Bancorp"
-        }
-      ]
-    },
-    {
       "name": "工業分銷",
       "reason": "GWW、FAST 經銷維修保養用品（MRO）與工業耗材，業績反映製造業與營建活動。",
       "stocks": [
@@ -3454,6 +3378,20 @@
         {
           "code": "FAST",
           "name": "Fastenal"
+        }
+      ]
+    },
+    {
+      "name": "管理式醫療/健康保險",
+      "reason": "HUM、CNC 經營 Medicare Advantage 與 Medicaid 健保業務，獲利取決於醫療成本率與政府費率。",
+      "stocks": [
+        {
+          "code": "HUM",
+          "name": "Humana"
+        },
+        {
+          "code": "CNC",
+          "name": "Centene Corporation"
         }
       ]
     },
@@ -3476,12 +3414,82 @@
       ]
     },
     {
-      "name": "倉儲物流自動化/條碼識別",
-      "reason": "ZBRA 提供條碼掃描器、行動電腦與 RFID 方案，協助倉儲及零售數位化。",
+      "name": "玩具與娛樂IP授權",
+      "reason": "HAS 經營玩具、桌遊與娛樂 IP 授權，受消費支出與 IP 變現能力影響。",
       "stocks": [
         {
-          "code": "ZBRA",
-          "name": "Zebra Technologies"
+          "code": "HAS",
+          "name": "Hasbro"
+        }
+      ]
+    },
+    {
+      "name": "物流與快遞運輸",
+      "reason": "FDX 經營快遞與包裹遞送，EXPD 從事貨運承攬與報關。兩者都受全球貿易量與電商包裹需求驅動。",
+      "stocks": [
+        {
+          "code": "FDX",
+          "name": "FedEx"
+        },
+        {
+          "code": "EXPD",
+          "name": "Expeditors International"
+        }
+      ]
+    },
+    {
+      "name": "穿戴裝置/消費電子品牌",
+      "reason": "GRMN 生產 GPS 穿戴裝置、運動手錶與航空電子產品，受消費電子與健身需求帶動。",
+      "stocks": [
+        {
+          "code": "GRMN",
+          "name": "Garmin"
+        }
+      ]
+    },
+    {
+      "name": "防禦型消費：食品飲料、菸草與家用品",
+      "reason": "KO 為飲料商，MO、PM 為菸草商，CHD 生產家用品。它們的需求穩定且配息較高，屬於防禦型消費股。",
+      "stocks": [
+        {
+          "code": "KO",
+          "name": "Coca-Cola Company (The)"
+        },
+        {
+          "code": "MO",
+          "name": "Altria"
+        },
+        {
+          "code": "PM",
+          "name": "Philip Morris International"
+        },
+        {
+          "code": "CHD",
+          "name": "Church & Dwight"
+        }
+      ]
+    },
+    {
+      "name": "電商平台",
+      "reason": "EBAY 經營線上交易市集，收入來自商品成交抽成。此題材反映線上零售的發展趨勢。",
+      "stocks": [
+        {
+          "code": "EBAY",
+          "name": "eBay Inc."
+        }
+      ]
+    },
+    {
+      "name": "醫療器材與耗材",
+      "reason": "WST 生產注射藥品包裝元件，BDX 供應針筒、診斷等醫療耗材。兩者都受醫療使用量與生物製劑成長帶動。",
+      "stocks": [
+        {
+          "code": "WST",
+          "name": "West Pharmaceutical Services"
+        },
+        {
+          "code": "BDX",
+          "name": "Becton Dickinson"
         }
       ]
     },
@@ -3506,16 +3514,6 @@
       ]
     },
     {
-      "name": "金屬包裝/飲料罐",
-      "reason": "BALL 生產鋁製飲料罐，受飲料需求與包裝去塑化趨勢帶動。",
-      "stocks": [
-        {
-          "code": "BALL",
-          "name": "Ball Corporation"
-        }
-      ]
-    },
-    {
       "name": "國防軍工",
       "reason": "LMT 為最大國防承包商，生產戰機與飛彈，收入來自國防預算。",
       "stocks": [
@@ -3526,12 +3524,36 @@
       ]
     },
     {
+      "name": "區域與商業銀行",
+      "reason": "USB、FITB 為美國大型區域銀行，獲利依賴淨利差與放款成長。",
+      "stocks": [
+        {
+          "code": "USB",
+          "name": "U.S. Bancorp"
+        },
+        {
+          "code": "FITB",
+          "name": "Fifth Third Bancorp"
+        }
+      ]
+    },
+    {
       "name": "公共安全通訊/關鍵任務無線電",
       "reason": "MSI 提供警消用無線電、指揮中心軟體與影像安全系統，主要客戶是政府部門。",
       "stocks": [
         {
           "code": "MSI",
           "name": "Motorola Solutions"
+        }
+      ]
+    },
+    {
+      "name": "現場娛樂/演唱會票務",
+      "reason": "LYV 經營演唱會主辦與 Ticketmaster 票務平台，受惠於現場娛樂需求與票價上漲。此題材反映體驗型消費支出。",
+      "stocks": [
+        {
+          "code": "LYV",
+          "name": "Live Nation Entertainment"
         }
       ]
     },
@@ -3560,44 +3582,22 @@
       ]
     },
     {
-      "name": "防禦型消費：食品飲料、菸草與家用品",
-      "reason": "KO 為飲料商，MO、PM 為菸草商，CHD 生產家用品。它們的需求穩定且配息較高，屬於防禦型消費股。",
+      "name": "金屬包裝/飲料罐",
+      "reason": "BALL 生產鋁製飲料罐，受飲料需求與包裝去塑化趨勢帶動。",
       "stocks": [
         {
-          "code": "KO",
-          "name": "Coca-Cola Company (The)"
-        },
-        {
-          "code": "MO",
-          "name": "Altria"
-        },
-        {
-          "code": "PM",
-          "name": "Philip Morris International"
-        },
-        {
-          "code": "CHD",
-          "name": "Church & Dwight"
+          "code": "BALL",
+          "name": "Ball Corporation"
         }
       ]
     },
     {
-      "name": "玩具與娛樂IP授權",
-      "reason": "HAS 經營玩具、桌遊與娛樂 IP 授權，受消費支出與 IP 變現能力影響。",
+      "name": "倉儲物流自動化/條碼識別",
+      "reason": "ZBRA 提供條碼掃描器、行動電腦與 RFID 方案，協助倉儲及零售數位化。",
       "stocks": [
         {
-          "code": "HAS",
-          "name": "Hasbro"
-        }
-      ]
-    },
-    {
-      "name": "穿戴裝置/消費電子品牌",
-      "reason": "GRMN 生產 GPS 穿戴裝置、運動手錶與航空電子產品，受消費電子與健身需求帶動。",
-      "stocks": [
-        {
-          "code": "GRMN",
-          "name": "Garmin"
+          "code": "ZBRA",
+          "name": "Zebra Technologies"
         }
       ]
     }
