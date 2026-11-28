@@ -1,0 +1,545 @@
+{
+  "review_date": "2026-11-28",
+  "generated_at": "2026-11-28T17:39:11+08:00",
+  "markets": [
+    {
+      "market": "TW",
+      "select_date": "本週 (11-24 ~ 11-25)",
+      "review_date": "2026-11-28",
+      "total": 5,
+      "win_count": 1,
+      "win_rate": 20.0,
+      "avg_return": -3.77,
+      "segments": {
+        "top3": {
+          "total": 5,
+          "win_count": 1,
+          "win_rate": 20.0,
+          "avg_return": -3.77
+        },
+        "top10": {
+          "total": 5,
+          "win_count": 1,
+          "win_rate": 20.0,
+          "avg_return": -3.77
+        },
+        "all": {
+          "total": 5,
+          "win_count": 1,
+          "win_rate": 20.0,
+          "avg_return": -3.77
+        }
+      },
+      "capped_stats": {
+        "capped": null,
+        "uncapped": {
+          "total": 5,
+          "win_count": 1,
+          "win_rate": 20.0,
+          "avg_return": -3.77
+        }
+      },
+      "benchmark": {
+        "universe_n": 414,
+        "universe_up": 33,
+        "universe_hit_rate": 8.0,
+        "window": [
+          "2026-11-24",
+          "2026-11-25"
+        ],
+        "source": "cache",
+        "index": "0050",
+        "index_return": -5.64
+      },
+      "lift_top3": 12.0,
+      "top3": [
+        {
+          "name": "視陽",
+          "ret": 4.79
+        },
+        {
+          "name": "潤弘",
+          "ret": 0.0
+        },
+        {
+          "name": "中華資安",
+          "ret": -6.27
+        }
+      ],
+      "bottom3": [
+        {
+          "name": "中華資安",
+          "ret": -6.27
+        },
+        {
+          "name": "長榮航",
+          "ret": -6.48
+        },
+        {
+          "name": "普鴻",
+          "ret": -10.87
+        }
+      ],
+      "details": [
+        {
+          "code": "2618.TW",
+          "name": "長榮航",
+          "base_price": 48.6,
+          "current_price": 45.45,
+          "return_pct": -6.48,
+          "first_rank": 1,
+          "capped": false
+        },
+        {
+          "code": "2597.TW",
+          "name": "潤弘",
+          "base_price": 192.0,
+          "current_price": 192.0,
+          "return_pct": 0.0,
+          "first_rank": 2,
+          "capped": false
+        },
+        {
+          "code": "6782.TW",
+          "name": "視陽",
+          "base_price": 292.5,
+          "current_price": 306.5,
+          "return_pct": 4.79,
+          "first_rank": 3,
+          "capped": false
+        },
+        {
+          "code": "7765.TW",
+          "name": "中華資安",
+          "base_price": 311.0,
+          "current_price": 291.5,
+          "return_pct": -6.27,
+          "first_rank": 1,
+          "capped": false
+        },
+        {
+          "code": "6590.TWO",
+          "name": "普鴻",
+          "base_price": 92.0,
+          "current_price": 82.0,
+          "return_pct": -10.87,
+          "first_rank": 2,
+          "capped": false
+        }
+      ]
+    },
+    {
+      "market": "US",
+      "select_date": "本週 (11-23 ~ 11-24)",
+      "review_date": "2026-11-28",
+      "total": 36,
+      "win_count": 28,
+      "win_rate": 77.8,
+      "avg_return": 1.41,
+      "segments": {
+        "top3": {
+          "total": 3,
+          "win_count": 2,
+          "win_rate": 66.7,
+          "avg_return": 2.8
+        },
+        "top10": {
+          "total": 11,
+          "win_count": 9,
+          "win_rate": 81.8,
+          "avg_return": 1.75
+        },
+        "all": {
+          "total": 36,
+          "win_count": 28,
+          "win_rate": 77.8,
+          "avg_return": 1.41
+        }
+      },
+      "capped_stats": {
+        "capped": {
+          "total": 6,
+          "win_count": 6,
+          "win_rate": 100.0,
+          "avg_return": 2.75
+        },
+        "uncapped": {
+          "total": 30,
+          "win_count": 22,
+          "win_rate": 73.3,
+          "avg_return": 1.14
+        }
+      },
+      "benchmark": {
+        "universe_n": 517,
+        "universe_up": 358,
+        "universe_hit_rate": 69.2,
+        "window": [
+          "2026-11-23",
+          "2026-11-24"
+        ],
+        "source": "cache",
+        "index": "SPY",
+        "index_return": -0.49
+      },
+      "lift_top3": -2.5,
+      "top3": [
+        {
+          "name": "Moderna",
+          "ret": 7.81
+        },
+        {
+          "name": "Humana",
+          "ret": 5.68
+        },
+        {
+          "name": "Fortinet",
+          "ret": 5.27
+        }
+      ],
+      "bottom3": [
+        {
+          "name": "Advanced Micro Devices",
+          "ret": -6.38
+        },
+        {
+          "name": "Analog Devices",
+          "ret": -8.65
+        },
+        {
+          "name": "Hewlett Packard Enterprise",
+          "ret": -10.95
+        }
+      ],
+      "details": [
+        {
+          "code": "MRNA",
+          "name": "Moderna",
+          "base_price": 212.08,
+          "current_price": 228.64,
+          "return_pct": 7.81,
+          "first_rank": 1,
+          "capped": false
+        },
+        {
+          "code": "MPC",
+          "name": "Marathon Petroleum",
+          "base_price": 357.69,
+          "current_price": 359.8,
+          "return_pct": 0.59,
+          "first_rank": 2,
+          "capped": false
+        },
+        {
+          "code": "VLO",
+          "name": "Valero Energy",
+          "base_price": 329.4,
+          "current_price": 329.39,
+          "return_pct": -0.0,
+          "first_rank": 3,
+          "capped": false
+        },
+        {
+          "code": "HPE",
+          "name": "Hewlett Packard Enterprise",
+          "base_price": 48.02,
+          "current_price": 42.76,
+          "return_pct": -10.95,
+          "first_rank": 4,
+          "capped": false
+        },
+        {
+          "code": "TGT",
+          "name": "Target Corporation",
+          "base_price": 168.19,
+          "current_price": 171.97,
+          "return_pct": 2.25,
+          "first_rank": 5,
+          "capped": false
+        },
+        {
+          "code": "PSX",
+          "name": "Phillips 66",
+          "base_price": 237.22,
+          "current_price": 242.12,
+          "return_pct": 2.07,
+          "first_rank": 6,
+          "capped": true
+        },
+        {
+          "code": "VTRS",
+          "name": "Viatris",
+          "base_price": 19.65,
+          "current_price": 20.2,
+          "return_pct": 2.8,
+          "first_rank": 7,
+          "capped": false
+        },
+        {
+          "code": "APA",
+          "name": "APA Corporation",
+          "base_price": 44.06,
+          "current_price": 46.1,
+          "return_pct": 4.63,
+          "first_rank": 8,
+          "capped": true
+        },
+        {
+          "code": "HST",
+          "name": "Host Hotels & Resorts",
+          "base_price": 24.74,
+          "current_price": 25.07,
+          "return_pct": 1.33,
+          "first_rank": 9,
+          "capped": false
+        },
+        {
+          "code": "NUE",
+          "name": "Nucor",
+          "base_price": 248.15,
+          "current_price": 256.75,
+          "return_pct": 3.47,
+          "first_rank": 10,
+          "capped": false
+        },
+        {
+          "code": "TRGP",
+          "name": "Targa Resources",
+          "base_price": 277.27,
+          "current_price": 280.55,
+          "return_pct": 1.18,
+          "first_rank": 11,
+          "capped": true
+        },
+        {
+          "code": "CRL",
+          "name": "Charles River Laboratories",
+          "base_price": 338.26,
+          "current_price": 337.39,
+          "return_pct": -0.26,
+          "first_rank": 12,
+          "capped": false
+        },
+        {
+          "code": "COP",
+          "name": "ConocoPhillips",
+          "base_price": 132.19,
+          "current_price": 136.8,
+          "return_pct": 3.49,
+          "first_rank": 13,
+          "capped": true
+        },
+        {
+          "code": "CSX",
+          "name": "CSX Corporation",
+          "base_price": 49.86,
+          "current_price": 51.38,
+          "return_pct": 3.05,
+          "first_rank": 14,
+          "capped": false
+        },
+        {
+          "code": "NTAP",
+          "name": "NetApp",
+          "base_price": 171.64,
+          "current_price": 172.67,
+          "return_pct": 0.6,
+          "first_rank": 15,
+          "capped": false
+        },
+        {
+          "code": "CVX",
+          "name": "Chevron Corporation",
+          "base_price": 206.17,
+          "current_price": 212.45,
+          "return_pct": 3.05,
+          "first_rank": 16,
+          "capped": true
+        },
+        {
+          "code": "CNC",
+          "name": "Centene Corporation",
+          "base_price": 63.32,
+          "current_price": 65.78,
+          "return_pct": 3.89,
+          "first_rank": 17,
+          "capped": false
+        },
+        {
+          "code": "XOM",
+          "name": "ExxonMobil",
+          "base_price": 156.9,
+          "current_price": 160.18,
+          "return_pct": 2.09,
+          "first_rank": 18,
+          "capped": true
+        },
+        {
+          "code": "STT",
+          "name": "State Street Corporation",
+          "base_price": 161.25,
+          "current_price": 164.69,
+          "return_pct": 2.13,
+          "first_rank": 19,
+          "capped": false
+        },
+        {
+          "code": "PANW",
+          "name": "Palo Alto Networks",
+          "base_price": 353.43,
+          "current_price": 366.76,
+          "return_pct": 3.77,
+          "first_rank": 20,
+          "capped": false
+        },
+        {
+          "code": "AMD",
+          "name": "Advanced Micro Devices",
+          "base_price": 453.46,
+          "current_price": 424.54,
+          "return_pct": -6.38,
+          "first_rank": 21,
+          "capped": false
+        },
+        {
+          "code": "TRV",
+          "name": "Travelers Companies (The)",
+          "base_price": 394.71,
+          "current_price": 407.29,
+          "return_pct": 3.19,
+          "first_rank": 22,
+          "capped": false
+        },
+        {
+          "code": "EOG",
+          "name": "EOG Resources",
+          "base_price": 145.34,
+          "current_price": 148.7,
+          "return_pct": 2.31,
+          "first_rank": 23,
+          "capped": false
+        },
+        {
+          "code": "TXN",
+          "name": "Texas Instruments",
+          "base_price": 291.19,
+          "current_price": 281.85,
+          "return_pct": -3.21,
+          "first_rank": 24,
+          "capped": false
+        },
+        {
+          "code": "MRK",
+          "name": "Merck & Co.",
+          "base_price": 135.47,
+          "current_price": 141.32,
+          "return_pct": 4.32,
+          "first_rank": 25,
+          "capped": false
+        },
+        {
+          "code": "HUM",
+          "name": "Humana",
+          "base_price": 383.68,
+          "current_price": 405.46,
+          "return_pct": 5.68,
+          "first_rank": 26,
+          "capped": false
+        },
+        {
+          "code": "GWW",
+          "name": "W. W. Grainger",
+          "base_price": 1390.12,
+          "current_price": 1431.87,
+          "return_pct": 3.0,
+          "first_rank": 27,
+          "capped": false
+        },
+        {
+          "code": "ADI",
+          "name": "Analog Devices",
+          "base_price": 378.75,
+          "current_price": 346.0,
+          "return_pct": -8.65,
+          "first_rank": 28,
+          "capped": false
+        },
+        {
+          "code": "BEN",
+          "name": "Franklin Resources",
+          "base_price": 33.53,
+          "current_price": 34.18,
+          "return_pct": 1.94,
+          "first_rank": 29,
+          "capped": false
+        },
+        {
+          "code": "IEX",
+          "name": "IDEX Corporation",
+          "base_price": 227.92,
+          "current_price": 227.42,
+          "return_pct": -0.22,
+          "first_rank": 30,
+          "capped": false
+        },
+        {
+          "code": "FTNT",
+          "name": "Fortinet",
+          "base_price": 132.5,
+          "current_price": 139.48,
+          "return_pct": 5.27,
+          "first_rank": 4,
+          "capped": false
+        },
+        {
+          "code": "CRWD",
+          "name": "CrowdStrike",
+          "base_price": 210.86,
+          "current_price": 217.2,
+          "return_pct": 3.01,
+          "first_rank": 19,
+          "capped": false
+        },
+        {
+          "code": "BNY",
+          "name": "BNY Mellon",
+          "base_price": 145.22,
+          "current_price": 149.66,
+          "return_pct": 3.06,
+          "first_rank": 23,
+          "capped": false
+        },
+        {
+          "code": "NDSN",
+          "name": "Nordson Corporation",
+          "base_price": 320.15,
+          "current_price": 324.17,
+          "return_pct": 1.26,
+          "first_rank": 27,
+          "capped": false
+        },
+        {
+          "code": "GRMN",
+          "name": "Garmin",
+          "base_price": 282.02,
+          "current_price": 287.46,
+          "return_pct": 1.93,
+          "first_rank": 28,
+          "capped": false
+        },
+        {
+          "code": "HAS",
+          "name": "Hasbro",
+          "base_price": 112.24,
+          "current_price": 109.09,
+          "return_pct": -2.81,
+          "first_rank": 30,
+          "capped": false
+        }
+      ]
+    }
+  ],
+  "alerts": [
+    "🟡 🇺🇸 美股 連續 2 週 Top3 命中率輸給股票池（P≤U），近 2 週: -2.5pp, -23.4pp。請持續觀察。"
+  ]
+}
